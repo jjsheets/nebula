@@ -27,34 +27,27 @@ jobs:
         id: cache
         with:
           path: |
-            ~/../tup
             ~/.tup
             ~/build
             !~/build/Tupfile
           key: ${{ runner.os }}-cache
 
-      - name: Install tup build system
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Install tools and dependencies
         run: |
-          sudo apt-get -q -y install libfuse3-dev
-          cd ..
-          git clone git://github.com/gittup/tup.git
-          cd tup
-          ./bootstrap.sh
-          cd ../nebula
-          ../tup/tup init
+          sudo apt-get install -y tup libglfw3-dev libvulkan-dev libxi-dev libxxf86vm-dev
+
+      - name: Initialize tup if not cached
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: tup init
 
       - name: Update submodules
         run: |
           git submodule init
           git submodule update
 
-      - name: Install lib dependencies
-        run: |
-          sudo apt-get install -y libglfw3-dev libvulkan-dev libxi-dev libxxf86vm-dev
-
       - name: Run tup to build
-        run: ../tup/tup
+        run: |
+          tup
 
 #      - name: Run tests
 #        run: test/facade_test
