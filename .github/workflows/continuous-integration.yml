@@ -49,6 +49,10 @@ jobs:
           git submodule init
           git submodule update
 
+      - name: Install lib dependencies
+        run: |
+          sudo apt-get install -y libglfw3 libvulkan1
+
       - name: Run tup to build
         run: ../tup/tup
 
