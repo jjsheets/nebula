@@ -27,3 +27,7 @@ jobs:
         stale-pr-message: 'No activity on this pull request. Marking it as stale. Update within 7 days or it will be closed.'
         close-issue-message: 'No activity on this stale issue in the past 7 days. Closing.'
         close-pr-message: 'No activity on this stale pull request in the past 7 days. Closing.'
+        stale-issue-label: 'stale'
+        close-issue-label: 'auto-closed'
+        stale-pr-label: 'stale'
+        close-pr-label: 'auto-closed'
