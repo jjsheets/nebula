@@ -1,3 +1,6 @@
+name: Create Issue Branch
+# Create an issue branch when an issue is assigned
+
 on:
   issues:
     types: [ assigned ]
