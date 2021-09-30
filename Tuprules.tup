@@ -1,0 +1,10 @@
+CFLAGS += -Wall
+CFLAGS += -O2
+CFLAGS += -I../src `pkg-config --cflags glfw3`
+CFLAGS += -std=c++17
+LDFLAGS = `pkg-config --libs glfw3`
+LDFLAGS += -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+
+!cc = |> g++ $(CFLAGS) -c %f -o %o |> %B.o
+!ar = |> ar crs %o %f |>
+!ld = |> g++ %f $(LDFLAGS) -o %o |>

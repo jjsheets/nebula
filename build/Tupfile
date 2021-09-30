@@ -1,0 +1,7 @@
+include_rules
+
+: foreach ../src/*.cc |> !cc |>
+: *.o ^test.o |> !link |> nebula
+: *.o ^main.o |> !link |> nebula_test
+
+.gitignore
