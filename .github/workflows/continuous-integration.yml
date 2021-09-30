@@ -51,7 +51,7 @@ jobs:
 
       - name: Install lib dependencies
         run: |
-          sudo apt-get install -y libglfw3 libvulkan1
+          sudo apt-get install -y libglfw3-dev libvulkan-dev
 
       - name: Run tup to build
         run: ../tup/tup
