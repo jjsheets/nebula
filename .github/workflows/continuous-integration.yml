@@ -1,0 +1,56 @@
+name: Continuous Integration
+
+on:
+  push:
+    paths:
+    - '**.cc'
+    - '**.h'
+    - '**Tupfile'
+    - 'Tuprules.tup'
+    - '.github/workflows/continuous-integration.yml'
+  pull_request:
+    paths:
+    - '**.cc'
+    - '**.h'
+    - '**Tupfile'
+    - 'Tuprules.tup'
+    - '.github/workflows/continuous-integration.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+          id: cache
+          with:
+            path: |
+              ~/../tup
+              ~/.tup
+              ~/build
+              !~/build/Tupfile
+            key: ${{ runner.os }}-cache
+
+      - name: Install tup build system
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get -q -y install libfuse3-dev
+          cd ..
+          git clone git://github.com/gittup/tup.git
+          cd tup
+          ./bootstrap.sh
+          cd ../nebula
+          ../tup/tup init
+
+      - name: Update submodules
+        run: |
+          git submodule init
+          git submodule update
+
+      - name: Run tup to build
+        run: ../tup/tup
+
+#      - name: Run tests
+#        run: test/facade_test
