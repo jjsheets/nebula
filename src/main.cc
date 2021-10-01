@@ -4,11 +4,9 @@
 #ifndef NEBULA_MAIN_CC
 #define NEBULA_MAIN_CC
 
-int main (
-  int argc,
-  char *argv[])
+int main(int argc, char *argv[])
 {
   return 0;
 }
 
-#endif //NEBULA_MAIN_CC
+#endif // NEBULA_MAIN_CC
