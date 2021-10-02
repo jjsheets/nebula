@@ -1,6 +1,8 @@
 CFLAGS += -Wall
 CFLAGS += -O2
-CFLAGS += -I../src `pkg-config --cflags glfw3`
+CFLAGS += -I../src
+CFLAGS += -I../external/doctest/doctest
+CFLAGS += `pkg-config --cflags glfw3`
 CFLAGS += -std=c++17
 LDFLAGS = `pkg-config --libs glfw3`
 LDFLAGS += -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
