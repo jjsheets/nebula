@@ -36,5 +36,5 @@ jobs:
         run: |
           tup
 
-#      - name: Run tests
-#        run: test/test
+      - name: Run tests
+        run: test/test
