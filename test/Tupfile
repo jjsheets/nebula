@@ -1,6 +1,7 @@
 include_rules
 
 : foreach ../src/*.cc ^../src/main.cc |> !cc |>
+: ../external/loguru/loguru.cpp |> !cc |>
 : *.o |> !ld |> test
 
 .gitignore
