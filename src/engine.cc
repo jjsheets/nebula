@@ -46,6 +46,8 @@ SCENARIO("class engine")
 
 namespace nebula {
 
+engine *engine::_engine;
+
 engine::engine()
 {
   if (!glfwInit()) {
@@ -57,6 +59,8 @@ engine::engine()
     glfwTerminate();
     throw std::exception();
   }
+  glfwSetKeyCallback(_window, engine::_keyCallback);
+  _engine = this;
 }
 
 engine::~engine()
@@ -67,9 +71,24 @@ engine::~engine()
   glfwTerminate();
 }
 
+// static routing function
+void engine::_keyCallback(
+    GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+  _engine->keyboardEvent(window, key, scancode, action, mods);
+}
+
+void engine::keyboardEvent(
+    GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    exit();
+  }
+}
+
 void engine::exit()
 {
-  glfwSetWindowShouldClose(_window, true);
+  glfwSetWindowShouldClose(_window, GLFW_TRUE);
 }
 
 void engine::loop()

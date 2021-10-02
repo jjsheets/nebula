@@ -11,7 +11,13 @@ namespace nebula {
 
 class engine {
 private:
+  static engine *_engine;
   GLFWwindow *_window;
+
+  static void _keyCallback(
+      GLFWwindow *window, int key, int scancode, int action, int mods);
+  void keyboardEvent(
+      GLFWwindow *window, int key, int scancode, int action, int mods);
 
 public:
   engine();
