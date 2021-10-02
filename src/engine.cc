@@ -9,7 +9,7 @@
 
 #include "doctest.h"
 
-SCENARIO("class engine")
+SCENARIO("class engine" * doctest::may_fail())
 {
   GIVEN("an engine object with no arguments")
   {
