@@ -6,14 +6,18 @@
 
 #include "engine.h"
 #include <exception>
-
 #include "doctest.h"
+#include "loguru.hpp"
 
 SCENARIO("class engine" * doctest::may_fail())
 {
-  GIVEN("an engine object with no arguments")
+  GIVEN("an engine object with only command line arguments")
   {
-    nebula::engine testEngine;
+    char argv0[] = "nebula";
+    char argv1[] = "-v";
+    char argv2[] = "OFF";
+    char *argv[] = {argv0, argv1, argv2, NULL};
+    nebula::engine testEngine(3, argv);
     THEN("it should have a 640 x 480 GLFW window with a border")
     {
       int width, height;
@@ -48,8 +52,10 @@ namespace nebula {
 
 engine *engine::_engine;
 
-engine::engine()
+engine::engine(int argc, char *argv[])
 {
+  loguru::init(argc, argv);
+  loguru::add_file("log/verbose.log", loguru::Truncate, loguru::Verbosity_MAX);
   if (!glfwInit()) {
     throw std::exception();
   }

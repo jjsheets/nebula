@@ -11,7 +11,7 @@
 
 int main(int argc, char *argv[])
 {
-  nebula::engine nebulaEngine;
+  nebula::engine nebulaEngine(argc, argv);
   nebulaEngine.loop();
   return 0;
 }
