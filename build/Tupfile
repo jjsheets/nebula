@@ -1,7 +1,8 @@
 include_rules
 
-: foreach ../src/*.cc |> !cc |>
-: *.o ^test.o |> !ld |> nebula
-: *.o ^main.o |> !ld |> nebula_test
+CFLAGS += -D DOCTEST_CONFIG_DISABLE
+
+: foreach ../src/*.cc ^../src/test.cc |> !cc |>
+: *.o |> !ld |> nebula
 
 .gitignore
