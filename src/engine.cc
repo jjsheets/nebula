@@ -66,11 +66,41 @@ namespace nebula {
 
 engine *engine::_engine;
 
+static void *_luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+  if (nsize == 0) {
+    free(ptr);
+    return NULL;
+  } else {
+    return realloc(ptr, nsize);
+  }
+}
+
+static void _luaWarnFunction(void *ud, const char *message, int tocont)
+{
+  LOG_S(WARNING) << message;
+}
+
+static int _luaPanic(lua_State *L)
+{
+  const char *msg = lua_tostring(L, -1);
+  if (!msg) {
+    msg = "error object is not a string";
+  }
+  LOG_S(ERROR) << "unprotected error in call to Lua API (" << msg << ")";
+  throw std::exception();
+}
+
 engine::engine(int argc, char *argv[])
 {
   loguru::init(argc, argv);
   loguru::add_file("log/verbose.log", loguru::Truncate, loguru::Verbosity_MAX);
   LOG_SCOPE_FUNCTION(INFO);
+  _luaState = lua_newstate(_luaAlloc, nullptr);
+  if (_luaState) {
+    lua_atpanic(_luaState, &_luaPanic);
+    lua_setwarnf(_luaState, _luaWarnFunction, nullptr);
+  }
   if (!glfwInit()) {
     throw std::exception();
   }

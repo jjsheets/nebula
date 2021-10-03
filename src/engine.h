@@ -7,13 +7,15 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+struct lua_State;
+
 namespace nebula {
 
 class engine {
 private:
   static engine *_engine;
   GLFWwindow *_window;
-  struct lua_State *_luaState;
+  lua_State *_luaState;
 
   static void _keyCallback(
       GLFWwindow *window, int key, int scancode, int action, int mods);
