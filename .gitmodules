@@ -4,3 +4,6 @@
 [submodule "external/loguru"]
 	path = external/loguru
 	url = https://github.com/emilk/loguru
+[submodule "external/lua"]
+	path = external/lua
+	url = https://github.com/lua/lua
