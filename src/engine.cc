@@ -5,10 +5,23 @@
 #define NEBULA_ENGINE_CC
 
 #include "engine.h"
+
+// Standard Library includes
 #include <exception>
+
+// Unit Testing includes
 #include "doctest.h"
+
+// Logging system includes
 #define LOGURU_WITH_STREAMS 1
 #include "loguru.hpp"
+
+// Lua scripting includes
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
 
 SCENARIO("class engine" * doctest::may_fail())
 {
