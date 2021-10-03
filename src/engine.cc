@@ -5,10 +5,22 @@
 #define NEBULA_ENGINE_CC
 
 #include "engine.h"
+
+// Standard Library includes
 #include <exception>
+
+// Unit Testing includes
 #include "doctest.h"
-#define LOGURU_WITH_STREAMS 1
+
+// Logging system includes
 #include "loguru.hpp"
+
+// Lua scripting includes
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
 
 SCENARIO("class engine" * doctest::may_fail())
 {
@@ -53,20 +65,62 @@ namespace nebula {
 
 engine *engine::_engine;
 
+static void *_luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+  if (nsize == 0) {
+    free(ptr);
+    return NULL;
+  } else {
+    return realloc(ptr, nsize);
+  }
+}
+
+static void _luaWarnFunction(void *ud, const char *message, int tocont)
+{
+  LOG_S(WARNING) << message;
+}
+
+static int _luaPanic(lua_State *L)
+{
+  const char *msg = lua_tostring(L, -1);
+  if (!msg) {
+    msg = "error object is not a string";
+  }
+  LOG_S(ERROR) << "unprotected error in call to Lua API (" << msg << ")";
+  throw std::exception();
+}
+
 engine::engine(int argc, char *argv[])
 {
   loguru::init(argc, argv);
   loguru::add_file("log/verbose.log", loguru::Truncate, loguru::Verbosity_MAX);
   LOG_SCOPE_FUNCTION(INFO);
-  if (!glfwInit()) {
+
+  LOG_S(INFO) << LUA_RELEASE;
+  _luaState = lua_newstate(_luaAlloc, nullptr);
+  if (!_luaState) {
+    LOG_S(ERROR) << "Could not initialize Lua: Out of memory";
     throw std::exception();
   }
+  lua_atpanic(_luaState, &_luaPanic);
+  lua_setwarnf(_luaState, _luaWarnFunction, nullptr);
+  LOG_S(INFO) << "Lua: scripting library loaded";
+
+  LOG_S(INFO) << "GLFW " << glfwGetVersionString();
+  if (!glfwInit()) {
+    LOG_S(ERROR) << "Could not initialize GLFW: Platform does not meet minimum "
+                    "requirements for GLFW initialization";
+    throw std::exception();
+  }
+  LOG_S(INFO) << "GLFW library loaded";
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   _window = glfwCreateWindow(640, 480, "Nebula", NULL, NULL);
   if (!_window) {
+    LOG_S(ERROR) << "GLFW: Window creation failed";
     glfwTerminate();
     throw std::exception();
   }
+  LOG_S(INFO) << "GLFW: Game window created (640x480)";
   glfwSetKeyCallback(_window, engine::_keyCallback);
   _engine = this;
 }
@@ -76,8 +130,12 @@ engine::~engine()
   LOG_SCOPE_FUNCTION(INFO);
   if (_window) {
     glfwDestroyWindow(_window);
+    LOG_S(INFO) << "GLFW: Game window destroyed";
   }
   glfwTerminate();
+  LOG_S(INFO) << "GLFW: Terminated";
+  lua_close(_luaState);
+  LOG_S(INFO) << "Lua: scripting library closed";
 }
 
 // static routing function
@@ -91,7 +149,6 @@ void engine::_keyCallback(
 void engine::keyboardEvent(
     GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-  LOG_SCOPE_FUNCTION(INFO);
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     exit();
   }

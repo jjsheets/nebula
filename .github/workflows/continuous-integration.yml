@@ -25,12 +25,18 @@ jobs:
 
       - name: Install tools and dependencies
         run: |
-          sudo apt-get install -y tup libglfw3-dev libvulkan-dev libxi-dev libxxf86vm-dev
+          sudo apt-get install -y tup libglfw3-dev libvulkan-dev libxi-dev libxxf86vm-dev libreadline-dev
 
       - name: Update submodules
         run: |
           git submodule init
           git submodule update
+
+      - name: Build Lua Library
+        run: |
+          cd external/lua
+          make all
+          cd ../..
 
       - name: Run tup to build
         run: |
