@@ -2,6 +2,7 @@ CFLAGS += -Wall
 CFLAGS += -O2
 CFLAGS += -I../src
 CFLAGS += -I../external/doctest/doctest
+CFLAGS += -I../external/loguru
 CFLAGS += `pkg-config --cflags glfw3`
 CFLAGS += -std=c++17
 LDFLAGS = `pkg-config --libs glfw3`

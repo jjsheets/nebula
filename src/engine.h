@@ -20,7 +20,7 @@ private:
       GLFWwindow *window, int key, int scancode, int action, int mods);
 
 public:
-  engine();
+  engine(int argc, char *argv[]);
   ~engine();
   GLFWwindow *getWindowPointer()
   {

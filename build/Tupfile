@@ -3,6 +3,7 @@ include_rules
 CFLAGS += -D DOCTEST_CONFIG_DISABLE
 
 : foreach ../src/*.cc ^../src/test.cc |> !cc |>
+: ../external/loguru/loguru.cpp |> !cc |>
 : *.o |> !ld |> nebula
 
 .gitignore
