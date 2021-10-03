@@ -1,0 +1,23 @@
+name: Handle Assigned PRs
+# Create an issue branch when an issue is assigned
+
+on:
+  pull_request_target:
+    types: [ assigned ]
+
+jobs:
+  create_issue_branch_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Adjust Labels
+        uses: andymckay/labeler@master
+        with:
+          add-labels: "qa"
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.number }}
+          body: |
+            - Verify all tests pass in CI
+            - If related to graphics or platform specifics, run tests manually on all supported OSes
+            - If PR is based on an issue, verify it fulfills the requirements of that issue

@@ -1,0 +1,17 @@
+name: Manage Closed Issues/PRs
+# Create an issue branch when an issue is assigned
+
+on:
+  issues:
+    types: [ closed ]
+  pull_request:
+    types: [ closed ]
+
+jobs:
+  create_issue_branch_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Adjust Labels
+        uses: andymckay/labeler@master
+        with:
+          remove-labels: "active, qa"
