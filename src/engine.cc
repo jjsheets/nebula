@@ -7,6 +7,7 @@
 #include "engine.h"
 #include <exception>
 #include "doctest.h"
+#define LOGURU_WITH_STREAMS 1
 #include "loguru.hpp"
 
 SCENARIO("class engine" * doctest::may_fail())
@@ -56,6 +57,7 @@ engine::engine(int argc, char *argv[])
 {
   loguru::init(argc, argv);
   loguru::add_file("log/verbose.log", loguru::Truncate, loguru::Verbosity_MAX);
+  LOG_SCOPE_FUNCTION(INFO);
   if (!glfwInit()) {
     throw std::exception();
   }
@@ -71,6 +73,7 @@ engine::engine(int argc, char *argv[])
 
 engine::~engine()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   if (_window) {
     glfwDestroyWindow(_window);
   }
@@ -81,12 +84,14 @@ engine::~engine()
 void engine::_keyCallback(
     GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+  // No log scope because this just routes the event to the active engine.
   _engine->keyboardEvent(window, key, scancode, action, mods);
 }
 
 void engine::keyboardEvent(
     GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+  LOG_SCOPE_FUNCTION(INFO);
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     exit();
   }
@@ -94,11 +99,13 @@ void engine::keyboardEvent(
 
 void engine::exit()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   glfwSetWindowShouldClose(_window, GLFW_TRUE);
 }
 
 void engine::loop()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   while (!glfwWindowShouldClose(_window)) {
     glfwPollEvents();
   }
