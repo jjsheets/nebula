@@ -11,6 +11,9 @@
 // Logging system includes
 #include "loguru.hpp"
 
+// Folder Handling includes
+#include "platform_folders.h"
+
 SCENARIO("class moduleManager")
 {
   GIVEN("a moduleManager object")
@@ -24,6 +27,15 @@ SCENARIO("class moduleManager")
         REQUIRE(modManager.getModulePaths() == "./data");
       }
     }
+    WHEN("a local mod path is added")
+    {
+      modManager.addModulePath("MyGame", false, true);
+      THEN("getModulePaths returns a path relative to the user's game folder")
+      {
+        REQUIRE(modManager.getModulePaths()
+                == sago::getSaveGamesFolder2() + "/MyGame");
+      }
+    }
   }
 }
 
@@ -32,7 +44,14 @@ namespace nebula {
 void moduleManager::addModulePath(
     const std::string &path, bool autoLoad, bool local)
 {
-  _modPaths.emplace(_modPaths.end(), path, autoLoad, local);
+  if (local) {
+    _modPaths.emplace(_modPaths.end(),
+        sago::getSaveGamesFolder2() + "/" + path,
+        autoLoad,
+        local);
+  } else {
+    _modPaths.emplace(_modPaths.end(), "./" + path, autoLoad, local);
+  }
 }
 
 std::string moduleManager::getModulePaths()
