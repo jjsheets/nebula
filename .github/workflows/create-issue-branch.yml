@@ -13,24 +13,8 @@ jobs:
         uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Remove planned Label
-        uses: buildsville/add-remove-label@v1
+      - name: Adjust Labels
+        uses: andymckay/labeler@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          label: planned
-          type: remove
-      - name: Add active Label
-        uses: buildsville/add-remove-label@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          label: active
-          type: add
-      - name: Comment with process
-        uses: actions-ecosystem/action-create-comment@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            Begin development on this branch by running the following commands in the root directory of your local copy of the repository:
-            
-            `git pull`
-            `git switch ${{ steps.Create_Issue_Branch.outputs.branchName }}`
+          add-labels: "active"
+          remove-labels: "planned"
