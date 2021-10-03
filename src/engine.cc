@@ -13,7 +13,6 @@
 #include "doctest.h"
 
 // Logging system includes
-#define LOGURU_WITH_STREAMS 1
 #include "loguru.hpp"
 
 // Lua scripting includes
@@ -96,20 +95,32 @@ engine::engine(int argc, char *argv[])
   loguru::init(argc, argv);
   loguru::add_file("log/verbose.log", loguru::Truncate, loguru::Verbosity_MAX);
   LOG_SCOPE_FUNCTION(INFO);
+
+  LOG_S(INFO) << LUA_RELEASE;
   _luaState = lua_newstate(_luaAlloc, nullptr);
-  if (_luaState) {
-    lua_atpanic(_luaState, &_luaPanic);
-    lua_setwarnf(_luaState, _luaWarnFunction, nullptr);
-  }
-  if (!glfwInit()) {
+  if (!_luaState) {
+    LOG_S(ERROR) << "Could not initialize Lua: Out of memory";
     throw std::exception();
   }
+  lua_atpanic(_luaState, &_luaPanic);
+  lua_setwarnf(_luaState, _luaWarnFunction, nullptr);
+  LOG_S(INFO) << "Lua: scripting library loaded";
+
+  LOG_S(INFO) << "GLFW " << glfwGetVersionString();
+  if (!glfwInit()) {
+    LOG_S(ERROR) << "Could not initialize GLFW: Platform does not meet minimum "
+                    "requirements for GLFW initialization";
+    throw std::exception();
+  }
+  LOG_S(INFO) << "GLFW library loaded";
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   _window = glfwCreateWindow(640, 480, "Nebula", NULL, NULL);
   if (!_window) {
+    LOG_S(ERROR) << "GLFW: Window creation failed";
     glfwTerminate();
     throw std::exception();
   }
+  LOG_S(INFO) << "GLFW: Game window created (640x480)";
   glfwSetKeyCallback(_window, engine::_keyCallback);
   _engine = this;
 }
@@ -119,8 +130,12 @@ engine::~engine()
   LOG_SCOPE_FUNCTION(INFO);
   if (_window) {
     glfwDestroyWindow(_window);
+    LOG_S(INFO) << "GLFW: Game window destroyed";
   }
   glfwTerminate();
+  LOG_S(INFO) << "GLFW: Terminated";
+  lua_close(_luaState);
+  LOG_S(INFO) << "Lua: scripting library closed";
 }
 
 // static routing function
@@ -134,7 +149,6 @@ void engine::_keyCallback(
 void engine::keyboardEvent(
     GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-  LOG_SCOPE_FUNCTION(INFO);
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     exit();
   }

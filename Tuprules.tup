@@ -6,7 +6,9 @@ CFLAGS += -I../external/loguru
 CFLAGS += -I../external/lua
 CFLAGS += `pkg-config --cflags glfw3`
 CFLAGS += -std=c++17
+CFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS = `pkg-config --libs glfw3`
+LDFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS += -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
 !cc = |> g++ $(CFLAGS) -c %f -o %o |> %B.o
