@@ -7,3 +7,9 @@
 [submodule "external/lua"]
 	path = external/lua
 	url = https://github.com/lua/lua
+[submodule "external/cute_headers"]
+	path = external/cute_headers
+	url = https://github.com/RandyGaul/cute_headers
+[submodule "external/PlatformFolders"]
+	path = external/PlatformFolders
+	url = https://github.com/sago007/PlatformFolders
