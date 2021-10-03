@@ -32,6 +32,12 @@ jobs:
           git submodule init
           git submodule update
 
+      - name: Build Lua Library
+        run: |
+          cd external/lua
+          make all
+          cd ../..
+
       - name: Run tup to build
         run: |
           tup
