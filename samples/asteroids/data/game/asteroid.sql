@@ -42,6 +42,10 @@ UPDATE OR FAIL mobile SET
 FROM mobile AS old
 WHERE accel != 0.0;
 
+// Stored view that always has 1 row containing the player location
+CREATE VIEW IF NOT EXISTS player_location AS
+SELECT x, y FROM location INNER JOIN player USING (entity) LIMIT 1;
+
 CREATE TABLE IF NOT EXISTS collision
 (
   entity INT PRIMARY KEY

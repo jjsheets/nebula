@@ -15,16 +15,39 @@ local mobile = newComponent("mobile",
   numeric("rotation")
 )
 
-local accelerate = updateSystem{
+local collision = newComponent("collision",
+  numeric("radius")
+)
+
+local asteroid = newComponent("asteroid",
+  int("size")
+)
+
+local explosion = newComponent("explosion",
+  int("size")
+)
+
+local bullet = newComponent("bullet",
+  numeric("age"),
+  int("damage")
+)
+
+local player_ship = newComponent("player_ship",
+  numeric("reload"),
+  int("shield"),
+  int("health"),
+  int("lives"),
+  int("score")
+)
+
+local accelerate = update{
   target = mobile,
   given = mobile:as("old"),
   require = "old.accel != 0.0",
-  set = {
-    "vel = min(old.max_vel, max(0.0, old.vel + old.accel))"
-  }
+  set = "vel = min(old.max_vel, max(0.0, old.vel + old.accel))"
 }
 
-local move = updateSystem{
+local move = update{
   target = location,
   given = entitiesWithAll(location:as("old"), mobile),
   require = "old.vel > 0.0",
@@ -37,31 +60,14 @@ local move = updateSystem{
   }
 }
 
+local player_location = newView("player_location",
+  select{
+    given = entitiesWithAll(location, player_ship),
+    limit = 1,
+    result = {"x", "y"}
+  }
+)
+
 local movement = systemGroup(
   accelerate, move
-)
-
-newComponent("collision",
-  numeric("radius")
-)
-
-newComponent("asteroid",
-  int("size")
-)
-
-newComponent("explosion",
-  int("size")
-)
-
-newComponent("bullet",
-  numeric("age"),
-  int("damage")
-)
-
-newComponent("player_ship",
-  numeric("reload"),
-  int("shield"),
-  int("health"),
-  int("lives"),
-  int("score")
 )
