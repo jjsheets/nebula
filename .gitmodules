@@ -13,3 +13,6 @@
 [submodule "external/PlatformFolders"]
 	path = external/PlatformFolders
 	url = https://github.com/sago007/PlatformFolders
+[submodule "external/sqlite"]
+	path = external/sqlite
+	url = https://github.com/sqlite/sqlite
