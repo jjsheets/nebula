@@ -200,3 +200,51 @@ COMMIT TRANSACTION;
 DELETE FROM entity WHERE entity IN (
   SELECT entity FROM explosion WHERE age < (sim_time() - 10)
 );
+
+-- Render Systems are just select statements used to let the engine know what needs to be rendered.
+
+-- Player ship rendering system
+-- Unless something strange has occurred in the game, this will always give 1 row.
+SELECT x, y, theta, reload, shield, health FROM location INNER JOIN player_ship
+WHERE location.entity = player_ship.entity;
+
+-- Bullet rendering system
+-- Note, the details of the bullet aren't important, just the position
+SELECT x, y, prev_x, prev_y FROM location INNER JOIN bullet
+WHERE location.entity = bullet.entity;
+
+-- Asteroid rendering system
+SELECT x, y, theta, radius FROM location INNER JOIN collision INNER JOIN asteroid
+WHERE location.entity = collision.entity AND location.entity = asteroid.entity;
+
+-- Explosion rendering system
+SELECT x, y, radius FROM location INNER JOIN explosion
+WHERE location.entity = explosion.entity;
+
+-- Score and lives rendering
+SELECT key, value FROM var WHERE key = "score" OR key = "lives";
+
+-- Render system to tell the engine if there is an active game
+SELECT active = value > 0 FROM var WHERE key = "lives";
+
+-- other things not yet in this description fo the game:
+--   player respawn mechanics
+--   system to force asteroids to not spawn too close to the player ship
+--   power-ups to increase shield, give invulnerability, etc.
+--   enemy ships
+--   score blips which give score when collided by the player ship
+--   A system to maintain a number of asteroids in game at any given time
+--   difficulty levels, or a series of increasingly difficult asteroid sets
+--     e.g. first level is five asteroids, but each level after gets an extra 5
+--     and each level has a maximum number of asteroids that can be in game at once
+
+-- The goal with update systems is to be able to condense them down into a single
+-- massive set of prepared statements that can be run in sequence to update the game
+-- state.
+
+-- Update systems are followed by prepared statements for the render systems which
+-- feed or even directly create command buffers to send to Vulkan. It might also
+-- be useful to use this to trigger sounds, such as when a new bullet is spawned, etc.
+
+-- Other prepared statements might be used purely for engine logic, such as
+-- determining whether a game menu should display.
