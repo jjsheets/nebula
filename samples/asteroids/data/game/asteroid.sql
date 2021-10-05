@@ -55,6 +55,13 @@ CREATE TABLE IF NOT EXISTS bullet
   damage INT
 );
 
+CREATE TABLE IF NOT EXISTS asteroid_hit
+(
+  entity INTEGER REFERENCES entity (entity),
+  bullet INTEGER REFERENCES entity (entity),
+  damage INT
+)
+
 CREATE TABLE IF NOT EXISTS player_ship
 (
   entity INT PRIMARY KEY
@@ -95,6 +102,23 @@ BEGIN TRANSACTION;
     (SELECT value FROM var WHERE key = "last_entity"),
     1.0, 100, 100, 3, 0
   );
+COMMIT TRANSACTION;
+
+-- System to accelerate the player ship; run when the W key is pressed or the s key is released
+UPDATE mobile SET accel = accel + 0.5 WHERE entity IN (SELECT entity FROM player_ship);
+
+-- System to deccelerate the ship; run when the W key is released or the s key is pressed
+UPDATE mobile SET accel = accel - 0.5 WHERE entity IN (SELECT entity FROM player_ship);
+
+-- System to turn the player ship left; run when the a key is pressed or the d key is released
+UPDATE mobile SET rotation = rotation + 0.5 WHERE entity IN (SELECT entity FROM player_ship);
+
+-- System to stop turning left; run when the a key is released or the d key is pressed
+UPDATE mobile SET rotation = rotation - 0.5 WHERE entity IN (SELECT entity FROM player_ship);
+
+-- System to initialize previous location for newly spawned location components
+BEGIN TRANSACTION;
+  UPDATE location SET prev_x = x, prev_y = y WHERE prev_x ISNULL;
 COMMIT TRANSACTION;
 
 -- System to adjust locations based on current location and mobile data
@@ -138,13 +162,8 @@ BEGIN TRANSACTION;
     (random() % 5) * 0.5 + 3
   );
   INSERT OR ROLLBACK INTO asteroid (entity) VALUES (
-    (SELECT value FROM var WHERE key = "last_entity"),
+    (SELECT value FROM var WHERE key = "last_entity")
   );
-COMMIT TRANSACTION;
-
--- System to initialize previous location for newly spawned location components
-BEGIN TRANSACTION;
-  UPDATE location SET prev_x = x, prev_y = y WHERE prev_x ISNULL;
 COMMIT TRANSACTION;
 
 -- System to add a bullet to the game
@@ -175,31 +194,92 @@ DELETE FROM entity WHERE entity IN (
   SELECT entity FROM bullet WHERE age < (sim_time() - 10)
 );
 
--- TODO: create systems to check for collisions between player ship and asteroids
--- When this happens, the player entity should be deleted and the lives variable reduced by 1
--- start by making a select statement which returns player entities that intersect any asteroid, with a limit of 1
--- the select statement should return the entity number.
--- a delete statement can then be easily made from that.
+-- Stored views which make circle to circle collisions easier to deal with in SQL
+CREATE VIEW collision_location AS SELECT
+  location.entity AS entity, x, y, radius
+  FROM location INNER JOIN collision USING(entity);
 
--- TODO: create system to react to collisions between bullets and asteroids
--- when this happens:
---   the asteroid's collision radius is decreased by the damage of the bullet
---   the bullet is deleted
+CREATE VIEW player_location AS SELECT
+  location.entity AS entity, x, y, radius
+  FROM location INNER JOIN player_ship USING (entity) INNER JOIN collision USING(entity);
+
+CREATE VIEW player_collision AS SELECT
+  a.entity AS collider, p.location AS player
+  FROM player_location AS p JOIN collision_location AS a
+  WHERE
+    p.entity != a.entity AND
+    (p.x - a.x) * (p.x - a.x) + (p.y - a.y) * (p.y - a.y) < (p.radius + a.radius) * (p.radius + a.radius);
+
+-- System to destroy player ships when they collide with something. Also loses 1 life
+BEGIN TRANSACTION;
+  UPDATE var SET value = value - 1
+    WHERE key = "lives" AND (SELECT count(collider) > 0 FROM player_collision);
+  DELETE FROM entity WHERE entity IN (
+    SELECT player FROM player_collision GROUP BY player
+  );
+COMMIT TRANSACTION;
+
+CREATE VIEW bullet_location AS SELECT
+  location.entity AS entity, x, y, damage
+  FROM location INNER JOIN bullet USING(entity);
+
+CREATE VIEW bullet_collision AS SELECT
+  a.entity AS collider, p.location AS projectile, damage
+  FROM bullet_location AS p JOIN collision_location AS a
+  WHERE
+    (p.x - a.x) * (p.x - a.x) + (p.y - a.y) * (p.y - a.y) < (a.radius * a.radius);
+
+-- System to deal with bullets hitting asteroids
+-- The asteroid needs to get smaller as a result of being hit, so we save the hits.
+-- Otherwise, damage might be done to the asteroid, but the collision would be lost
+-- when deleting bullets.
+BEGIN TRANSACTION;
+  INSERT INTO asteroid_hit (entity, bullet, damage)
+    SELECT collider, projectile, damage FROM bullet_collision
+    WHERE collider IN (SELECT entity FROM asteroid);
+  DELETE FROM bullet WHERE entity IN (SELECT bullet FROM asteroid_hit)
+  UPDATE collision SET radius = radius - damage
+    FROM asteroid_hit
+    WHERE collision.entity = asteroid_hit.entity;
+  DELETE FROM asteroid_hit;
+COMMIT TRANSACTION;
 
 -- System to convert asteroids with collision.radius < 0 into explosions
--- TODO: Test the following
+-- This also gives 100 score for each asteroid destroyed
 BEGIN TRANSACTION;
+  UPDATE var SET value = value + 100 * (
+    SELECT count(entity) FROM collision INNER JOIN asteroid USING (entity)
+    WHERE radius <= 0
+  ) WHERE key = "score";
   INSERT INTO explosion
-    SELECT asteroid.entity, sim_time() FROM collision INNER JOIN asteroid
-    WHERE collision.entity = asteroid.entity AND radius <= 0;
+    SELECT asteroid.entity, sim_time() FROM collision INNER JOIN asteroid USING (entity)
+    WHERE radius <= 0;
   DELETE FROM asteroid WHERE entity IN (SELECT entity FROM explosion);
   DELETE FROM collision WHERE entity IN (SELECT entity FROM explosion);
 COMMIT TRANSACTION;
 
--- System to destroy old explosions
-DELETE FROM entity WHERE entity IN (
-  SELECT entity FROM explosion WHERE age < (sim_time() - 10)
-);
+-- System to convert the oldest explosion back into new a collision if it's old enough
+BEGIN TRANSACTION;
+  INSERT OR REPLACE INTO var VALUES ( "last_entity", (
+    SELECT entity FROM explosion WHERE age < (sim_time() - 10) ORDER BY age ASC LIMIT 1
+  ));
+  UPDATE location SET
+    x = abs(random()) % 200) - 100, y = (abs(random()) % 200) - 100, theta = radians(abs(random()) % 360)
+    WHERE
+      entity = (SELECT value FROM var WHERE key = "last_entity");
+  UPDATE mobile SET
+    accel = 0, vel = (random() % 10) * 0.1 + 0.5, max_vel = 100, rotation = 0
+    WHERE
+      entity = (SELECT value FROM var WHERE key = "last_entity");
+  INSERT OR ROLLBACK INTO collision VALUES (
+    (SELECT value FROM var WHERE key = "last_entity"),
+    (random() % 5) * 0.5 + 3
+  );
+  INSERT OR ROLLBACK INTO asteroid (entity) VALUES (
+    (SELECT value FROM var WHERE key = "last_entity")
+  );
+  DELETE FROM explosion WHERE entity = (SELECT value FROM var WHERE key = "last_entity");
+COMMIT TRANSACTION;
 
 -- Render Systems are just select statements used to let the engine know what needs to be rendered.
 
@@ -219,7 +299,7 @@ WHERE location.entity = collision.entity AND location.entity = asteroid.entity;
 
 -- Explosion rendering system
 SELECT x, y, radius FROM location INNER JOIN explosion
-WHERE location.entity = explosion.entity;
+WHERE location.entity = explosion.entity AND explosion.age < (sim_time() - 2);
 
 -- Score and lives rendering
 SELECT key, value FROM var WHERE key = "score" OR key = "lives";
