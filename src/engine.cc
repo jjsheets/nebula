@@ -6,8 +6,8 @@
 
 #include "engine.h"
 
-// Standard Library includes
-#include <exception>
+// Exception includes
+#include "exceptions.h"
 
 // Unit Testing includes
 #include "doctest.h"
@@ -87,7 +87,7 @@ static int _luaPanic(lua_State *L)
     msg = "error object is not a string";
   }
   LOG_S(ERROR) << "unprotected error in call to Lua API (" << msg << ")";
-  throw std::exception();
+  throw std::runtime_error(msg);
 }
 
 engine::engine(int argc, char *argv[])
@@ -100,7 +100,7 @@ engine::engine(int argc, char *argv[])
   _luaState = lua_newstate(_luaAlloc, nullptr);
   if (!_luaState) {
     LOG_S(ERROR) << "Could not initialize Lua: Out of memory";
-    throw std::exception();
+    throw std::runtime_error("Out of memory");
   }
   lua_atpanic(_luaState, &_luaPanic);
   lua_setwarnf(_luaState, _luaWarnFunction, nullptr);
@@ -110,7 +110,7 @@ engine::engine(int argc, char *argv[])
   if (!glfwInit()) {
     LOG_S(ERROR) << "Could not initialize GLFW: Platform does not meet minimum "
                     "requirements for GLFW initialization";
-    throw std::exception();
+    throw glfwException();
   }
   LOG_S(INFO) << "GLFW library loaded";
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -118,7 +118,7 @@ engine::engine(int argc, char *argv[])
   if (!_window) {
     LOG_S(ERROR) << "GLFW: Window creation failed";
     glfwTerminate();
-    throw std::exception();
+    throw glfwException();
   }
   LOG_S(INFO) << "GLFW: Game window created (640x480)";
   glfwSetKeyCallback(_window, engine::_keyCallback);
