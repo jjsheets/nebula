@@ -6,6 +6,7 @@ CFLAGS += -I../external/loguru
 CFLAGS += -I../external/lua
 CFLAGS += -I../external/cute_headers
 CFLAGS += -I../external/PlatformFolders/sago
+CFLAGS += -I../external/semver/include
 CFLAGS += `pkg-config --cflags glfw3`
 CFLAGS += -std=c++17
 CFLAGS += -DLOGURU_WITH_STREAMS=1
