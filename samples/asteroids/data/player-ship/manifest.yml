@@ -1,0 +1,9 @@
+module:
+  id: player-ship
+  core: true
+  dependencies:
+  - game-field
+  include:
+  - components.yml
+  - systems.yml
+  - renders.yml

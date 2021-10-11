@@ -1,0 +1,59 @@
+systems:
+- init_prev_location:
+  - update:
+      component: location
+      require:
+        prev_x: null
+      set:
+        prev_x: x
+        prev_y: y
+- update_location:
+  - update:
+      component: location
+      entity_join:
+        old: location
+        mobile: mobile
+      require:
+        vel: '> 0.0'
+      set:
+        prev_x: old.x
+        prev_y: old.y
+        theta: old.theta + mobile.rotation
+        x: old.x - sin(old.theta) * mobile.vel * deltaT()
+        y: old.y + cos(old.theta) * mobile.vel * deltaT()
+- update_velocity:
+  - update:
+      component: mobile
+      require:
+        accel: '!= 0.0'
+      set:
+        vel: clamp(vel + accel, 0.0, max_vel)
+- wrap_game_field:
+  - update:
+      component: location
+      require:
+        x: '< -100'
+      set:
+        x: x + 200
+        prev_x: prev_x + 200
+  - update:
+      component: location
+      require:
+        x: '> 100'
+      set:
+        x: x - 200
+        prev_x: prev_x - 200
+  - update:
+      component: location
+      require:
+        y: '< -100'
+      set:
+        y: y + 200
+        prev_y: prev_y + 200
+  - update:
+      component: location
+      require:
+        y: '> 100'
+      set:
+        y: y - 200
+        prev_y: prev_y - 200

@@ -1,0 +1,64 @@
+systems:
+- new_player:
+    new_entity:
+      id: player
+      trigger:
+        component: player_ship
+        count: '< 1'
+      location:
+        x: 0.0
+        y: 0.0
+        prev_x: 0.0
+        prev_y: 0.0
+        theta: 0.0
+      mobile:
+        accel: 0.0
+        vel: 0.0
+        max_vel: 5.0
+        rotation: 0.0
+      collision:
+        radius: 1.0
+      player_ship:
+        reload: 1.0
+        shield: 100
+        health: 100
+- accelerate:
+    update:
+      component: mobile
+      keybinds:
+        Accelerate: pressed
+        Decelerate: released
+      require:
+        entity_has: player_ship
+      set:
+        accel: accel + 0.5
+- decelerate:
+    update:
+      component: mobile
+      keybinds:
+        Accelerate: released
+        Decelerate: pressed
+      require:
+        entity_has: player_ship
+      set:
+        accel: accel - 0.5
+- turn_left:
+    update:
+      component: mobile
+      keybinds:
+        Left: pressed
+        Right: released
+      require:
+        entity_has: player_ship
+      set:
+        rotation: rotation + 0.5
+- turn_right:
+    update:
+      component: mobile
+      keybinds:
+        Left: released
+        Right: pressed
+      require:
+        entity_has: player_ship
+      set:
+        rotation: rotation - 0.5

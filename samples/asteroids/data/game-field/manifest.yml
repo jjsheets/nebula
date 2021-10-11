@@ -1,0 +1,6 @@
+module:
+  id: game-field
+  core: true
+  include:
+  - components.yml
+  - systems.yml

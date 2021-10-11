@@ -1,0 +1,12 @@
+renders:
+- player_ship:
+    entity_join:
+      location: location
+      player_ship: player_ship
+    data:
+    - x
+    - y
+    - theta
+    - reload
+    - shield
+    - health
