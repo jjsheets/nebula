@@ -6,8 +6,8 @@
 
 #include <string>
 #include <set>
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace nebula {
 
@@ -22,15 +22,15 @@ private:
   std::string _tags;
   std::vector<std::string> _dependencies;
 
-  static void resolve(const module &mod);
+  static void resolve(std::map<std::string, module> &modules, module &mod);
 
 public:
-  static std::map<std::string, module *> _modules;
-
   module(const std::string &path);
+  module(const module &other);
+  module() { }
   ~module();
 
-  static void resolve();
+  static void resolve(std::map<std::string, module> &modules);
 };
 
 } // namespace nebula

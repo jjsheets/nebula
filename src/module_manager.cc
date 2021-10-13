@@ -19,10 +19,10 @@ SCENARIO("class moduleManager")
 {
   GIVEN("a moduleManager object")
   {
-    nebula::moduleManager modManager("gameFolder");
+    nebula::moduleManager modManager;
     WHEN("a non-local mod path is added")
     {
-      modManager.addModulePath("data", true, false);
+      modManager.addModulePath("data", false);
       THEN("getModulePaths returns a path in the current working directory")
       {
         REQUIRE(modManager.getModulePaths()
@@ -32,7 +32,7 @@ SCENARIO("class moduleManager")
     }
     WHEN("a local mod path is added")
     {
-      modManager.addModulePath("MyGame", false, true);
+      modManager.addModulePath("MyGame", true);
       THEN("getModulePaths returns a path relative to the user's game folder")
       {
         REQUIRE(modManager.getModulePaths()
@@ -44,23 +44,18 @@ SCENARIO("class moduleManager")
 
 namespace nebula {
 
-void moduleManager::addModulePath(
-    const std::string &path, bool autoLoad, bool local)
+void moduleManager::addModulePath(const std::string &path, bool user)
 {
   LOG_SCOPE_FUNCTION(INFO);
-  if (local) {
-    _modPaths.emplace(_modPaths.end(),
-        sago::getSaveGamesFolder2() + "/" + path,
-        autoLoad,
-        local);
+  if (user) {
+    _modPaths.emplace(
+        _modPaths.end(), sago::getSaveGamesFolder2() + "/" + path, user);
   } else {
     _modPaths.emplace(_modPaths.end(),
         (const std::string &)(std::filesystem::current_path()) + "/" + path,
-        autoLoad,
-        local);
+        user);
   }
-  LOG_S(INFO) << "Added Module Path: " << _modPaths.back()._path
-              << (autoLoad ? " (auto load)" : "");
+  LOG_S(INFO) << "Added Module Path: " << _modPaths.back()._path;
 }
 
 std::string moduleManager::getModulePaths()
@@ -70,6 +65,15 @@ std::string moduleManager::getModulePaths()
       _modPaths.end(),
       [&](const moduleManager::modPath &v) { pathList.append(v._path); });
   return pathList;
+}
+
+void moduleManager::modPath::loadManifests(moduleManager &manager)
+{
+  for (const auto &entry : std::filesystem::directory_iterator(_path))
+    if (entry.is_directory()) {
+      // TODO: move this into modules constructor
+      manager._modules.emplace_back(entry.path().string());
+    }
 }
 
 } // namespace nebula

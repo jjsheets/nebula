@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "module.h"
 
 namespace nebula {
@@ -14,26 +15,21 @@ class moduleManager {
 private:
   struct modPath {
     std::string _path;
-    bool _autoLoad;
-    bool _local;
+    bool _user;
 
-    modPath(const std::string &path, bool autoLoad, bool local)
-        : _path(path), _autoLoad(autoLoad), _local(local)
-    {
-    }
+    modPath(const std::string &path, bool user) : _path(path), _user(user) { }
+    void loadManifests(moduleManager &manager);
   };
 
+  std::map<std::string, module> _moduleMap;
+  std::vector<module> _modules;
   std::vector<modPath> _modPaths;
-  std::string _localFolderName;
 
 public:
-  moduleManager(const std::string &localFolderName)
-      : _localFolderName(localFolderName)
-  {
-  }
+  moduleManager() { }
   ~moduleManager() { }
 
-  void addModulePath(const std::string &path, bool autoLoad, bool local);
+  void addModulePath(const std::string &path, bool user);
   std::string getModulePaths();
 };
 

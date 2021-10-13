@@ -14,30 +14,35 @@ module::module(const std::string &path) : _rootPath(path)
   // read the manifest file for the module
 }
 
-// TODO: Add constructors to allow Map to work directly with the module class,
-// Alternatively, add the vector back in, and use map only with the identifier?
+module::module(const module &other)
+    : _rootPath(other._rootPath), _identifier(other._identifier),
+      _name(other._name), _tags(other._tags), _dependencies(other._dependencies)
+{
+}
 
 module::~module() { }
 
 std::set<std::string> module::_resolved;
 std::set<std::string> module::_unresolved;
-std::map<std::string, module> module::_modules;
 
-void module::resolve() { }
+void module::resolve(std::map<std::string, module> &modules)
+{
+  // TODO: move this stuff to module_manager class
+}
 
-void module::resolve(const module &mod)
+void module::resolve(std::map<std::string, module> &modules, module &mod)
 {
   if (_resolved.find(mod._identifier) != _resolved.end()) {
     return;
   }
   _unresolved.insert(mod._identifier);
   std::for_each(
-      mod._dependencies.begin(), mod._dependencies.end(), [](std::string dep) {
+      mod._dependencies.begin(), mod._dependencies.end(), [&](std::string dep) {
         if (_resolved.find(dep) == _resolved.end()) {
           if (_unresolved.find(dep) != _resolved.end()) {
             throw std::runtime_error("Circular dependency detected!");
           }
-          resolve(_modules[dep]);
+          resolve(modules, modules.at(dep));
         }
       });
   _resolved.insert(mod._identifier);
