@@ -71,9 +71,32 @@ void moduleManager::modPath::loadManifests(moduleManager &manager)
 {
   for (const auto &entry : std::filesystem::directory_iterator(_path))
     if (entry.is_directory()) {
-      // TODO: move this into modules constructor
       manager._modules.emplace_back(entry.path().string());
     }
+}
+
+void moduleManager::resolve()
+{
+  // TODO: resolve all modules in sequence
+}
+
+void moduleManager::resolve(module &mod)
+{
+  if (_resolved.find(mod.identifier()) != _resolved.end()) {
+    return;
+  }
+  _unresolved.insert(mod.identifier());
+  std::for_each(
+      mod._dependencies.begin(), mod._dependencies.end(), [&](std::string dep) {
+        if (_resolved.find(dep) == _resolved.end()) {
+          if (_unresolved.find(dep) != _resolved.end()) {
+            throw std::runtime_error("Circular dependency detected!");
+          }
+          resolve(_moduleMap.at(dep));
+        }
+      });
+  _resolved.insert(mod.identifier());
+  _unresolved.erase(mod.identifier());
 }
 
 } // namespace nebula

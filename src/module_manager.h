@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <map>
 #include "module.h"
 
@@ -24,6 +25,11 @@ private:
   std::map<std::string, module> _moduleMap;
   std::vector<module> _modules;
   std::vector<modPath> _modPaths;
+  std::set<std::string> _resolved;
+  std::set<std::string> _unresolved;
+
+  void resolve(module &mod);
+  void resolve();
 
 public:
   moduleManager() { }
