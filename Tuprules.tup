@@ -7,12 +7,14 @@ CFLAGS += -I../external/lua
 CFLAGS += -I../external/cute_headers
 CFLAGS += -I../external/PlatformFolders/sago
 CFLAGS += -I../external/semver/include
+CFLAGS += -I../external/yaml-cpp/include
 CFLAGS += `pkg-config --cflags glfw3`
 CFLAGS += -std=c++17
 CFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS = `pkg-config --libs glfw3`
 LDFLAGS += -DLOGURU_WITH_STREAMS=1
-LDFLAGS += -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+LDFLAGS += -L../external/yaml-cpp
+LDFLAGS += -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lyaml-cpp
 
 !cc = |> g++ $(CFLAGS) -c %f -o %o |>
 !ar = |> ar crs %o %f |>

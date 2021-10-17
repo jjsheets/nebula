@@ -32,10 +32,13 @@ jobs:
           git submodule init
           git submodule update
 
-      - name: Build Lua Library
+      - name: Build Libraries
         run: |
           cd external/lua
           make all
+          cd ../yaml-cpp
+          cmake .
+          make
           cd ../..
 
       - name: Run tup to build
