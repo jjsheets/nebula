@@ -29,14 +29,18 @@ private:
   std::set<std::string> _unresolved;
 
   void resolve(module &mod);
-  void resolve();
 
 public:
   moduleManager() { }
   ~moduleManager() { }
 
   void addModulePath(const std::string &path, bool user);
+  std::vector<module> &modules();
+  void resolve();
+
+#ifndef DOCTEST_CONFIG_DISABLE
   std::string getModulePaths();
+#endif
 };
 
 } // namespace nebula

@@ -15,6 +15,23 @@
 #include <filesystem>
 #include "platform_folders.h"
 
+#ifndef DOCTEST_CONFIG_DISABLE
+
+namespace nebula {
+
+std::string moduleManager::getModulePaths()
+{
+  std::string pathList("");
+  std::for_each(_modPaths.begin(),
+      _modPaths.end(),
+      [&](const moduleManager::modPath &v) { pathList.append(v._path); });
+  return pathList;
+}
+
+} // namespace nebula
+
+#endif
+
 SCENARIO("class moduleManager")
 {
   GIVEN("a moduleManager object")
@@ -58,15 +75,6 @@ void moduleManager::addModulePath(const std::string &path, bool user)
   LOG_S(INFO) << "Added Module Path: " << _modPaths.back()._path;
 }
 
-std::string moduleManager::getModulePaths()
-{
-  std::string pathList("");
-  std::for_each(_modPaths.begin(),
-      _modPaths.end(),
-      [&](const moduleManager::modPath &v) { pathList.append(v._path); });
-  return pathList;
-}
-
 void moduleManager::modPath::loadManifests(moduleManager &manager)
 {
   for (const auto &entry : std::filesystem::directory_iterator(_path))
@@ -77,7 +85,11 @@ void moduleManager::modPath::loadManifests(moduleManager &manager)
 
 void moduleManager::resolve()
 {
-  // TODO: resolve all modules in sequence
+  std::for_each(_modules.begin(), _modules.end(), [&](auto &mod) {
+    if (mod.load() && _resolved.find(mod.identifier()) == _resolved.end()) {
+      resolve(mod);
+    }
+  });
 }
 
 void moduleManager::resolve(module &mod)
@@ -87,7 +99,7 @@ void moduleManager::resolve(module &mod)
   }
   _unresolved.insert(mod.identifier());
   std::for_each(
-      mod._dependencies.begin(), mod._dependencies.end(), [&](std::string dep) {
+      mod.dependencies().begin(), mod.dependencies().end(), [&](auto &dep) {
         if (_resolved.find(dep) == _resolved.end()) {
           if (_unresolved.find(dep) != _resolved.end()) {
             throw std::runtime_error("Circular dependency detected!");

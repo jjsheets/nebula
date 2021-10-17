@@ -9,14 +9,16 @@
 
 namespace nebula {
 
-module::module(const std::string &path) : _rootPath(path)
+module::module(const std::string &path, bool shouldLoad)
+    : _rootPath(path), _load(shouldLoad)
 {
   // read the manifest file for the module
 }
 
 module::module(const module &other)
     : _rootPath(other._rootPath), _identifier(other._identifier),
-      _name(other._name), _tags(other._tags), _dependencies(other._dependencies)
+      _name(other._name), _tags(other._tags),
+      _dependencies(other._dependencies), _load(other._load)
 {
 }
 
