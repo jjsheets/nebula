@@ -1,5 +1,7 @@
 module:
   id: game-field
+  name: Game Playing Field
+  tags: core
   core: true
   include:
   - components.yml

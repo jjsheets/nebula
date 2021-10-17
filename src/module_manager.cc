@@ -66,11 +66,12 @@ void moduleManager::addModulePath(const std::string &path, bool user)
   LOG_SCOPE_FUNCTION(INFO);
   if (user) {
     _modPaths.emplace(
-        _modPaths.end(), sago::getSaveGamesFolder2() + "/" + path, user);
+        _modPaths.end(), sago::getSaveGamesFolder2() + "/" + path, user, *this);
   } else {
     _modPaths.emplace(_modPaths.end(),
         (const std::string &)(std::filesystem::current_path()) + "/" + path,
-        user);
+        user,
+        *this);
   }
   LOG_S(INFO) << "Added Module Path: " << _modPaths.back()._path;
 }

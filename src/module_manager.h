@@ -18,7 +18,11 @@ private:
     std::string _path;
     bool _user;
 
-    modPath(const std::string &path, bool user) : _path(path), _user(user) { }
+    modPath(const std::string &path, bool user, moduleManager &manager)
+        : _path(path), _user(user)
+    {
+      loadManifests(manager);
+    }
     void loadManifests(moduleManager &manager);
   };
 

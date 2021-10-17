@@ -12,11 +12,11 @@ namespace nebula {
 class module {
 private:
   std::string _rootPath;
+  bool _load;
   std::string _identifier;
   std::string _name;
   std::string _tags;
   std::vector<std::string> _dependencies;
-  bool _load;
 
 public:
   module(const std::string &path, bool shouldLoad = false);
