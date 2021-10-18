@@ -22,7 +22,7 @@ private:
     modPath(const std::string &path, bool user, moduleManager &manager)
         : _path(path), _user(user)
     {
-      std::filesystem::create_directory(path);
+      std::filesystem::create_directory(path); // fails silently if path exists
       loadManifests(manager);
     }
     void loadManifests(moduleManager &manager);
