@@ -32,7 +32,20 @@ module::module(const std::string &path, bool shouldLoad)
   std::string _tags
       = manifest["module"]["tags"].as<std::string, std::string>("");
   if (manifest["module"]["dependencies"]) {
-    // TODO: handle dependency tracking
+    for (auto iterator = manifest["module"]["dependencies"].begin();
+         iterator != manifest["module"]["dependencies"].end();
+         ++iterator)
+    {
+      _dependencies.emplace_back(iterator->as<std::string>());
+    }
+  }
+  if (manifest["module"]["include"]) {
+    for (auto iterator = manifest["module"]["include"].begin();
+         iterator != manifest["module"]["include"].end();
+         ++iterator)
+    {
+      _includes.emplace_back(iterator->as<std::string>());
+    }
   }
 }
 

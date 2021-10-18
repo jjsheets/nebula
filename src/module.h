@@ -17,6 +17,7 @@ private:
   std::string _name;
   std::string _tags;
   std::vector<std::string> _dependencies;
+  std::vector<std::string> _includes;
 
 public:
   module(const std::string &path, bool shouldLoad = false);
