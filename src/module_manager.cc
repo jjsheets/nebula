@@ -12,7 +12,6 @@
 #include "loguru.hpp"
 
 // Folder Handling includes
-#include <filesystem>
 #include "platform_folders.h"
 
 #ifndef DOCTEST_CONFIG_DISABLE
@@ -37,14 +36,14 @@ SCENARIO("class moduleManager")
   GIVEN("a moduleManager object")
   {
     nebula::moduleManager modManager;
-    WHEN("a non-local mod path is added")
+    WHEN("a core mod path is added")
     {
-      modManager.addModulePath("data", false);
+      modManager.addModulePath("samples/asteroids/data", false);
       THEN("getModulePaths returns a path in the current working directory")
       {
         REQUIRE(modManager.getModulePaths()
                 == (const std::string &)(std::filesystem::current_path())
-                       + "/data");
+                       + "/samples/asteroids/data");
       }
     }
     WHEN("a local mod path is added")

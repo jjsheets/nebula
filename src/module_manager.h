@@ -9,6 +9,7 @@
 #include <set>
 #include <map>
 #include "module.h"
+#include <filesystem>
 
 namespace nebula {
 
@@ -21,6 +22,7 @@ private:
     modPath(const std::string &path, bool user, moduleManager &manager)
         : _path(path), _user(user)
     {
+      std::filesystem::create_directory(path);
       loadManifests(manager);
     }
     void loadManifests(moduleManager &manager);
