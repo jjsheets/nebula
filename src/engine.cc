@@ -1,9 +1,6 @@
 // This document is licensed according to the LGPL v2.1 license
 // Consult the LICENSE file in the root project directory for details
 
-#ifndef NEBULA_ENGINE_CC
-#define NEBULA_ENGINE_CC
-
 #include "engine.h"
 
 // Exception includes
@@ -22,26 +19,27 @@ extern "C" {
 #include <lualib.h>
 }
 
+#ifndef DOCTEST_CONFIG_DISABLE
 SCENARIO("class engine" * doctest::may_fail())
 {
   GIVEN("an engine object with only command line arguments")
   {
     char argv0[] = "nebula";
-    char argv1[] = "-v";
+    char argv1[] = "-v"; // This and the next option disable logging to stdout
     char argv2[] = "OFF";
     char *argv[] = {argv0, argv1, argv2, NULL};
     nebula::engine testEngine(3, argv);
-    THEN("it should have a 640 x 480 GLFW window with a border")
+    THEN("it should have a 1600 x 900 GLFW window with a border")
     {
       int width, height;
       glfwGetWindowSize(testEngine.getWindowPointer(), &width, &height);
-      REQUIRE(width == 640);
-      REQUIRE(height == 480);
+      REQUIRE(width == 1600);
+      REQUIRE(height == 900);
       REQUIRE(
           glfwGetWindowAttrib(testEngine.getWindowPointer(), GLFW_DECORATED));
     }
 
-#if 0
+  #if 0
     // This is for descriptive purposes only, until this can be coded with a
     // proper test
     THEN("it should stop its loop if told to by the OS")
@@ -57,9 +55,10 @@ SCENARIO("class engine" * doctest::may_fail())
       testEngine.exit();
       testEngine.loop();
     }
-#endif
+  #endif
   }
 }
+#endif
 
 namespace nebula {
 
@@ -106,34 +105,16 @@ engine::engine(int argc, char *argv[])
   lua_setwarnf(_luaState, _luaWarnFunction, nullptr);
   LOG_S(INFO) << "Lua: scripting library loaded";
 
-  LOG_S(INFO) << "GLFW " << glfwGetVersionString();
-  if (!glfwInit()) {
-    LOG_S(ERROR) << "Could not initialize GLFW: Platform does not meet minimum "
-                    "requirements for GLFW initialization";
-    throw glfwException();
-  }
-  LOG_S(INFO) << "GLFW library loaded";
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  _window = glfwCreateWindow(640, 480, "Nebula", NULL, NULL);
-  if (!_window) {
-    LOG_S(ERROR) << "GLFW: Window creation failed";
-    glfwTerminate();
-    throw glfwException();
-  }
-  LOG_S(INFO) << "GLFW: Game window created (640x480)";
-  glfwSetKeyCallback(_window, engine::_keyCallback);
-  _engine = this;
+  _graphics = new graphics(1600, 900, engine::_keyCallback);
+  _engine   = this;
 }
 
 engine::~engine()
 {
   LOG_SCOPE_FUNCTION(INFO);
-  if (_window) {
-    glfwDestroyWindow(_window);
-    LOG_S(INFO) << "GLFW: Game window destroyed";
+  if (_graphics) {
+    delete _graphics;
   }
-  glfwTerminate();
-  LOG_S(INFO) << "GLFW: Terminated";
   lua_close(_luaState);
   LOG_S(INFO) << "Lua: scripting library closed";
 }
@@ -157,17 +138,15 @@ void engine::keyboardEvent(
 void engine::exit()
 {
   LOG_SCOPE_FUNCTION(INFO);
-  glfwSetWindowShouldClose(_window, GLFW_TRUE);
+  glfwSetWindowShouldClose(*_graphics, GLFW_TRUE);
 }
 
 void engine::loop()
 {
   LOG_SCOPE_FUNCTION(INFO);
-  while (!glfwWindowShouldClose(_window)) {
+  while (!glfwWindowShouldClose(*_graphics)) {
     glfwPollEvents();
   }
 }
 
 } // namespace nebula
-
-#endif // NEBULA_ENGINE_CC

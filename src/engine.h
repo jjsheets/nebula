@@ -4,8 +4,7 @@
 #ifndef NEBULA_ENGINE_H
 #define NEBULA_ENGINE_H
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include "graphics.h"
 
 struct lua_State;
 
@@ -14,8 +13,8 @@ namespace nebula {
 class engine {
 private:
   static engine *_engine;
-  GLFWwindow *_window;
   lua_State *_luaState;
+  graphics *_graphics;
 
   static void _keyCallback(
       GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -25,12 +24,14 @@ private:
 public:
   engine(int argc, char *argv[]);
   ~engine();
-  GLFWwindow *getWindowPointer()
-  {
-    return _window;
-  }
   void exit();
   void loop();
+#ifndef DOCTEST_CONFIG_DISABLE
+  GLFWwindow *getWindowPointer()
+  {
+    return *_graphics;
+  }
+#endif
 };
 
 } // namespace nebula
