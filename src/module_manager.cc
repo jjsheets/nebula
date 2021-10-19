@@ -12,27 +12,43 @@
 #include "loguru.hpp"
 
 // Folder Handling includes
-#include <filesystem>
 #include "platform_folders.h"
 
-SCENARIO("class moduleManager")
+#ifndef DOCTEST_CONFIG_DISABLE
+
+namespace nebula {
+
+std::string moduleManager::getModulePaths()
+{
+  std::string pathList("");
+  std::for_each(_modPaths.begin(),
+      _modPaths.end(),
+      [&](const moduleManager::modPath &v) { pathList.append(v._path); });
+  return pathList;
+}
+
+} // namespace nebula
+
+#endif
+
+SCENARIO("class moduleManager" * doctest::may_fail())
 {
   GIVEN("a moduleManager object")
   {
-    nebula::moduleManager modManager("gameFolder");
-    WHEN("a non-local mod path is added")
+    nebula::moduleManager modManager;
+    WHEN("a core mod path is added")
     {
-      modManager.addModulePath("data", true, false);
+      modManager.addModulePath("samples/asteroids/data", false);
       THEN("getModulePaths returns a path in the current working directory")
       {
         REQUIRE(modManager.getModulePaths()
                 == (const std::string &)(std::filesystem::current_path())
-                       + "/data");
+                       + "/samples/asteroids/data");
       }
     }
     WHEN("a local mod path is added")
     {
-      modManager.addModulePath("MyGame", false, true);
+      modManager.addModulePath("MyGame", true);
       THEN("getModulePaths returns a path relative to the user's game folder")
       {
         REQUIRE(modManager.getModulePaths()
@@ -44,32 +60,55 @@ SCENARIO("class moduleManager")
 
 namespace nebula {
 
-void moduleManager::addModulePath(
-    const std::string &path, bool autoLoad, bool local)
+void moduleManager::addModulePath(const std::string &path, bool user)
 {
   LOG_SCOPE_FUNCTION(INFO);
-  if (local) {
-    _modPaths.emplace(_modPaths.end(),
-        sago::getSaveGamesFolder2() + "/" + path,
-        autoLoad,
-        local);
+  if (user) {
+    _modPaths.emplace(
+        _modPaths.end(), sago::getSaveGamesFolder2() + "/" + path, user, *this);
   } else {
     _modPaths.emplace(_modPaths.end(),
         (const std::string &)(std::filesystem::current_path()) + "/" + path,
-        autoLoad,
-        local);
+        user,
+        *this);
   }
-  LOG_S(INFO) << "Added Module Path: " << _modPaths.back()._path
-              << (autoLoad ? " (auto load)" : "");
+  LOG_S(INFO) << "Added Module Path: " << _modPaths.back()._path;
 }
 
-std::string moduleManager::getModulePaths()
+void moduleManager::modPath::loadManifests(moduleManager &manager)
 {
-  std::string pathList("");
-  std::for_each(_modPaths.begin(),
-      _modPaths.end(),
-      [&](const moduleManager::modPath &v) { pathList.append(v._path); });
-  return pathList;
+  for (const auto &entry : std::filesystem::directory_iterator(_path))
+    if (entry.is_directory()) {
+      manager._modules.emplace_back(entry.path().string());
+    }
+}
+
+void moduleManager::resolve()
+{
+  std::for_each(_modules.begin(), _modules.end(), [&](auto &mod) {
+    if (mod.load() && _resolved.find(mod.identifier()) == _resolved.end()) {
+      resolve(mod);
+    }
+  });
+}
+
+void moduleManager::resolve(module &mod)
+{
+  if (_resolved.find(mod.identifier()) != _resolved.end()) {
+    return;
+  }
+  _unresolved.insert(mod.identifier());
+  std::for_each(
+      mod.dependencies().begin(), mod.dependencies().end(), [&](auto &dep) {
+        if (_resolved.find(dep) == _resolved.end()) {
+          if (_unresolved.find(dep) != _resolved.end()) {
+            throw std::runtime_error("Circular dependency detected!");
+          }
+          resolve(_moduleMap.at(dep));
+        }
+      });
+  _resolved.insert(mod.identifier());
+  _unresolved.erase(mod.identifier());
 }
 
 } // namespace nebula

@@ -1,39 +1,4 @@
 
-
-CREATE TABLE IF NOT EXISTS entity
-(
-  entity INTEGER PRIMARY KEY AUTOINCREMENT,
-  id TEXT UNIQUE
-);
-
-CREATE TABLE IF NOT EXISTS location
-(
-  entity INT PRIMARY KEY
-    REFERENCES entity (entity) ON DELETE CASCADE,
-  x NUMERIC,
-  y NUMERIC,
-  prev_x NUMERIC,
-  prev_y NUMERIC,
-  theta NUMERIC
-);
-
-CREATE TABLE IF NOT EXISTS mobile
-(
-  entity INT PRIMARY KEY
-    REFERENCES entity (entity) ON DELETE CASCADE,
-  accel NUMERIC,
-  vel NUMERIC,
-  max_vel NUMERIC,
-  rotation NUMERIC
-);
-
-CREATE TABLE IF NOT EXISTS collision
-(
-  entity INT PRIMARY KEY
-    REFERENCES entity (entity) ON DELETE CASCADE,
-  radius NUMERIC
-);
-
 CREATE TABLE IF NOT EXISTS asteroid
 (
   entity INT PRIMARY KEY
@@ -62,15 +27,6 @@ CREATE TABLE IF NOT EXISTS asteroid_hit
   damage INT
 )
 
-CREATE TABLE IF NOT EXISTS player_ship
-(
-  entity INT PRIMARY KEY
-    REFERENCES entity (entity) ON DELETE CASCADE,
-  reload NUMERIC,
-  shield INT,
-  health INT
-);
-
 CREATE TABLE IF NOT EXISTS var
 (
   key PRIMARY KEY, value
@@ -80,69 +36,6 @@ CREATE TABLE IF NOT EXISTS var
 BEGIN TRANSACTION;
   INSERT OR REPLACE INTO var VALUES ( "score", 0 );
   INSERT OR REPLACE INTO var VALUES ( "lives", 3 );
-COMMIT TRANSACTION;
-
--- System to add the player entity if it does not exist.
-BEGIN TRANSACTION;
-  INSERT OR ROLLBACK INTO entity (id) VALUES ("player");
-  INSERT OR REPLACE INTO var VALUES ( "last_entity", last_insert_rowid() );
-  INSERT OR ROLLBACK INTO location VALUES (
-    (SELECT value FROM var WHERE key = "last_entity"),
-    0, 0, 0, 0, 0
-  );
-  INSERT OR ROLLBACK INTO mobile VALUES (
-    (SELECT value FROM var WHERE key = "last_entity"),
-    0, 0, 5, 0
-  );
-  INSERT OR ROLLBACK INTO collision VALUES (
-    (SELECT value FROM var WHERE key = "last_entity"),
-    1
-  );
-  INSERT OR ROLLBACK INTO player_ship VALUES (
-    (SELECT value FROM var WHERE key = "last_entity"),
-    1.0, 100, 100, 3, 0
-  );
-COMMIT TRANSACTION;
-
--- System to accelerate the player ship; run when the W key is pressed or the s key is released
-UPDATE mobile SET accel = accel + 0.5 WHERE entity IN (SELECT entity FROM player_ship);
-
--- System to deccelerate the ship; run when the W key is released or the s key is pressed
-UPDATE mobile SET accel = accel - 0.5 WHERE entity IN (SELECT entity FROM player_ship);
-
--- System to turn the player ship left; run when the a key is pressed or the d key is released
-UPDATE mobile SET rotation = rotation + 0.5 WHERE entity IN (SELECT entity FROM player_ship);
-
--- System to stop turning left; run when the a key is released or the d key is pressed
-UPDATE mobile SET rotation = rotation - 0.5 WHERE entity IN (SELECT entity FROM player_ship);
-
--- System to initialize previous location for newly spawned location components
-BEGIN TRANSACTION;
-  UPDATE location SET prev_x = x, prev_y = y WHERE prev_x ISNULL;
-COMMIT TRANSACTION;
-
--- System to adjust locations based on current location and mobile data
-UPDATE OR FAIL location SET
-  prev_x = old.x,
-  prev_y = old.y,
-  theta = old.theta + mobile.rotation,
-  x = old.x - sin(old.theta) * mobile.vel,
-  y = old.y + cos(old.theta) * mobile.vel
-FROM location AS old INNER JOIN mobile USING (entity)
-WHERE vel > 0.0 AND old.entity = mobile.entity;
-
--- System to deal with acceleration
-UPDATE OR FAIL mobile SET
-  vel = min(old.max_vel, max(0.0, old.vel + old.accel))
-FROM mobile AS old
-WHERE accel != 0.0;
-
--- System to wrap around the play field
-BEGIN TRANSACTION;
-  UPDATE location SET x = x + 200, prev_x = prev_x + 200 WHERE x < -100;
-  UPDATE location SET x = x - 200, prev_x = prev_x - 200 WHERE x > 100;
-  UPDATE location SET y = y + 200, prev_y = prev_y + 200 WHERE y < -100;
-  UPDATE location SET y = y - 200, prev_y = prev_y - 200 WHERE y > 100;
 COMMIT TRANSACTION;
 
 -- System to add an asteroid to the game
@@ -282,11 +175,6 @@ BEGIN TRANSACTION;
 COMMIT TRANSACTION;
 
 -- Render Systems are just select statements used to let the engine know what needs to be rendered.
-
--- Player ship rendering system
--- Unless something strange has occurred in the game, this will always give 1 row.
-SELECT x, y, theta, reload, shield, health FROM location INNER JOIN player_ship
-WHERE location.entity = player_ship.entity;
 
 -- Bullet rendering system
 -- Note, the details of the bullet aren't important, just the position

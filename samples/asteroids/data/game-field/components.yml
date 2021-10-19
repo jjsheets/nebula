@@ -1,0 +1,14 @@
+components:
+- location:
+    x: numeric
+    y: numeric
+    prev_x: numeric
+    prev_y: numeric
+    theta: numeric
+- mobile:
+    accel: numeric
+    vel: numeric
+    max_vel: numeric
+    rotation: numeric
+- collision:
+    radius: numeric

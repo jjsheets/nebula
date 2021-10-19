@@ -16,3 +16,9 @@
 [submodule "external/sqlite"]
 	path = external/sqlite
 	url = https://github.com/sqlite/sqlite
+[submodule "external/semver"]
+	path = external/semver
+	url = https://github.com/Neargye/semver
+[submodule "external/yaml-cpp"]
+	path = external/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp

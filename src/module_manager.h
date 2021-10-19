@@ -6,7 +6,10 @@
 
 #include <string>
 #include <vector>
+#include <set>
+#include <map>
 #include "module.h"
+#include <filesystem>
 
 namespace nebula {
 
@@ -14,27 +17,36 @@ class moduleManager {
 private:
   struct modPath {
     std::string _path;
-    bool _autoLoad;
-    bool _local;
+    bool _user;
 
-    modPath(const std::string &path, bool autoLoad, bool local)
-        : _path(path), _autoLoad(autoLoad), _local(local)
+    modPath(const std::string &path, bool user, moduleManager &manager)
+        : _path(path), _user(user)
     {
+      std::filesystem::create_directory(path); // fails silently if path exists
+      loadManifests(manager);
     }
+    void loadManifests(moduleManager &manager);
   };
 
+  std::map<std::string, module> _moduleMap;
+  std::vector<module> _modules;
   std::vector<modPath> _modPaths;
-  std::string _localFolderName;
+  std::set<std::string> _resolved;
+  std::set<std::string> _unresolved;
+
+  void resolve(module &mod);
 
 public:
-  moduleManager(const std::string &localFolderName)
-      : _localFolderName(localFolderName)
-  {
-  }
+  moduleManager() { }
   ~moduleManager() { }
 
-  void addModulePath(const std::string &path, bool autoLoad, bool local);
+  void addModulePath(const std::string &path, bool user);
+  std::vector<module> &modules();
+  void resolve();
+
+#ifndef DOCTEST_CONFIG_DISABLE
   std::string getModulePaths();
+#endif
 };
 
 } // namespace nebula
