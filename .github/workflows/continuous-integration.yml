@@ -32,12 +32,36 @@ jobs:
         run: |
           git submodule init
           git submodule update
+          git submodule status external/lua >luastatus
+          git submodule status external/yaml-cpp >yaml-cppstatus
 
-      - name: Build Libraries
+      - name: Cache Handling (lua)
+        id: cache-lua
+        uses: actions/cache@v2
+        with:
+          path: |
+            external/lua/liblua.a
+          key: ${{ runner.os }}-${{ hashFiles('luastatus') }}
+
+      - name: Cache Handling (yaml-cpp)
+        id: cache-yaml
+        uses: actions/cache@v2
+        with:
+          path: |
+            external/yaml-cpp/libyaml-cpp.a
+          key: ${{ runner.os }}-${{ hashFiles('yaml-cppstatus') }}
+
+      - name: Build Lua Library
+        if: steps.cache-lua.outputs.cache-hit != 'true'
         run: |
           cd external/lua
           make all
-          cd ../yaml-cpp
+          cd ../..
+
+      - name: Build YAML Library
+        if: steps.cache-yaml.outputs.cache-hit != 'true'
+        run: |
+          cd external/yaml-cpp
           cmake .
           make
           cd ../..
