@@ -42,7 +42,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
-          cwd
+          pwd
 
       - name: Update submodules
         run: |
