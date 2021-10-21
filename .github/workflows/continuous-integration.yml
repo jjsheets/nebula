@@ -59,6 +59,7 @@ jobs:
         with:
           path: |
             external/yaml-cpp/libyaml-cpp.a
+            external/yaml-cpp/include/yaml-cpp/dll.h
           key: ${{ runner.os }}-${{ hashFiles('yaml-cppstatus') }}
 
       - name: Build Lua Library
