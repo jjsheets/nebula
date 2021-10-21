@@ -43,6 +43,7 @@ jobs:
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           Expand-Archive -Force tup.zip .
+          echo "::add-path::${env:GITHUB_WORKSPACE}"
 
       - name: Update submodules
         run: |
