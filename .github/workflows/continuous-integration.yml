@@ -110,6 +110,7 @@ jobs:
       - name: Run tup to build (Windows)
         if: matrix.os == 'windows-latest'
         run: |
+          perl -MCPAN -e 'install Pod::Usage'
           ./tup
 
       - name: Run tests
