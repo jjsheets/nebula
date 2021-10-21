@@ -51,7 +51,7 @@ jobs:
         with:
           path: |
             external/lua/liblua.a
-          key: ${{ runner.os }}-${{ hashFiles('luastatus') }}
+          key: ${{ runner.os }}-lua-1-${{ hashFiles('luastatus') }}
 
       - name: Cache Handling (yaml-cpp)
         id: cache-yaml
@@ -60,7 +60,7 @@ jobs:
           path: |
             external/yaml-cpp/libyaml-cpp.a
             external/yaml-cpp/include/yaml-cpp/dll.h
-          key: ${{ runner.os }}-${{ hashFiles('yaml-cppstatus') }}
+          key: ${{ runner.os }}-yaml-cpp-1-${{ hashFiles('yaml-cppstatus') }}
 
       - name: Build Lua Library (Linux)
         if: (steps.cache-lua.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
