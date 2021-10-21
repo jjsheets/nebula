@@ -62,11 +62,20 @@ jobs:
             external/yaml-cpp/include/yaml-cpp/dll.h
           key: ${{ runner.os }}-${{ hashFiles('yaml-cppstatus') }}
 
-      - name: Build Lua Library
-        if: steps.cache-lua.outputs.cache-hit != 'true'
+      - name: Build Lua Library (Linux)
+        if: (steps.cache-lua.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
         run: |
           cd external/lua
           sed -i 's/CC= gcc/CC= g++/g' makefile
+          make all
+          cd ../..
+
+      - name: Build Lua Library (Windows)
+        if: (steps.cache-lua.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        run: |
+          cd external/lua
+          sed -i 's/CC= gcc/CC= g++/g' makefile
+          sed -i 's/DLUA_USE_LINUX/DLUA_USE_WINDOWS/g' makefile
           make all
           cd ../..
 
