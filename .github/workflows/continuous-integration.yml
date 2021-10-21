@@ -80,11 +80,19 @@ jobs:
           make all
           cd ../..
 
-      - name: Build YAML Library
-        if: steps.cache-yaml.outputs.cache-hit != 'true'
+      - name: Build YAML Library (Linux)
+        if: (steps.cache-yaml.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
         run: |
           cd external/yaml-cpp
           cmake .
+          make
+          cd ../..
+
+      - name: Build YAML Library (Windows)
+        if: (steps.cache-yaml.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        run: |
+          cd external/yaml-cpp
+          cmake -G "MinGW Makefiles" .
           make
           cd ../..
 
