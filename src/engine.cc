@@ -13,11 +13,11 @@
 #include "loguru.hpp"
 
 // Lua scripting includes
-extern "C" {
+// extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
-}
+//}
 
 #ifndef DOCTEST_CONFIG_DISABLE
 SCENARIO("class engine" * doctest::may_fail())
