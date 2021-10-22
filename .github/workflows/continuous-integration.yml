@@ -77,8 +77,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            external/glfw/libglfw3.a
-          key: ${{ runner.os }}-glfw-1-${{ hashFiles('glfwstatus') }}
+            external/glfw/src/libglfw3.a
+          key: ${{ runner.os }}-glfw-2-${{ hashFiles('glfwstatus') }}
 
       - name: Build Lua Library (Ubuntu)
         if: (steps.cache-lua.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
