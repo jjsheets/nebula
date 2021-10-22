@@ -43,9 +43,12 @@ jobs:
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           Expand-Archive -Force tup.zip .
+          echo "Tup Extracted"
           curl https://github.com/glfw/glfw/releases/download/3.3.2/glfw-3.3.2.bin.WIN64.zip -o glfw.zip
           Expand-Archive -force glfw.zip
+          echo "GLFW Extracted"
           Rename-Item -Path glfw-3.3.2.bin.WIN64 -NewName glfw
+          echo "GLFW Folder Renamed"
 
       - name: Update submodules
         run: |
