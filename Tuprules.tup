@@ -9,7 +9,7 @@ CFLAGS += -I../external/PlatformFolders/sago
 CFLAGS += -I../external/semver/include
 CFLAGS += -I../external/yaml-cpp/include
 CFLAGS += -I../external/glfw/include
-ifeq (@(RUNNER_OS),Windows)
+ifeq ($(RUNNER_OS),Windows)
 CFLAGS += -I$(VULKAN_SDK)/include
 endif
 CFLAGS += -std=c++17
@@ -17,7 +17,7 @@ CFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS = -L../external/glfw/src
 LDFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS += -L../external/yaml-cpp
-ifeq (@(RUNNER_OS),Windows)
+ifeq ($(RUNNER_OS),Windows)
 LDFLAGS += -L$(VULKAN_SDK)/lib -lglfw3 -lvulkan-1
 else
 LDFLAGS += -lglfw3 -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
