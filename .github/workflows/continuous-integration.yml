@@ -43,11 +43,11 @@ jobs:
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           echo "Tup Binaries Downloaded"
-          Expand-Archive -Force tup.zip .
+          7z x tup.zip
           echo "Tup Extracted"
           curl https://github.com/glfw/glfw/releases/download/3.3.2/glfw-3.3.2.bin.WIN64.zip -o glfw.zip
           echo "GLFW Binaries downloaded"
-          Expand-Archive -force glfw.zip
+          7z x glfw.zip
           echo "GLFW Extracted"
           Rename-Item -Path glfw-3.3.2.bin.WIN64 -NewName glfw
           echo "GLFW Folder Renamed"
