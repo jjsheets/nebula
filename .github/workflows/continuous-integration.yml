@@ -36,21 +36,15 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y tup libglfw3-dev libvulkan-dev libxi-dev libxxf86vm-dev libreadline-dev
+          sudo apt-get install -y tup libvulkan-dev libxi-dev libxxf86vm-dev libreadline-dev xorg-dev
 
       - name: Install tools and dependencies (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           echo "Tup Binaries Downloaded"
-          7z x tup.zip
+          7z x -bso0 -bsp0 tup.zip
           echo "Tup Extracted"
-          curl https://github.com/glfw/glfw/releases/download/3.3.4/glfw-3.3.4.bin.WIN64.zip -o glfw.zip
-          echo "GLFW Binaries downloaded"
-          7z x glfw.zip
-          echo "GLFW Extracted"
-          Rename-Item -Path glfw-3.3.4.bin.WIN64 -NewName glfw
-          echo "GLFW Folder Renamed"
 
       - name: Update submodules
         run: |
@@ -76,6 +70,14 @@ jobs:
             external/yaml-cpp/include/yaml-cpp/dll.h
           key: ${{ runner.os }}-yaml-cpp-1-${{ hashFiles('yaml-cppstatus') }}
 
+      - name: Cache Handling (GLFW)
+        id: cache-glfw
+        uses: actions/cache@v2
+        with:
+          path: |
+            external/glfw/liblua.a
+          key: ${{ runner.os }}-glfw-1-${{ hashFiles('glfwstatus') }}
+
       - name: Build Lua Library (Ubuntu)
         if: (steps.cache-lua.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
         run: |
@@ -99,7 +101,7 @@ jobs:
         run: |
           cd external/yaml-cpp
           cmake .
-          make
+          make yaml-cpp
           cd ../..
 
       - name: Build YAML Library (Windows)
@@ -107,7 +109,23 @@ jobs:
         run: |
           cd external/yaml-cpp
           cmake -G "MinGW Makefiles" .
-          make
+          make yaml-cpp
+          cd ../..
+
+      - name: Build GLFW Library (Ubuntu)
+        if: (steps.cache-glfw.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
+        run: |
+          cd external/glfw
+          cmake .
+          make glfw
+          cd ../..
+
+      - name: Build GLFW Library (Windows)
+        if: (steps.cache-glfw.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        run: |
+          cd external/glfw
+          cmake -G "MinGW Makefiles" .
+          make glfw
           cd ../..
 
       - name: Run tup to build (Ubuntu)

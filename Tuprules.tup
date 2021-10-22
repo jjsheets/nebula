@@ -8,24 +8,16 @@ CFLAGS += -I../external/cute_headers
 CFLAGS += -I../external/PlatformFolders/sago
 CFLAGS += -I../external/semver/include
 CFLAGS += -I../external/yaml-cpp/include
-ifeq (@(RUNNER_OS),Windows)
-CFLAGS += -I../external/glfw3/include
-else
-CFLAGS += `pkg-config --cflags glfw3`
-endif
+CFLAGS += -I../external/glfw/include
 CFLAGS += -std=c++17
 CFLAGS += -DLOGURU_WITH_STREAMS=1
-ifeq (@(RUNNER_OS),Windows)
-LDFLAGS = -L../external/glfw3/lib-mingw-w64 -lglfw3
-else
-LDFLAGS = `pkg-config --libs glfw3`
-endif
+LDFLAGS = -L../external/glfw/src
 LDFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS += -L../external/yaml-cpp
 ifeq (@(RUNNER_OS),Windows)
-LDFLAGS += -lvulkan
+LDFLAGS += -lglfw3 -lvulkan
 else
-LDFLAGS += -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+LDFLAGS += -lglfw3 -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 endif
 LDFLAGS += -lyaml-cpp
 
