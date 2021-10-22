@@ -41,11 +41,11 @@ jobs:
       - name: Install tools and dependencies (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          curl http://gittup.org/tup/win32/tup-latest.zip - o tup.zip
+          curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           echo "Tup Binaries Downloaded"
           7z x tup.zip
           echo "Tup Extracted"
-          curl https://github.com/glfw/glfw/releases/download/3.3.4/glfw-3.3.4.bin.WIN64.zip - o glfw.zip
+          curl https://github.com/glfw/glfw/releases/download/3.3.4/glfw-3.3.4.bin.WIN64.zip -o glfw.zip
           echo "GLFW Binaries downloaded"
           7z x glfw.zip
           echo "GLFW Extracted"
