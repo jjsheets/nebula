@@ -43,9 +43,8 @@ jobs:
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           7z x -bso0 -bsp0 tup.zip
-          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe" -OutFile VulkanSDK.exe
-          $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
-          $installer.WaitForExit();
+          curl https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe" -o VulkanSDK.exe
+          VulkanSDK.exe /S
 
       - name: Update submodules
         run: |
