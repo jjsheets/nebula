@@ -43,9 +43,10 @@ jobs:
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           7z x -bso0 -bsp0 tup.zip
-          curl https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe -o VulkanSDK.exe
-          $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
-          $installer.WaitForExit();
+
+      - name: Install Vulkan SDK (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: humbletim/setup-vulkan-sdk@v1.0.3
 
       - name: Update submodules
         run: |
