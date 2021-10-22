@@ -43,7 +43,7 @@ jobs:
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           7z x -bso0 -bsp0 tup.zip
-          curl https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe" -o VulkanSDK.exe
+          curl https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe -o VulkanSDK.exe
           $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
           $installer.WaitForExit();
 
@@ -138,6 +138,8 @@ jobs:
       - name: Run tup to build (Windows)
         if: matrix.os == 'windows-latest'
         run: |
+          $Env:VULKAN_SDK = "C:/VulkanSDK/1.2.176.1"
+          $Env:Path += ";C:/VulkanSDK/1.2.176.1/Bin"
           ./tup
 
       - name: Run tests
