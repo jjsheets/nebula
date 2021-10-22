@@ -42,9 +42,10 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
-          echo "Tup Binaries Downloaded"
           7z x -bso0 -bsp0 tup.zip
-          echo "Tup Extracted"
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe" -OutFile VulkanSDK.exe
+          $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
+          $installer.WaitForExit();
 
       - name: Update submodules
         run: |
