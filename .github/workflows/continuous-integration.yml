@@ -52,6 +52,7 @@ jobs:
           git submodule update
           git submodule status external/lua >luastatus
           git submodule status external/yaml-cpp >yaml-cppstatus
+          git submodule status external/glfw >glfwstatus
 
       - name: Cache Handling (lua)
         id: cache-lua
@@ -75,7 +76,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            external/glfw/liblua.a
+            external/glfw/libglfw3.a
           key: ${{ runner.os }}-glfw-1-${{ hashFiles('glfwstatus') }}
 
       - name: Build Lua Library (Ubuntu)
