@@ -32,7 +32,7 @@ jobs:
         with:
           msystem: MSYS
           update: true
-          install: git gcc make cmake base-devel libreadline-devel
+          install: git gcc make mingw-w64-x86_64-cmake base-devel libreadline-devel
 
       - name: Install tools and dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -130,7 +130,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd external/glfw
-          cmake -G "Unix Makefiles" -DGLFW_BUILD_WIN32=ON -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
+          cmake -G "MSYS Makefiles" -DGLFW_BUILD_WIN32=ON -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
           make glfw
           cd ../..
 
