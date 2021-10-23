@@ -121,7 +121,7 @@ jobs:
         if: (steps.cache-glfw.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
         run: |
           cd external/glfw
-          cmake .
+          cmake -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
           make glfw
           cd ../..
 
@@ -130,7 +130,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd external/glfw
-          cmake .
+          cmake -G "MSYS Makefiles" -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
           make glfw
           cd ../..
 
