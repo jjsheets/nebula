@@ -3,8 +3,13 @@ include_rules
 CFLAGS += -D DOCTEST_CONFIG_DISABLE
 
 : foreach ../src/*.cc ^../src/test.cc |> !cc |> %B.o
+ifeq (@(TUP_PLATFORM),win32)
+: ../external/loguru/loguru.cpp |> !cc -D _WIN32 |> %B.o
+: ../external/PlatformFolders/sago/platform_folders.cpp -D _WIN32 |> !cc |> %B.o
+else
 : ../external/loguru/loguru.cpp |> !cc |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc |> %B.o
+endif
 : *.o ../external/lua/liblua.a |> !ld |> nebula
 
 .gitignore
