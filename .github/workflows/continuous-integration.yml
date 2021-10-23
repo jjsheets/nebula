@@ -37,8 +37,7 @@ jobs:
             gcc
             make
             mingw-w64-x86_64-cmake
-            mingw-w64-clang-x86_64-glfw
-            mingw-w64-clang-x86_64-python-pkgconfig
+            mingw-w64-x86_64-glfw
             base-devel
             libreadline-devel
 
