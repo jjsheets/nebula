@@ -130,7 +130,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd external/glfw
-          cmake -G "MSYS Makefiles" -DGLFW_BUILD_WIN32=ON -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
+          cmake -G "Unix Makefiles" -DGLFW_BUILD_WIN32=ON -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
           make glfw
           cd ../..
 
