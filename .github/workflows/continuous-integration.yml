@@ -138,6 +138,8 @@ jobs:
 
       - name: Run tup to build (Windows)
         if: matrix.os == 'windows-latest'
+        env:
+          BUILD_OS: Windows
         run: |
           ./tup
 
