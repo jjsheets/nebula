@@ -113,7 +113,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd external/yaml-cpp
-          cmake -G "MinGW Makefiles" .
+          cmake .
           make yaml-cpp
           cd ../..
 
@@ -130,7 +130,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd external/glfw
-          cmake -G "MinGW Makefiles" .
+          cmake .
           make glfw
           cd ../..
 
