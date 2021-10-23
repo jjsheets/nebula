@@ -34,7 +34,7 @@ LDFLAGS += -lyaml-cpp
 ifeq (@(TUP_PLATFORM),win32)
 !cc = |> clang++ $(CFLAGS) -c %f -o %o |>
 !ar = |> llvm-ar crs %o %f |>
-!ld = |> clang++  %f $(LDFLAGS) -o %o |>
+!ld = |> clang++ -stdlib=libc++ -fuse-ld=lld %f $(LDFLAGS) -o %o |>
 else
 !cc = |> g++ $(CFLAGS) -c %f -o %o |>
 !ar = |> ar crs %o %f |>
