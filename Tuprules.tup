@@ -9,17 +9,23 @@ CFLAGS += -I../external/cute_headers
 CFLAGS += -I../external/PlatformFolders/sago
 CFLAGS += -I../external/semver/include
 CFLAGS += -I../external/yaml-cpp/include
-CFLAGS += -I../external/glfw/include
 ifeq (@(TUP_PLATFORM),win32)
 CFLAGS += -I../VULKAN_SDK/include
+CFLAGS += `pkg-config --cflags glfw3`
+else
+CFLAGS += -I../external/glfw/include
 endif
 CFLAGS += -std=c++17
 CFLAGS += -DLOGURU_WITH_STREAMS=1
+ifeq (@(TUP_PLATFORM),win32)
+CFLAGS += `pkg-config --libs glfw3`
+else
 LDFLAGS = -L../external/glfw/src
+endif
 LDFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS += -L../external/yaml-cpp
 ifeq (@(TUP_PLATFORM),win32)
-LDFLAGS += -L../VULKAN_SDK/lib -lglfw3 -lvulkan-1
+LDFLAGS += -L../VULKAN_SDK/lib -lvulkan-1
 else
 LDFLAGS += -lglfw3 -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 endif
