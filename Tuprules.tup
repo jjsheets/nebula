@@ -18,7 +18,7 @@ endif
 CFLAGS += -std=c++17
 CFLAGS += -DLOGURU_WITH_STREAMS=1
 ifeq (@(TUP_PLATFORM),win32)
-CFLAGS += `pkg-config --libs glfw3`
+LDFLAGS += `pkg-config --libs glfw3`
 else
 LDFLAGS = -L../external/glfw/src
 endif
