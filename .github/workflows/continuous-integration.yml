@@ -30,7 +30,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
         with:
-          msystem: CLANG64
+          msystem: MSYS
           update: true
           install: git gcc make mingw-w64-x86_64-cmake base-devel libreadline-devel
 
@@ -113,7 +113,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd external/yaml-cpp
-          cmake .
+          /clang64/bin/cmake .
           make yaml-cpp
           cd ../..
 
@@ -130,7 +130,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd external/glfw
-          cmake -G "MSYS Makefiles" -DGLFW_BUILD_WIN32=ON -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
+          /clang64/bin/cmake -G "MSYS Makefiles" -DGLFW_BUILD_WIN32=ON -DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
           make glfw
           cd ../..
 
