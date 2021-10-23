@@ -26,11 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install MinGW (Windows)
+      - name: Install MSYS2 (Windows)
         if: matrix.os == 'windows-latest'
-        uses: egor-tensin/setup-mingw@v2
+        uses: msys2/setup-msys2@v2
         with:
-          platform: x64
+          msystem: MSYS
 
       - name: Install tools and dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -91,6 +91,7 @@ jobs:
 
       - name: Build Lua Library (Windows)
         if: (steps.cache-lua.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        shell: msys2 {0}
         run: |
           cd external/lua
           sed -i 's/CC= gcc/CC= g++/g' makefile
@@ -109,6 +110,7 @@ jobs:
 
       - name: Build YAML Library (Windows)
         if: (steps.cache-yaml.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        shell: msys2 {0}
         run: |
           cd external/yaml-cpp
           cmake -G "MinGW Makefiles" .
@@ -125,6 +127,7 @@ jobs:
 
       - name: Build GLFW Library (Windows)
         if: (steps.cache-glfw.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        shell: msys2 {0}
         run: |
           cd external/glfw
           cmake -G "MinGW Makefiles" .
@@ -138,8 +141,7 @@ jobs:
 
       - name: Run tup to build (Windows)
         if: matrix.os == 'windows-latest'
-        env:
-          BUILD_OS: Windows
+        shell: msys2 {0}
         run: |
           ./tup
 
