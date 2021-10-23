@@ -12,7 +12,6 @@
 #include "loguru.hpp"
 
 // Folder Handling includes
-#include <filesystem>
 #include "platform_folders.h"
 
 #ifndef DOCTEST_CONFIG_DISABLE
