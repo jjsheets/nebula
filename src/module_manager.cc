@@ -68,7 +68,7 @@ void moduleManager::addModulePath(const std::string &path, bool user)
         _modPaths.end(), sago::getSaveGamesFolder2() + "/" + path, user, *this);
   } else {
     _modPaths.emplace(_modPaths.end(),
-        (const std::string &)(std::filesystem::current_path()) + "/" + path,
+        std::filesystem::current_path().native() + "/" + path,
         user,
         *this);
   }
