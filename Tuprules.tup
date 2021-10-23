@@ -11,7 +11,7 @@ CFLAGS += -I../external/semver/include
 CFLAGS += -I../external/yaml-cpp/include
 CFLAGS += -I../external/glfw/include
 ifeq (@(TUP_PLATFORM),win32)
-CFLAGS += -IVULKAN_SDK/include
+CFLAGS += -I../VULKAN_SDK/include
 endif
 CFLAGS += -std=c++17
 CFLAGS += -DLOGURU_WITH_STREAMS=1
@@ -19,7 +19,7 @@ LDFLAGS = -L../external/glfw/src
 LDFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS += -L../external/yaml-cpp
 ifeq (@(TUP_PLATFORM),win32)
-LDFLAGS += -LVULKAN_SDK/lib -lglfw3 -lvulkan-1
+LDFLAGS += -L../VULKAN_SDK/lib -lglfw3 -lvulkan-1
 else
 LDFLAGS += -lglfw3 -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 endif
