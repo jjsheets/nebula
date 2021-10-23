@@ -31,6 +31,12 @@ LDFLAGS += -lglfw3 -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 endif
 LDFLAGS += -lyaml-cpp
 
+ifeq (@(TUP_PLATFORM),win32)
+!cc = |> clang++ $(CFLAGS) -c %f -o %o |>
+!ar = |> llvm-ar crs %o %f |>
+!ld = |> clang++ %f $(LDFLAGS) -o %o |>
+else
 !cc = |> g++ $(CFLAGS) -c %f -o %o |>
 !ar = |> ar crs %o %f |>
 !ld = |> g++ %f $(LDFLAGS) -o %o |>
+endif
