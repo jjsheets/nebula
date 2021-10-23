@@ -31,6 +31,8 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: MSYS
+          update: true
+          install: git make cmake base-devel
 
       - name: Install tools and dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
