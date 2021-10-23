@@ -32,7 +32,7 @@ jobs:
         with:
           msystem: MSYS
           update: true
-          install: git gcc make cmake base-devel libreadline
+          install: git gcc make cmake base-devel libreadline-devel
 
       - name: Install tools and dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
