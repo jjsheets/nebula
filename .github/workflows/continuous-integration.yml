@@ -34,7 +34,6 @@ jobs:
           update: true
           install: >-
             git
-            gcc
             make
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-glfw
