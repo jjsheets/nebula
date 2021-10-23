@@ -38,7 +38,7 @@ jobs:
             make
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-glfw
-            mingw-w64-x86_64-headers-git
+            mingw-w64-headers-git
             base-devel
             libreadline-devel
 
