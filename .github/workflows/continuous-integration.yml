@@ -32,7 +32,15 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git gcc make mingw-w64-x86_64-cmake mingw-w64-clang-x86_64-glfw base-devel libreadline-devel
+          install: >-
+            git
+            gcc
+            make
+            mingw-w64-x86_64-cmake
+            mingw-w64-clang-x86_64-glfw
+            mingw-w64-clang-x86_64-python-pkgconfig
+            base-devel
+            libreadline-devel
 
       - name: Install tools and dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -76,6 +84,7 @@ jobs:
           key: ${{ runner.os }}-yaml-cpp-1-${{ hashFiles('yaml-cppstatus') }}
 
       - name: Cache Handling (GLFW)
+        if: matrix.os != 'windows-latest'
         id: cache-glfw
         uses: actions/cache@v2
         with:
