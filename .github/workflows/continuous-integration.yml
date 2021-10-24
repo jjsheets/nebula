@@ -158,4 +158,5 @@ jobs:
           ./tup
 
       - name: Run tests
+        if: matrix.os == 'ubuntu-latest'
         run: test/test
