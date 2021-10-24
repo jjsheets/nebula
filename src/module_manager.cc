@@ -42,7 +42,7 @@ SCENARIO("class moduleManager" * doctest::may_fail())
       THEN("getModulePaths returns a path in the current working directory")
       {
         REQUIRE(modManager.getModulePaths()
-                == (const std::string &)(std::filesystem::current_path())
+                == (std::filesystem::current_path().u8string()
                        + "/samples/asteroids/data");
       }
     }
