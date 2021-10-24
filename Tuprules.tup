@@ -32,11 +32,22 @@ endif
 LDFLAGS += -lyaml-cpp
 
 ifeq (@(TUP_PLATFORM),win32)
-!cc = |> clang++ -target x86_64-w64-mingw32 $(CFLAGS) -c %f -o %o |>
-!ar = |> llvm-ar crs %o %f |>
-!ld = |> clang++ -target x86_64-w64-mingw32 -stdlib=libstdc++ -fuse-ld=lld -v %f $(LDFLAGS) -lc++ -lc++abi -lole32 `llvm-config --system-libs --libs core support` -o %o |>
+CFLAGS += -target x86_64-w64-mingw32
+CC = clang++
+AR = llvm-ar
+LD = clang++
+LDFLAGS += -target x86_64-w64-mingw32
+LDFLAGS += -stdlib=libstdc++
+LDFLAGS += -fuse-ld=lld
+LDFLAGS += -v
+LDFLAGS += -lc++ -lc++abi -lole32
+LDFLAGS += `llvm-config --system-libs --libs core support`
 else
-!cc = |> g++ $(CFLAGS) -c %f -o %o |>
-!ar = |> ar crs %o %f |>
-!ld = |> g++ %f $(LDFLAGS) -o %o |>
+CC = g++
+AR = ar
+LD = g++
 endif
+
+!cc = |> $(CC) $(CFLAGS) -c %f -o %o |>
+!ar = |> $(AR) crs %o %f |>
+!ld = |> $(LD) %f $(LDFLAGS) -o %o |>
