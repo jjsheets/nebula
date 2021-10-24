@@ -1,3 +1,4 @@
+
 CFLAGS += -Wall
 CFLAGS += -O2
 CFLAGS += -I../src
@@ -8,14 +9,45 @@ CFLAGS += -I../external/cute_headers
 CFLAGS += -I../external/PlatformFolders/sago
 CFLAGS += -I../external/semver/include
 CFLAGS += -I../external/yaml-cpp/include
+ifeq (@(TUP_PLATFORM),win32)
+CFLAGS += -I../VULKAN_SDK/include
 CFLAGS += `pkg-config --cflags glfw3`
+else
+CFLAGS += -I../external/glfw/include
+endif
 CFLAGS += -std=c++17
 CFLAGS += -DLOGURU_WITH_STREAMS=1
-LDFLAGS = `pkg-config --libs glfw3`
+ifeq (@(TUP_PLATFORM),win32)
+LDFLAGS += `pkg-config --libs glfw3`
+else
+LDFLAGS = -L../external/glfw/src
+endif
 LDFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS += -L../external/yaml-cpp
-LDFLAGS += -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lyaml-cpp
+ifeq (@(TUP_PLATFORM),win32)
+LDFLAGS += -L../VULKAN_SDK/lib -lvulkan-1
+else
+LDFLAGS += -lglfw3 -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+endif
+LDFLAGS += -lyaml-cpp
 
-!cc = |> g++ $(CFLAGS) -c %f -o %o |>
-!ar = |> ar crs %o %f |>
-!ld = |> g++ %f $(LDFLAGS) -o %o |>
+ifeq (@(TUP_PLATFORM),win32)
+CFLAGS += -target x86_64-w64-mingw32
+CC = clang++
+AR = llvm-ar
+LD = clang++
+LDFLAGS += -target x86_64-w64-mingw32
+LDFLAGS += -stdlib=libstdc++
+LDFLAGS += -fuse-ld=lld
+LDFLAGS += -v
+LDFLAGS += -lc++ -lc++abi -lole32
+LDFLAGS += `llvm-config --system-libs --libs core support`
+else
+CC = g++
+AR = ar
+LD = g++
+endif
+
+!cc = |> $(CC) $(CFLAGS) -c %f -o %o |>
+!ar = |> $(AR) crs %o %f |>
+!ld = |> $(LD) %f $(LDFLAGS) -o %o |>

@@ -42,8 +42,8 @@ SCENARIO("class moduleManager" * doctest::may_fail())
       THEN("getModulePaths returns a path in the current working directory")
       {
         REQUIRE(modManager.getModulePaths()
-                == (const std::string &)(std::filesystem::current_path())
-                       + "/samples/asteroids/data");
+                == (std::filesystem::current_path().u8string()
+                    + "/samples/asteroids/data"));
       }
     }
     WHEN("a local mod path is added")
@@ -68,7 +68,7 @@ void moduleManager::addModulePath(const std::string &path, bool user)
         _modPaths.end(), sago::getSaveGamesFolder2() + "/" + path, user, *this);
   } else {
     _modPaths.emplace(_modPaths.end(),
-        (const std::string &)(std::filesystem::current_path()) + "/" + path,
+        std::filesystem::current_path().u8string() + "/" + path,
         user,
         *this);
   }
