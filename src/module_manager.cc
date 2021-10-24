@@ -43,7 +43,7 @@ SCENARIO("class moduleManager" * doctest::may_fail())
       {
         REQUIRE(modManager.getModulePaths()
                 == (std::filesystem::current_path().u8string()
-                       + "/samples/asteroids/data");
+                    + "/samples/asteroids/data"));
       }
     }
     WHEN("a local mod path is added")
