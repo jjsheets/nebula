@@ -111,8 +111,10 @@ jobs:
           sed -i 's/CC= gcc/CC= clang++/g' makefile
           sed -i 's/AR= ar rc/AR= llvm-ar rc/g' makefile
           sed -i 's/RANLIB= ranlib/RANLIB= llvm-ranlib/g' makefile
-          sed -i 's/DLUA_USE_LINUX -DLUA_USE_READLINE/DLUA_USE_WINDOWS/g' makefile
+          sed -i 's/-std=c99 -DLUA_USE_LINUX -DLUA_USE_READLINE/-DLUA_USE_WINDOWS/g' makefile
           sed -i 's/-ldl -lreadline//g' makefile
+          sed -i 's/	-Wlogical-op \\//g' makefile
+          sed -i 's/	-Wno-aggressive-loop-optimizations \\//g' makefile
           make all
           cd ../..
 
