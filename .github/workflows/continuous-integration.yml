@@ -132,8 +132,8 @@ jobs:
         run: |
           cd external/yaml-cpp
           echo $path
-          export CC=/usr/bin/clang
-          export CXX=/usr/bin/clang++
+          export CC=/mingw64/bin/clang.exe
+          export CXX=/mingw64/bin/clang++.exe
           cmake -G "MSYS Makefiles" -D_CMAKE_TOOLCHAIN_PREFIX=llvm- .
           make yaml-cpp
           cd ../..
