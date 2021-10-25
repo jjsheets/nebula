@@ -86,10 +86,13 @@ void graphics::createVulkanInstance()
   auto extensions                    = getRequiredExtensions();
   createInfo.enabledExtensionCount   = static_cast<uint32_t>(extensions.size());
   createInfo.ppEnabledExtensionNames = extensions.data();
+  VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
   if (_useValidationLayers) {
     createInfo.enabledLayerCount
         = static_cast<uint32_t>(_validationLayers.size());
     createInfo.ppEnabledLayerNames = _validationLayers.data();
+    setDebugMessengerCreateInfo(debugCreateInfo);
+    createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
   } else {
     createInfo.enabledLayerCount = 0;
   }
@@ -161,9 +164,10 @@ VKAPI_ATTR VkBool32 VKAPI_CALL graphics::debugCallback(
   return VK_FALSE;
 }
 
-void graphics::setValidationCallback()
+void graphics::setDebugMessengerCreateInfo(
+    VkDebugUtilsMessengerCreateInfoEXT &createInfo)
 {
-  VkDebugUtilsMessengerCreateInfoEXT createInfo {};
+  createInfo       = {};
   createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
                              | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
@@ -174,7 +178,15 @@ void graphics::setValidationCallback()
                          | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
   createInfo.pfnUserCallback = graphics::debugCallback;
   createInfo.pUserData       = nullptr;
-  auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+  createInfo.pNext           = nullptr;
+}
+
+void graphics::setValidationCallback()
+{
+  VkDebugUtilsMessengerCreateInfoEXT createInfo;
+  setDebugMessengerCreateInfo(createInfo);
+  createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+  auto func        = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
       _instance, "vkCreateDebugUtilsMessengerEXT");
   if (func != nullptr) {
     if (func(_instance, &createInfo, nullptr, &_debugMessenger) == VK_SUCCESS) {
