@@ -5,13 +5,17 @@
 
 // Exception includes
 #include "exceptions.h"
+#include <string>
 
 // Logging system includes
 #include "loguru.hpp"
 
 namespace nebula {
 
-graphics::graphics(uint32_t width, uint32_t height, GLFWkeyfun keyCallback)
+graphics::graphics(uint32_t width,
+    uint32_t height,
+    GLFWkeyfun keyCallback,
+    bool useValidationLayers)
     : _width(width), _height(height), _window(nullptr), _instance(nullptr)
 {
   LOG_S(INFO) << "GLFW " << glfwGetVersionString();
@@ -32,7 +36,7 @@ graphics::graphics(uint32_t width, uint32_t height, GLFWkeyfun keyCallback)
   LOG_S(INFO) << "GLFW: Game window created (" << _width << "x" << _height
               << ")";
   glfwSetKeyCallback(_window, keyCallback);
-  createVulkanInstance();
+  createVulkanInstance(useValidationLayers);
 }
 
 graphics::~graphics()
@@ -50,9 +54,14 @@ graphics::~graphics()
   LOG_S(INFO) << "GLFW: Terminated";
 }
 
-void graphics::createVulkanInstance()
+void graphics::createVulkanInstance(bool useValidationLayers)
 {
   LOG_SCOPE_FUNCTION(INFO);
+  if (useValidationLayers && !checkValidationLayerSupport()) {
+    LOG_S(ERROR) << "Vulkan: validation layers requested, but not available";
+    throw std::runtime_error(
+        "Vulkan: validation layers requested, but not available");
+  }
   VkApplicationInfo appInfo {};
   appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pApplicationName   = "Nebula";
@@ -68,12 +77,39 @@ void graphics::createVulkanInstance()
       = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
   createInfo.enabledExtensionCount   = glfwExtensionCount;
   createInfo.ppEnabledExtensionNames = glfwExtensions;
-  createInfo.enabledLayerCount       = 0;
+  if (useValidationLayers) {
+    createInfo.enabledLayerCount
+        = static_cast<uint32_t>(_validationLayers.size());
+    createInfo.ppEnabledLayerNames = _validationLayers.data();
+  } else {
+    createInfo.enabledLayerCount = 0;
+  }
   if (vkCreateInstance(&createInfo, nullptr, &_instance) != VK_SUCCESS) {
     LOG_S(ERROR) << "Vulkan: failed to create instance";
-    throw std::runtime_error("failed to create instance");
+    throw std::runtime_error("Vulkan: failed to create instance");
   }
   LOG_S(INFO) << "Vulkan: instance created";
+}
+
+bool graphics::checkValidationLayerSupport()
+{
+  uint32_t layerCount;
+  vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+  std::vector<VkLayerProperties> availableLayers(layerCount);
+  vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+  for (const std::string layerName : _validationLayers) {
+    bool layerFound = false;
+    for (const auto &layerProperties : availableLayers) {
+      if (layerName == layerProperties.layerName) {
+        layerFound = true;
+        break;
+      }
+    }
+    if (!layerFound) {
+      return false;
+    }
+  }
+  return true;
 }
 
 } // namespace nebula

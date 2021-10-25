@@ -7,6 +7,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <vector>
+
 namespace nebula {
 
 class graphics {
@@ -16,10 +18,17 @@ private:
   GLFWwindow *_window;
   VkInstance _instance;
 
-  void createVulkanInstance();
+  const std::vector<const char *> _validationLayers
+      = {"VK_LAYER_KHRONOS_validation"};
+
+  void createVulkanInstance(bool useValidationLayers);
+  bool checkValidationLayerSupport();
 
 public:
-  graphics(uint32_t width, uint32_t height, GLFWkeyfun keyCallback);
+  graphics(uint32_t width,
+      uint32_t height,
+      GLFWkeyfun keyCallback,
+      bool useValidationLayers);
   ~graphics();
   operator GLFWwindow *()
   {
