@@ -17,12 +17,22 @@ private:
   uint32_t _height;
   GLFWwindow *_window;
   VkInstance _instance;
+  bool _useValidationLayers;
+  VkDebugUtilsMessengerEXT _debugMessenger;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
 
-  void createVulkanInstance(bool useValidationLayers);
+  void createVulkanInstance();
   bool checkValidationLayerSupport();
+  std::vector<const char *> getRequiredExtensions();
+  void setValidationCallback();
+
+  static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+      VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+      VkDebugUtilsMessageTypeFlagsEXT messageType,
+      const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+      void *pUserData);
 
 public:
   graphics(uint32_t width,
