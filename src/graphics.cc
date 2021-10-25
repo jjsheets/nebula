@@ -17,8 +17,9 @@ graphics::graphics(uint32_t width,
     GLFWkeyfun keyCallback,
     bool useValidationLayers)
     : _width(width), _height(height), _window(nullptr), _instance(nullptr),
-      _useValidationLayers(useValidationLayers)
+      _useValidationLayers(useValidationLayers), _physicalDevice(VK_NULL_HANDLE)
 {
+  LOG_SCOPE_FUNCTION(INFO);
   LOG_S(INFO) << "GLFW " << glfwGetVersionString();
   if (!glfwInit()) {
     LOG_S(ERROR) << "Could not initialize GLFW: Platform does not meet minimum "
@@ -41,6 +42,7 @@ graphics::graphics(uint32_t width,
   if (_useValidationLayers) {
     setValidationCallback();
   }
+  pickPhysicalDevice();
 }
 
 graphics::~graphics()
@@ -105,6 +107,7 @@ void graphics::createVulkanInstance()
 
 bool graphics::checkValidationLayerSupport()
 {
+  LOG_SCOPE_FUNCTION(1);
   uint32_t layerCount;
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
   std::vector<VkLayerProperties> availableLayers(layerCount);
@@ -126,6 +129,7 @@ bool graphics::checkValidationLayerSupport()
 
 std::vector<const char *> graphics::getRequiredExtensions()
 {
+  LOG_SCOPE_FUNCTION(1);
   uint32_t glfwExtensionCount = 0;
   const char **glfwExtensions
       = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -143,6 +147,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL graphics::debugCallback(
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData)
 {
+  LOG_SCOPE_FUNCTION(9);
   std::string typeString;
   if (messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) {
     typeString = "(gen)";
@@ -167,6 +172,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL graphics::debugCallback(
 void graphics::setDebugMessengerCreateInfo(
     VkDebugUtilsMessengerCreateInfoEXT &createInfo)
 {
+  LOG_SCOPE_FUNCTION(1);
   createInfo       = {};
   createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
@@ -183,6 +189,7 @@ void graphics::setDebugMessengerCreateInfo(
 
 void graphics::setValidationCallback()
 {
+  LOG_SCOPE_FUNCTION(1);
   VkDebugUtilsMessengerCreateInfoEXT createInfo;
   setDebugMessengerCreateInfo(createInfo);
   createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -196,6 +203,71 @@ void graphics::setValidationCallback()
   LOG_S(ERROR) << "Vulkan: failed to set up validation layer callback";
   throw std::runtime_error(
       "Vulkan: failed to set up validation layer callback");
+}
+
+void graphics::pickPhysicalDevice()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  uint32_t deviceCount = 0;
+  vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
+  if (deviceCount == 0) {
+    LOG_S(ERROR) << "Vulkan: failed to find GPUs with Vulkan support";
+    throw std::runtime_error("Vulkan: failed to find GPUs with Vulkan support");
+  }
+  std::vector<VkPhysicalDevice> devices(deviceCount);
+  vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
+  for (const auto &device : devices) {
+    if (deviceIsSuitable(device)) {
+      _physicalDevice = device;
+      break;
+    }
+  }
+  if (_physicalDevice == VK_NULL_HANDLE) {
+    LOG_S(ERROR) << "Vulkan: failed to find a suitable GPU";
+    throw std::runtime_error("Vulkan: failed to find a suitable GPU");
+  }
+}
+
+bool graphics::deviceIsSuitable(VkPhysicalDevice device)
+{
+  LOG_SCOPE_FUNCTION(1);
+  VkPhysicalDeviceProperties deviceProperties;
+  VkPhysicalDeviceFeatures deviceFeatures;
+  vkGetPhysicalDeviceProperties(device, &deviceProperties);
+  vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+  if (deviceProperties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+    return false;
+  }
+  graphics::queueFamilyIndices queueFamilies(device);
+  if (!queueFamilies.isComplete()) {
+    return false;
+  }
+  return true;
+}
+
+graphics::queueFamilyIndices::queueFamilyIndices(VkPhysicalDevice device)
+{
+  LOG_SCOPE_FUNCTION(1);
+  uint32_t queueFamilyCount = 0;
+  vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+  std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+  vkGetPhysicalDeviceQueueFamilyProperties(
+      device, &queueFamilyCount, queueFamilies.data());
+  int i = 0;
+  for (const auto &queueFamily : queueFamilies) {
+    if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+      _graphicsFamily = i;
+    }
+    if (isComplete()) {
+      break;
+    }
+    i++;
+  }
+}
+
+bool graphics::queueFamilyIndices::isComplete()
+{
+  return _graphicsFamily.has_value();
 }
 
 } // namespace nebula

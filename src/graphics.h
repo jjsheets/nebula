@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
+#include <optional>
 
 namespace nebula {
 
@@ -19,6 +20,7 @@ private:
   VkInstance _instance;
   bool _useValidationLayers;
   VkDebugUtilsMessengerEXT _debugMessenger;
+  VkPhysicalDevice _physicalDevice;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -29,12 +31,20 @@ private:
   void setValidationCallback();
   void setDebugMessengerCreateInfo(
       VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+  void pickPhysicalDevice();
+  bool deviceIsSuitable(VkPhysicalDevice device);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
       VkDebugUtilsMessageTypeFlagsEXT messageType,
       const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
       void *pUserData);
+
+  struct queueFamilyIndices {
+    std::optional<uint32_t> _graphicsFamily;
+    queueFamilyIndices(VkPhysicalDevice device);
+    bool isComplete();
+  };
 
 public:
   graphics(uint32_t width,
