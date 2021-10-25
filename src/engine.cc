@@ -105,7 +105,7 @@ engine::engine(int argc, char *argv[])
   lua_setwarnf(_luaState, _luaWarnFunction, nullptr);
   LOG_S(INFO) << "Lua: scripting library loaded";
 
-  _graphics = new graphics(1600, 900, engine::_keyCallback);
+  _graphics = new graphics(1600, 900, engine::_keyCallback, true);
   _engine   = this;
 }
 
