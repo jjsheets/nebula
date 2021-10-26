@@ -21,6 +21,8 @@ private:
   bool _useValidationLayers;
   VkDebugUtilsMessengerEXT _debugMessenger;
   VkPhysicalDevice _physicalDevice;
+  VkDevice _logicalDevice;
+  VkQueue _graphicsQueue;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -33,6 +35,7 @@ private:
       VkDebugUtilsMessengerCreateInfoEXT &createInfo);
   void pickPhysicalDevice();
   bool deviceIsSuitable(VkPhysicalDevice device);
+  void createLogicalDevice();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
