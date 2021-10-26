@@ -17,7 +17,8 @@ graphics::graphics(uint32_t width,
     GLFWkeyfun keyCallback,
     bool useValidationLayers)
     : _width(width), _height(height), _window(nullptr), _instance(nullptr),
-      _useValidationLayers(useValidationLayers), _physicalDevice(VK_NULL_HANDLE)
+      _useValidationLayers(useValidationLayers),
+      _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
   LOG_S(INFO) << "GLFW " << glfwGetVersionString();
@@ -43,11 +44,15 @@ graphics::graphics(uint32_t width,
     setValidationCallback();
   }
   pickPhysicalDevice();
+  createLogicalDevice();
 }
 
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  if (_logicalDevice) {
+    vkDestroyDevice(_logicalDevice, nullptr);
+  }
   if (_useValidationLayers) {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
         _instance, "vkDestroyDebugUtilsMessengerEXT");
@@ -238,7 +243,7 @@ bool graphics::deviceIsSuitable(VkPhysicalDevice device)
   if (deviceProperties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
     return false;
   }
-  graphics::queueFamilyIndices queueFamilies(device);
+  queueFamilyIndices queueFamilies(device);
   if (!queueFamilies.isComplete()) {
     return false;
   }
@@ -268,6 +273,41 @@ graphics::queueFamilyIndices::queueFamilyIndices(VkPhysicalDevice device)
 bool graphics::queueFamilyIndices::isComplete()
 {
   return _graphicsFamily.has_value();
+}
+
+void graphics::createLogicalDevice()
+{
+  queueFamilyIndices queueFamilies(_physicalDevice);
+  VkDeviceQueueCreateInfo queueCreateInfo {};
+  queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+  queueCreateInfo.queueFamilyIndex = queueFamilies._graphicsFamily.value();
+  queueCreateInfo.queueCount       = 1;
+  float queuePriority              = 1.0f;
+  queueCreateInfo.pQueuePriorities = &queuePriority;
+  VkPhysicalDeviceFeatures deviceFeatures {};
+  VkDeviceCreateInfo createInfo {};
+  createInfo.sType                 = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  createInfo.pQueueCreateInfos     = &queueCreateInfo;
+  createInfo.queueCreateInfoCount  = 1;
+  createInfo.pEnabledFeatures      = &deviceFeatures;
+  createInfo.enabledExtensionCount = 0;
+  if (_useValidationLayers) {
+    createInfo.enabledLayerCount
+        = static_cast<uint32_t>(_validationLayers.size());
+    createInfo.ppEnabledLayerNames = _validationLayers.data();
+  } else {
+    createInfo.enabledLayerCount = 0;
+  }
+  if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_logicalDevice)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create logical device";
+    throw std::runtime_error("Vulkan: failed to create logical device");
+  }
+  vkGetDeviceQueue(_logicalDevice,
+      queueFamilies._graphicsFamily.value(),
+      0,
+      &_graphicsQueue);
 }
 
 } // namespace nebula
