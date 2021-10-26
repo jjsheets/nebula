@@ -6,6 +6,7 @@
 // Exception includes
 #include "exceptions.h"
 #include <string>
+#include <set>
 
 // Logging system includes
 #include "loguru.hpp"
@@ -18,7 +19,8 @@ graphics::graphics(uint32_t width,
     bool useValidationLayers)
     : _width(width), _height(height), _window(nullptr), _instance(nullptr),
       _useValidationLayers(useValidationLayers),
-      _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE)
+      _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE),
+      _surface(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
   LOG_S(INFO) << "GLFW " << glfwGetVersionString();
@@ -43,6 +45,7 @@ graphics::graphics(uint32_t width,
   if (_useValidationLayers) {
     setValidationCallback();
   }
+  createSurface();
   pickPhysicalDevice();
   createLogicalDevice();
 }
@@ -59,6 +62,9 @@ graphics::~graphics()
     if (func != nullptr) {
       func(_instance, _debugMessenger, nullptr);
     }
+  }
+  if (_surface) {
+    vkDestroySurfaceKHR(_instance, _surface, nullptr);
   }
   if (_instance) {
     vkDestroyInstance(_instance, nullptr);
@@ -243,14 +249,15 @@ bool graphics::deviceIsSuitable(VkPhysicalDevice device)
   if (deviceProperties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
     return false;
   }
-  queueFamilyIndices queueFamilies(device);
+  queueFamilyIndices queueFamilies(device, _surface);
   if (!queueFamilies.isComplete()) {
     return false;
   }
   return true;
 }
 
-graphics::queueFamilyIndices::queueFamilyIndices(VkPhysicalDevice device)
+graphics::queueFamilyIndices::queueFamilyIndices(
+    VkPhysicalDevice device, VkSurfaceKHR surface)
 {
   LOG_SCOPE_FUNCTION(1);
   uint32_t queueFamilyCount = 0;
@@ -263,6 +270,11 @@ graphics::queueFamilyIndices::queueFamilyIndices(VkPhysicalDevice device)
     if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
       _graphicsFamily = i;
     }
+    VkBool32 presentSupport = false;
+    vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+    if (presentSupport) {
+      _presentFamily = i;
+    }
     if (isComplete()) {
       break;
     }
@@ -272,23 +284,32 @@ graphics::queueFamilyIndices::queueFamilyIndices(VkPhysicalDevice device)
 
 bool graphics::queueFamilyIndices::isComplete()
 {
-  return _graphicsFamily.has_value();
+  return _graphicsFamily.has_value() && _presentFamily.has_value();
 }
 
 void graphics::createLogicalDevice()
 {
-  queueFamilyIndices queueFamilies(_physicalDevice);
-  VkDeviceQueueCreateInfo queueCreateInfo {};
-  queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-  queueCreateInfo.queueFamilyIndex = queueFamilies._graphicsFamily.value();
-  queueCreateInfo.queueCount       = 1;
-  float queuePriority              = 1.0f;
-  queueCreateInfo.pQueuePriorities = &queuePriority;
+  LOG_SCOPE_FUNCTION(INFO);
+  queueFamilyIndices queueFamilies(_physicalDevice, _surface);
+  std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+  std::set<uint32_t> uniqueQueueFamilies
+      = {queueFamilies._graphicsFamily.value(),
+          queueFamilies._presentFamily.value()};
+  float queuePriority = 1.0f;
+  for (auto queueFamily : uniqueQueueFamilies) {
+    VkDeviceQueueCreateInfo queueCreateInfo {};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = queueFamily;
+    queueCreateInfo.queueCount       = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+    queueCreateInfos.push_back(queueCreateInfo);
+  }
   VkPhysicalDeviceFeatures deviceFeatures {};
   VkDeviceCreateInfo createInfo {};
-  createInfo.sType                 = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-  createInfo.pQueueCreateInfos     = &queueCreateInfo;
-  createInfo.queueCreateInfoCount  = 1;
+  createInfo.sType             = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  createInfo.pQueueCreateInfos = queueCreateInfos.data();
+  createInfo.queueCreateInfoCount
+      = static_cast<uint32_t>(queueCreateInfos.size());
   createInfo.pEnabledFeatures      = &deviceFeatures;
   createInfo.enabledExtensionCount = 0;
   if (_useValidationLayers) {
@@ -308,6 +329,19 @@ void graphics::createLogicalDevice()
       queueFamilies._graphicsFamily.value(),
       0,
       &_graphicsQueue);
+  vkGetDeviceQueue(
+      _logicalDevice, queueFamilies._presentFamily.value(), 0, &_presentQueue);
+}
+
+void graphics::createSurface()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  if (glfwCreateWindowSurface(_instance, _window, nullptr, &_surface)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create window surface";
+    throw std::runtime_error("Vulkan: failed to create window surface");
+  }
 }
 
 } // namespace nebula
