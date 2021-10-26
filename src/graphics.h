@@ -23,6 +23,8 @@ private:
   VkPhysicalDevice _physicalDevice;
   VkDevice _logicalDevice;
   VkQueue _graphicsQueue;
+  VkQueue _presentQueue;
+  VkSurfaceKHR _surface;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -36,6 +38,7 @@ private:
   void pickPhysicalDevice();
   bool deviceIsSuitable(VkPhysicalDevice device);
   void createLogicalDevice();
+  void createSurface();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -45,7 +48,9 @@ private:
 
   struct queueFamilyIndices {
     std::optional<uint32_t> _graphicsFamily;
-    queueFamilyIndices(VkPhysicalDevice device);
+    std::optional<uint32_t> _presentFamily;
+
+    queueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface);
     bool isComplete();
   };
 
