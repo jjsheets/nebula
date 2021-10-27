@@ -28,6 +28,8 @@ private:
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
+  const std::vector<const char *> _deviceExtensions
+      = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
   void createVulkanInstance();
   bool checkValidationLayerSupport();
@@ -39,6 +41,7 @@ private:
   bool deviceIsSuitable(VkPhysicalDevice device);
   void createLogicalDevice();
   void createSurface();
+  bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -52,6 +55,15 @@ private:
 
     queueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface);
     bool isComplete();
+  };
+
+  struct swapChainSupportDetails {
+    VkSurfaceCapabilitiesKHR _capabilities;
+    std::vector<VkSurfaceFormatKHR> _formats;
+    std::vector<VkPresentModeKHR> _presentModes;
+
+    swapChainSupportDetails(VkPhysicalDevice device, VkSurfaceKHR surface);
+    bool isSuitable();
   };
 
 public:

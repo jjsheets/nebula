@@ -242,18 +242,31 @@ void graphics::pickPhysicalDevice()
 bool graphics::deviceIsSuitable(VkPhysicalDevice device)
 {
   LOG_SCOPE_FUNCTION(1);
+  queueFamilyIndices queueFamilies(device, _surface);
+  swapChainSupportDetails swapChainDetails(device, _surface);
+  return queueFamilies.isComplete() && checkDeviceExtensionSupport(device)
+      && swapChainDetails.isSuitable();
+}
+
+bool graphics::checkDeviceExtensionSupport(VkPhysicalDevice device)
+{
   VkPhysicalDeviceProperties deviceProperties;
-  VkPhysicalDeviceFeatures deviceFeatures;
   vkGetPhysicalDeviceProperties(device, &deviceProperties);
-  vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
   if (deviceProperties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
     return false;
   }
-  queueFamilyIndices queueFamilies(device, _surface);
-  if (!queueFamilies.isComplete()) {
-    return false;
+  uint32_t extensionCount;
+  vkEnumerateDeviceExtensionProperties(
+      device, nullptr, &extensionCount, nullptr);
+  std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+  vkEnumerateDeviceExtensionProperties(
+      device, nullptr, &extensionCount, availableExtensions.data());
+  std::set<std::string> requiredExtensions(
+      _deviceExtensions.begin(), _deviceExtensions.end());
+  for (const auto &extension : availableExtensions) {
+    requiredExtensions.erase(extension.extensionName);
   }
-  return true;
+  return requiredExtensions.empty();
 }
 
 graphics::queueFamilyIndices::queueFamilyIndices(
@@ -310,8 +323,10 @@ void graphics::createLogicalDevice()
   createInfo.pQueueCreateInfos = queueCreateInfos.data();
   createInfo.queueCreateInfoCount
       = static_cast<uint32_t>(queueCreateInfos.size());
-  createInfo.pEnabledFeatures      = &deviceFeatures;
-  createInfo.enabledExtensionCount = 0;
+  createInfo.pEnabledFeatures = &deviceFeatures;
+  createInfo.enabledExtensionCount
+      = static_cast<uint32_t>(_deviceExtensions.size());
+  createInfo.ppEnabledExtensionNames = _deviceExtensions.data();
   if (_useValidationLayers) {
     createInfo.enabledLayerCount
         = static_cast<uint32_t>(_validationLayers.size());
@@ -342,6 +357,32 @@ void graphics::createSurface()
     LOG_S(ERROR) << "Vulkan: failed to create window surface";
     throw std::runtime_error("Vulkan: failed to create window surface");
   }
+}
+
+graphics::swapChainSupportDetails::swapChainSupportDetails(
+    VkPhysicalDevice device, VkSurfaceKHR surface)
+{
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &_capabilities);
+  uint32_t formatCount;
+  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+  if (formatCount != 0) {
+    _formats.resize(formatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device, surface, &formatCount, _formats.data());
+  }
+  uint32_t modeCount;
+  vkGetPhysicalDeviceSurfacePresentModesKHR(
+      device, surface, &modeCount, nullptr);
+  if (modeCount != 0) {
+    _presentModes.resize(modeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device, surface, &modeCount, _presentModes.data());
+  }
+}
+
+bool graphics::swapChainSupportDetails::isSuitable()
+{
+  return !_formats.empty() && !_presentModes.empty();
 }
 
 } // namespace nebula
