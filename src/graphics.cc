@@ -164,7 +164,6 @@ VKAPI_ATTR VkBool32 VKAPI_CALL graphics::debugCallback(
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData)
 {
-  LOG_SCOPE_FUNCTION(9);
   std::string typeString;
   if (messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) {
     typeString = "(gen)";
@@ -256,6 +255,7 @@ bool graphics::deviceIsSuitable(VkPhysicalDevice device)
 
 bool graphics::checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
+  LOG_SCOPE_FUNCTION(2);
   VkPhysicalDeviceProperties deviceProperties;
   vkGetPhysicalDeviceProperties(device, &deviceProperties);
   if (deviceProperties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
@@ -303,6 +303,7 @@ graphics::queueFamilyIndices::queueFamilyIndices(
 
 bool graphics::queueFamilyIndices::isComplete()
 {
+  LOG_SCOPE_FUNCTION(2);
   return _graphicsFamily.has_value() && _presentFamily.has_value();
 }
 
@@ -346,6 +347,7 @@ void graphics::createLogicalDevice()
     LOG_S(ERROR) << "Vulkan: failed to create logical device";
     throw std::runtime_error("Vulkan: failed to create logical device");
   }
+  LOG_S(INFO) << "Vulkan: logical device created";
   vkGetDeviceQueue(_logicalDevice,
       queueFamilies._graphicsFamily.value(),
       0,
@@ -368,6 +370,7 @@ void graphics::createSurface()
 graphics::swapChainSupportDetails::swapChainSupportDetails(
     VkPhysicalDevice device, VkSurfaceKHR surface)
 {
+  LOG_SCOPE_FUNCTION(1);
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &_capabilities);
   uint32_t formatCount;
   vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
@@ -388,39 +391,51 @@ graphics::swapChainSupportDetails::swapChainSupportDetails(
 
 bool graphics::swapChainSupportDetails::isSuitable()
 {
+  LOG_SCOPE_FUNCTION(2);
   return !_formats.empty() && !_presentModes.empty();
 }
 
 VkSurfaceFormatKHR graphics::chooseSwapSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR> &availableFormats)
 {
+  LOG_SCOPE_FUNCTION(1);
   for (const auto &availableFormat : availableFormats) {
     if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB
         && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
     {
+      LOG_S(INFO) << "Format: BGRA, 32-bit";
+      LOG_S(INFO) << "Color Space: SRGB, Non-linear";
       return availableFormat;
     }
   }
+  LOG_S(INFO) << "Format & Color Space automatically chosen ("
+              << availableFormats[0].format << ", "
+              << availableFormats[0].colorSpace << ")";
   return availableFormats[0];
 }
 
 VkPresentModeKHR graphics::chooseSwapPresentMode(
     const std::vector<VkPresentModeKHR> &availablePresentModes)
 {
+  LOG_SCOPE_FUNCTION(1);
   for (const auto &availablePresentMode : availablePresentModes) {
     if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+      LOG_S(INFO) << "Present Mode: Mailbox";
       return availablePresentMode;
     }
   }
-
+  LOG_S(INFO) << "Present Mode: FIFO";
   return VK_PRESENT_MODE_FIFO_KHR;
 }
 
 VkExtent2D graphics::chooseSwapExtent(
     const VkSurfaceCapabilitiesKHR &capabilities)
 {
+  LOG_SCOPE_FUNCTION(1);
   if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
   {
+    LOG_S(INFO) << "Swap Chain Extent: " << capabilities.currentExtent.width
+                << "x" << capabilities.currentExtent.height;
     return capabilities.currentExtent;
   } else {
     int width, height;
@@ -435,6 +450,8 @@ VkExtent2D graphics::chooseSwapExtent(
     actualExtent.height = std::clamp(actualExtent.height,
         capabilities.minImageExtent.height,
         capabilities.maxImageExtent.height);
+    LOG_S(INFO) << "Swap Chain Extent: " << actualExtent.width << "x"
+                << actualExtent.height;
 
     return actualExtent;
   }
@@ -442,6 +459,7 @@ VkExtent2D graphics::chooseSwapExtent(
 
 void graphics::createSwapChain()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   swapChainSupportDetails swapChainSupport(_physicalDevice, _surface);
   VkSurfaceFormatKHR surfaceFormat
       = chooseSwapSurfaceFormat(swapChainSupport._formats);
