@@ -487,6 +487,12 @@ void graphics::createSwapChain()
     LOG_S(ERROR) << "Vulkan: failed to create swap chain";
     throw std::runtime_error("Vulkan: failed to create swap chain");
   }
+  vkGetSwapchainImagesKHR(_logicalDevice, _swapChain, &imageCount, nullptr);
+  _swapChainImages.resize(imageCount);
+  vkGetSwapchainImagesKHR(
+      _logicalDevice, _swapChain, &imageCount, _swapChainImages.data());
+  _swapChainImageFormat = surfaceFormat.format;
+  _swapChainExtent      = extent;
 }
 
 } // namespace nebula

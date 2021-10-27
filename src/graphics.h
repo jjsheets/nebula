@@ -26,6 +26,9 @@ private:
   VkQueue _presentQueue;
   VkSurfaceKHR _surface;
   VkSwapchainKHR _swapChain;
+  std::vector<VkImage> _swapChainImages;
+  VkFormat _swapChainImageFormat;
+  VkExtent2D _swapChainExtent;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
