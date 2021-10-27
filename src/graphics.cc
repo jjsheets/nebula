@@ -7,6 +7,8 @@
 #include "exceptions.h"
 #include <string>
 #include <set>
+#include <limits>
+#include <algorithm>
 
 // Logging system includes
 #include "loguru.hpp"
@@ -20,7 +22,7 @@ graphics::graphics(uint32_t width,
     : _width(width), _height(height), _window(nullptr), _instance(nullptr),
       _useValidationLayers(useValidationLayers),
       _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE),
-      _surface(VK_NULL_HANDLE)
+      _surface(VK_NULL_HANDLE), _swapChain(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
   LOG_S(INFO) << "GLFW " << glfwGetVersionString();
@@ -48,11 +50,15 @@ graphics::graphics(uint32_t width,
   createSurface();
   pickPhysicalDevice();
   createLogicalDevice();
+  createSwapChain();
 }
 
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  if (_swapChain) {
+    vkDestroySwapchainKHR(_logicalDevice, _swapChain, nullptr);
+  }
   if (_logicalDevice) {
     vkDestroyDevice(_logicalDevice, nullptr);
   }
@@ -383,6 +389,104 @@ graphics::swapChainSupportDetails::swapChainSupportDetails(
 bool graphics::swapChainSupportDetails::isSuitable()
 {
   return !_formats.empty() && !_presentModes.empty();
+}
+
+VkSurfaceFormatKHR graphics::chooseSwapSurfaceFormat(
+    const std::vector<VkSurfaceFormatKHR> &availableFormats)
+{
+  for (const auto &availableFormat : availableFormats) {
+    if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB
+        && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+    {
+      return availableFormat;
+    }
+  }
+  return availableFormats[0];
+}
+
+VkPresentModeKHR graphics::chooseSwapPresentMode(
+    const std::vector<VkPresentModeKHR> &availablePresentModes)
+{
+  for (const auto &availablePresentMode : availablePresentModes) {
+    if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+      return availablePresentMode;
+    }
+  }
+
+  return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+VkExtent2D graphics::chooseSwapExtent(
+    const VkSurfaceCapabilitiesKHR &capabilities)
+{
+  if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+  {
+    return capabilities.currentExtent;
+  } else {
+    int width, height;
+    glfwGetFramebufferSize(_window, &width, &height);
+
+    VkExtent2D actualExtent
+        = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+
+    actualExtent.width  = std::clamp(actualExtent.width,
+        capabilities.minImageExtent.width,
+        capabilities.maxImageExtent.width);
+    actualExtent.height = std::clamp(actualExtent.height,
+        capabilities.minImageExtent.height,
+        capabilities.maxImageExtent.height);
+
+    return actualExtent;
+  }
+}
+
+void graphics::createSwapChain()
+{
+  swapChainSupportDetails swapChainSupport(_physicalDevice, _surface);
+  VkSurfaceFormatKHR surfaceFormat
+      = chooseSwapSurfaceFormat(swapChainSupport._formats);
+  VkPresentModeKHR presentMode
+      = chooseSwapPresentMode(swapChainSupport._presentModes);
+  VkExtent2D extent   = chooseSwapExtent(swapChainSupport._capabilities);
+  uint32_t imageCount = swapChainSupport._capabilities.minImageCount + 1;
+  if (swapChainSupport._capabilities.maxImageCount > 0
+      && imageCount > swapChainSupport._capabilities.maxImageCount)
+  {
+    imageCount = swapChainSupport._capabilities.maxImageCount;
+  }
+  VkSwapchainCreateInfoKHR createInfo {};
+  createInfo.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+  createInfo.surface          = _surface;
+  createInfo.minImageCount    = imageCount;
+  createInfo.imageFormat      = surfaceFormat.format;
+  createInfo.imageColorSpace  = surfaceFormat.colorSpace;
+  createInfo.imageExtent      = extent;
+  createInfo.imageArrayLayers = 1;
+  createInfo.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  queueFamilyIndices indices(_physicalDevice, _surface);
+  uint32_t queueFamilyIndices[]
+      = {indices._graphicsFamily.value(), indices._presentFamily.value()};
+
+  if (indices._graphicsFamily != indices._presentFamily) {
+    createInfo.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;
+    createInfo.queueFamilyIndexCount = 2;
+    createInfo.pQueueFamilyIndices   = queueFamilyIndices;
+  } else {
+    createInfo.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
+    createInfo.queueFamilyIndexCount = 0;
+    createInfo.pQueueFamilyIndices   = nullptr;
+  }
+  createInfo.preTransform   = swapChainSupport._capabilities.currentTransform;
+  createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+  createInfo.presentMode    = presentMode;
+  createInfo.clipped        = VK_TRUE;
+  createInfo.oldSwapchain   = VK_NULL_HANDLE;
+  if (vkCreateSwapchainKHR(_logicalDevice, &createInfo, nullptr, &_swapChain)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create swap chain";
+    throw std::runtime_error("Vulkan: failed to create swap chain");
+  }
 }
 
 } // namespace nebula

@@ -25,6 +25,7 @@ private:
   VkQueue _graphicsQueue;
   VkQueue _presentQueue;
   VkSurfaceKHR _surface;
+  VkSwapchainKHR _swapChain;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -42,6 +43,12 @@ private:
   void createLogicalDevice();
   void createSurface();
   bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+  VkSurfaceFormatKHR chooseSwapSurfaceFormat(
+      const std::vector<VkSurfaceFormatKHR> &availableFormats);
+  VkPresentModeKHR chooseSwapPresentMode(
+      const std::vector<VkPresentModeKHR> &availablePresentModes);
+  VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
+  void createSwapChain();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
