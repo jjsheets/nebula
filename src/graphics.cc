@@ -51,11 +51,15 @@ graphics::graphics(uint32_t width,
   pickPhysicalDevice();
   createLogicalDevice();
   createSwapChain();
+  createImageViews();
 }
 
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  for (auto imageView : _swapChainImageViews) {
+    vkDestroyImageView(_logicalDevice, imageView, nullptr);
+  }
   if (_swapChain) {
     vkDestroySwapchainKHR(_logicalDevice, _swapChain, nullptr);
   }
@@ -166,11 +170,11 @@ VKAPI_ATTR VkBool32 VKAPI_CALL graphics::debugCallback(
 {
   std::string typeString;
   if (messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT) {
-    typeString = "(gen)";
+    typeString = " (gen)";
   } else if (messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) {
-    typeString = "(val)";
+    typeString = " (val)";
   } else if (messageType == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) {
-    typeString = "(perf)";
+    typeString = " (perf)";
   }
   if (severity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
     LOG_S(1) << "Vulkan" << typeString << ": " << pCallbackData->pMessage;
@@ -511,6 +515,35 @@ void graphics::createSwapChain()
       _logicalDevice, _swapChain, &imageCount, _swapChainImages.data());
   _swapChainImageFormat = surfaceFormat.format;
   _swapChainExtent      = extent;
+}
+
+void graphics::createImageViews()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  _swapChainImageViews.resize(_swapChainImages.size());
+  for (size_t i = 0; i < _swapChainImages.size(); i++) {
+    VkImageViewCreateInfo createInfo {};
+    createInfo.sType        = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    createInfo.image        = _swapChainImages[i];
+    createInfo.viewType     = VK_IMAGE_VIEW_TYPE_2D;
+    createInfo.format       = _swapChainImageFormat;
+    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    createInfo.subresourceRange.baseMipLevel   = 0;
+    createInfo.subresourceRange.levelCount     = 1;
+    createInfo.subresourceRange.baseArrayLayer = 0;
+    createInfo.subresourceRange.layerCount     = 1;
+    if (vkCreateImageView(
+            _logicalDevice, &createInfo, nullptr, &_swapChainImageViews[i])
+        != VK_SUCCESS)
+    {
+      LOG_S(ERROR) << "Vulkan: failed to create image views";
+      throw std::runtime_error("Vulkan: failed to create image views");
+    }
+  }
 }
 
 } // namespace nebula
