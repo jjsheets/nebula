@@ -29,6 +29,7 @@ private:
   std::vector<VkImage> _swapChainImages;
   VkFormat _swapChainImageFormat;
   VkExtent2D _swapChainExtent;
+  std::vector<VkImageView> _swapChainImageViews;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -52,6 +53,7 @@ private:
       const std::vector<VkPresentModeKHR> &availablePresentModes);
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
   void createSwapChain();
+  void createImageViews();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
