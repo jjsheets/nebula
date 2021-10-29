@@ -45,6 +45,10 @@ public:
   void press();
   void release();
   void delta(double delta);
+  bool bound()
+  {
+    return _bound;
+  }
 };
 
 } // namespace nebula
