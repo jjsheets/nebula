@@ -13,6 +13,7 @@ void bind::bindKey(int key)
   _jid.reset();
   _jBtn.reset();
   _jAxis.reset();
+  _bound = true;
 }
 
 void bind::bindMButton(int mBtn)
@@ -23,6 +24,7 @@ void bind::bindMButton(int mBtn)
   _jid.reset();
   _jBtn.reset();
   _jAxis.reset();
+  _bound = true;
 }
 
 void bind::bindMAxis(int mAxis)
@@ -33,6 +35,7 @@ void bind::bindMAxis(int mAxis)
   _jid.reset();
   _jBtn.reset();
   _jAxis.reset();
+  _bound = true;
 }
 
 void bind::bindJButton(int jid, int jBtn)
@@ -43,6 +46,7 @@ void bind::bindJButton(int jid, int jBtn)
   _jid  = jid;
   _jBtn = jBtn;
   _jAxis.reset();
+  _bound = true;
 }
 
 void bind::bindJAxis(int jid, int jAxis)
@@ -53,6 +57,7 @@ void bind::bindJAxis(int jid, int jAxis)
   _jid = jid;
   _jBtn.reset();
   _jAxis = jAxis;
+  _bound = true;
 }
 
 void bind::unbind()
@@ -63,6 +68,7 @@ void bind::unbind()
   _jid.reset();
   _jBtn.reset();
   _jAxis.reset();
+  _bound = false;
 }
 
 void bind::press()

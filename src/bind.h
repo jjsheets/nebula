@@ -20,12 +20,20 @@ private:
   std::optional<int> _jid;   // when bound to a joystick, this is the GLFW jid
   std::optional<int> _jBtn;  // joystick button to bind to
   std::optional<int> _jAxis; // joystick axis to bind to
+  std::string _category;
+  std::string _name;
+  std::string _bind;
+  bool _bound;
+
 public:
   bind(std::function<void()> pressHandler,
       std::function<void()> releaseHandler,
-      std::function<void(double)> deltaHandler)
+      std::function<void(double)> deltaHandler,
+      const std::string &category,
+      const std::string &name)
       : _pressHandler(pressHandler), _releaseHandler(releaseHandler),
-        _deltaHandler(deltaHandler)
+        _deltaHandler(deltaHandler), _category(category), _name(name),
+        _bind(""), _bound(false)
   {
   }
   void bindKey(int key);
