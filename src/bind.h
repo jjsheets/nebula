@@ -13,7 +13,7 @@
 
 namespace nebula {
 
-class bind : std::enable_shared_from_this<bind> {
+class bind {
 public:
   enum struct action
   {
@@ -49,11 +49,13 @@ private:
   std::string _bind;
   bool _bound;
 
-  static std::map<std::tuple<int, int>, std::shared_ptr<bind>> _keyBinds;
-  static std::map<std::tuple<int, int>, std::shared_ptr<bind>> _mBtnBinds;
-  static std::map<std::tuple<int, int>, std::shared_ptr<bind>> _mAxisBinds;
-  static std::map<std::tuple<int, int, int>, std::shared_ptr<bind>> _jBtnBinds;
-  static std::map<std::tuple<int, int, int>, std::shared_ptr<bind>> _jAxisBinds;
+  static std::map<std::tuple<int, int>, std::weak_ptr<bind>> _keyBinds;
+  static std::map<std::tuple<int, int>, std::weak_ptr<bind>> _mBtnBinds;
+  static std::map<std::tuple<int, int>, std::weak_ptr<bind>> _mAxisBinds;
+  static std::map<std::tuple<int, int, int>, std::weak_ptr<bind>> _jBtnBinds;
+  static std::map<std::tuple<int, int, int>, std::weak_ptr<bind>> _jAxisBinds;
+
+  static std::map<std::string, std::shared_ptr<bind>> _bindList;
 
   bind()
       : _pressHandler(nullptr), _releaseHandler(nullptr),
@@ -86,17 +88,16 @@ public:
   {
     return _bound;
   }
+  std::string combinedName()
+  {
+    return _category + ":" + _name;
+  }
 
-  [[nodiscard]] static std::shared_ptr<bind> create(
-      std::function<void()> pressHandler,
+  static std::shared_ptr<bind> create(std::function<void()> pressHandler,
       std::function<void()> releaseHandler,
       std::function<void(double)> deltaHandler,
       const std::string &category,
-      const std::string &name)
-  {
-    return std::shared_ptr<bind>(
-        new bind(pressHandler, releaseHandler, deltaHandler, category, name));
-  }
+      const std::string &name);
   static void keyboardEvent(int key, action event, modifier mods);
   static void mouseButtonEvent(int mBtn, action event, modifier mods);
   static void mouseAxisEvent(int mAxis, double delta, modifier mods);
