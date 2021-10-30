@@ -36,6 +36,7 @@ private:
   const std::vector<const char *> _deviceExtensions
       = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
+  void initGLFW(GLFWkeyfun keyCallback);
   void createVulkanInstance();
   bool checkValidationLayerSupport();
   std::vector<const char *> getRequiredExtensions();
