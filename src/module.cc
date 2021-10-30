@@ -16,7 +16,14 @@ namespace nebula {
 module::module(const std::string &path, bool shouldLoad)
     : _rootPath(path), _load(shouldLoad)
 {
-  YAML::Node manifest = YAML::LoadFile(path + "/manifest.yml");
+  YAML::Node manifest;
+  try {
+    manifest = YAML::LoadFile(path + "/manifest.yml");
+  } catch (YAML::BadFile &e) {
+    LOG_S(ERROR) << "Manifest file is missing or corrupt:";
+    LOG_S(ERROR) << "  " << path << "/manifest.yml";
+    throw;
+  }
   if (!manifest["module"]) {
     LOG_S(ERROR) << "Manifest file lacks module section:";
     LOG_S(ERROR) << "  " << path << "/manifest.yml";
@@ -28,23 +35,17 @@ module::module(const std::string &path, bool shouldLoad)
     throw std::runtime_error("Manifest file lacks identifier");
   }
   _identifier = manifest["module"]["id"].as<std::string>();
-  _name       = manifest["module"]["name"].as<std::string, std::string>("");
+  _name = manifest["module"]["name"].as<std::string, std::string>(_identifier);
   std::string _tags
       = manifest["module"]["tags"].as<std::string, std::string>("");
   if (manifest["module"]["dependencies"]) {
-    for (auto iterator = manifest["module"]["dependencies"].begin();
-         iterator != manifest["module"]["dependencies"].end();
-         ++iterator)
-    {
-      _dependencies.emplace_back(iterator->as<std::string>());
+    for (const auto &iterator : manifest["module"]["dependencies"]) {
+      _dependencies.emplace_back(iterator.as<std::string>());
     }
   }
   if (manifest["module"]["include"]) {
-    for (auto iterator = manifest["module"]["include"].begin();
-         iterator != manifest["module"]["include"].end();
-         ++iterator)
-    {
-      _includes.emplace_back(iterator->as<std::string>());
+    for (const auto &iterator : manifest["module"]["include"]) {
+      _includes.emplace_back(iterator.as<std::string>());
     }
   }
 }
