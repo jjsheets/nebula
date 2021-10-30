@@ -188,7 +188,12 @@ SCENARIO("class bind")
     nebula::bind::modifier modifier;
     auto bind = nebula::bind::create([&]() { pressed = true; },
         [&]() { released = true; },
-        [&](double d) { delta += d; },
+        [&](double d) {
+          INFO("delta = ", delta);
+          INFO("d = ", d);
+          delta += d;
+          INFO("delta = ", delta);
+        },
         "Category",
         "Name");
     // the integer used as the mouse button is intended to be a GLFW constant,
