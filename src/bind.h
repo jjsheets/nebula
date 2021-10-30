@@ -73,6 +73,9 @@ private:
         _bind(""), _bound(false)
   {
   }
+  bool press();
+  bool release();
+  bool delta(double delta);
 
 public:
   void bindKey(int key, modifier mods);
@@ -89,9 +92,6 @@ public:
   {
     return _category + ":" + _name;
   }
-  bool press();
-  bool release();
-  bool delta(double delta);
 
   static std::shared_ptr<bind> create(std::function<void()> pressHandler,
       std::function<void()> releaseHandler,
