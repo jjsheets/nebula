@@ -55,7 +55,6 @@ private:
   static std::map<std::tuple<int, int, int>, std::shared_ptr<bind>> _jBtnBinds;
   static std::map<std::tuple<int, int, int>, std::shared_ptr<bind>> _jAxisBinds;
 
-public:
   bind()
       : _pressHandler(nullptr), _releaseHandler(nullptr),
         _deltaHandler(nullptr), _category(""), _name(""), _bind(""),
@@ -72,6 +71,8 @@ public:
         _bind(""), _bound(false)
   {
   }
+
+public:
   void bindKey(int key, modifier mods);
   void bindMButton(int mBtn, modifier mods);
   void bindMAxis(int mAxis, modifier mods);
@@ -86,6 +87,16 @@ public:
     return _bound;
   }
 
+  [[nodiscard]] static std::shared_ptr<bind> create(
+      std::function<void()> pressHandler,
+      std::function<void()> releaseHandler,
+      std::function<void(double)> deltaHandler,
+      const std::string &category,
+      const std::string &name)
+  {
+    return std::shared_ptr<bind>(
+        new bind(pressHandler, releaseHandler, deltaHandler, category, name));
+  }
   static void keyboardEvent(int key, action event, modifier mods);
   static void mouseButtonEvent(int mBtn, action event, modifier mods);
   static void mouseAxisEvent(int mAxis, double delta, modifier mods);
