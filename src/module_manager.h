@@ -34,7 +34,7 @@ private:
   std::set<std::string> _resolved;
   std::set<std::string> _unresolved;
 
-  void resolve(module &mod);
+  void resolveModule(module &mod);
 
 public:
   moduleManager() { }
@@ -42,7 +42,7 @@ public:
 
   void addModulePath(const std::string &path, bool user);
   std::vector<module> &modules();
-  void resolve();
+  void resolveModules();
 
 #ifndef DOCTEST_CONFIG_DISABLE
   std::string getModulePaths();

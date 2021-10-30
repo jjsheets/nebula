@@ -83,16 +83,16 @@ void moduleManager::modPath::loadManifests(moduleManager &manager)
     }
 }
 
-void moduleManager::resolve()
+void moduleManager::resolveModules()
 {
   std::for_each(_modules.begin(), _modules.end(), [&](auto &mod) {
     if (mod.load() && _resolved.find(mod.identifier()) == _resolved.end()) {
-      resolve(mod);
+      resolveModule(mod);
     }
   });
 }
 
-void moduleManager::resolve(module &mod)
+void moduleManager::resolveModule(module &mod)
 {
   if (_resolved.find(mod.identifier()) != _resolved.end()) {
     return;
@@ -104,7 +104,7 @@ void moduleManager::resolve(module &mod)
           if (_unresolved.find(dep) != _resolved.end()) {
             throw std::runtime_error("Circular dependency detected!");
           }
-          resolve(_moduleMap.at(dep));
+          resolveModule(_moduleMap.at(dep));
         }
       });
   _resolved.insert(mod.identifier());

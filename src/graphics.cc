@@ -25,24 +25,7 @@ graphics::graphics(uint32_t width,
       _surface(VK_NULL_HANDLE), _swapChain(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
-  LOG_S(INFO) << "GLFW " << glfwGetVersionString();
-  if (!glfwInit()) {
-    LOG_S(ERROR) << "Could not initialize GLFW: Platform does not meet minimum "
-                    "requirements for GLFW initialization";
-    throw glfwException();
-  }
-  LOG_S(INFO) << "GLFW library loaded";
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  _window = glfwCreateWindow(_width, _height, "Nebula", nullptr, nullptr);
-  if (!_window) {
-    LOG_S(ERROR) << "GLFW: Window creation failed";
-    glfwTerminate();
-    throw glfwException();
-  }
-  LOG_S(INFO) << "GLFW: Game window created (" << _width << "x" << _height
-              << ")";
-  glfwSetKeyCallback(_window, keyCallback);
+  initGLFW(keyCallback);
   createVulkanInstance();
   if (_useValidationLayers) {
     setValidationCallback();
@@ -86,6 +69,29 @@ graphics::~graphics()
   }
   glfwTerminate();
   LOG_S(INFO) << "GLFW: Terminated";
+}
+
+void graphics::initGLFW(GLFWkeyfun keyCallback)
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  LOG_S(INFO) << "GLFW " << glfwGetVersionString();
+  if (!glfwInit()) {
+    LOG_S(ERROR) << "Could not initialize GLFW: Platform does not meet minimum "
+                    "requirements for GLFW initialization";
+    throw glfwException();
+  }
+  LOG_S(INFO) << "GLFW library loaded";
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  _window = glfwCreateWindow(_width, _height, "Nebula", nullptr, nullptr);
+  if (!_window) {
+    LOG_S(ERROR) << "GLFW: Window creation failed";
+    glfwTerminate();
+    throw glfwException();
+  }
+  LOG_S(INFO) << "GLFW: Game window created (" << _width << "x" << _height
+              << ")";
+  glfwSetKeyCallback(_window, keyCallback);
 }
 
 void graphics::createVulkanInstance()
