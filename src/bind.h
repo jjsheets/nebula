@@ -71,6 +71,9 @@ private:
         _bind(""), _bound(false)
   {
   }
+  void press();
+  void release();
+  void delta(double delta);
 
 public:
   void bindKey(int key, modifier mods);
@@ -79,9 +82,6 @@ public:
   void bindJButton(int jid, int jBtn, modifier mods);
   void bindJAxis(int jid, int jAxis, modifier mods);
   void unbind();
-  void press();
-  void release();
-  void delta(double delta);
   bool bound()
   {
     return _bound;
