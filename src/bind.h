@@ -73,9 +73,6 @@ private:
         _bind(""), _bound(false)
   {
   }
-  void press();
-  void release();
-  void delta(double delta);
 
 public:
   void bindKey(int key, modifier mods);
@@ -92,6 +89,9 @@ public:
   {
     return _category + ":" + _name;
   }
+  bool press();
+  bool release();
+  bool delta(double delta);
 
   static std::shared_ptr<bind> create(std::function<void()> pressHandler,
       std::function<void()> releaseHandler,
@@ -105,6 +105,14 @@ public:
       int jid, int jBtn, action event, modifier mods);
   static void joystickAxisEvent(
       int jid, int jAxis, double delta, modifier mods);
+  static std::shared_ptr<bind> findKey(int key, modifier mods);
+  static std::shared_ptr<bind> findMButton(int mBtn, modifier mods);
+  static std::shared_ptr<bind> findMAxis(int mAxis, modifier mods);
+  static std::shared_ptr<bind> findJButton(int jid, int jBtn, modifier mods);
+  static std::shared_ptr<bind> findJAxis(int jid, int jAxis, modifier mods);
+  static std::shared_ptr<bind> findBind(
+      const std::string &category, const std::string &name);
+  static void clearBinds();
 };
 
 } // namespace nebula
