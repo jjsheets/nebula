@@ -9,10 +9,11 @@
 #include <map>
 #include <tuple>
 #include <string>
+#include <memory>
 
 namespace nebula {
 
-class bind {
+class bind : std::enable_shared_from_this<bind> {
 public:
   enum struct action
   {
@@ -48,11 +49,11 @@ private:
   std::string _bind;
   bool _bound;
 
-  static std::map<std::tuple<int, int>, bind> _keyBinds;
-  static std::map<std::tuple<int, int>, bind> _mBtnBinds;
-  static std::map<std::tuple<int, int>, bind> _mAxisBinds;
-  static std::map<std::tuple<int, int, int>, bind> _jBtnBinds;
-  static std::map<std::tuple<int, int, int>, bind> _jAxisBinds;
+  static std::map<std::tuple<int, int>, std::shared_ptr<bind>> _keyBinds;
+  static std::map<std::tuple<int, int>, std::shared_ptr<bind>> _mBtnBinds;
+  static std::map<std::tuple<int, int>, std::shared_ptr<bind>> _mAxisBinds;
+  static std::map<std::tuple<int, int, int>, std::shared_ptr<bind>> _jBtnBinds;
+  static std::map<std::tuple<int, int, int>, std::shared_ptr<bind>> _jAxisBinds;
 
 public:
   bind()
