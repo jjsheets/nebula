@@ -13,11 +13,10 @@ SCENARIO("class bind")
   {
     bool pressed  = false;
     bool released = false;
-    double delta  = 0.0;
     nebula::bind::modifier modifier;
     auto bind = nebula::bind::create([&]() { pressed = true; },
         [&]() { released = true; },
-        [&](double d) { delta += d; },
+        [&](double d) {},
         "Category",
         "Name");
     // the integer used as the key is intended to be a GLFW constant, but its
@@ -82,11 +81,10 @@ SCENARIO("class bind")
   {
     bool pressed  = false;
     bool released = false;
-    double delta  = 0.0;
     nebula::bind::modifier modifier;
     auto bind = nebula::bind::create([&]() { pressed = true; },
         [&]() { released = true; },
-        [&](double d) { delta += d; },
+        [&](double d) {},
         "Category",
         "Name");
     // the integer used as the mouse button is intended to be a GLFW constant,
@@ -125,11 +123,10 @@ SCENARIO("class bind")
   {
     bool pressed  = false;
     bool released = false;
-    double delta  = 0.0;
     nebula::bind::modifier modifier;
     auto bind = nebula::bind::create([&]() { pressed = true; },
         [&]() { released = true; },
-        [&](double d) { delta += d; },
+        [&](double d) {},
         "Category",
         "Name");
     // the integer used as the mouse button is intended to be a GLFW constant,
@@ -182,17 +179,14 @@ SCENARIO("class bind")
 
   GIVEN("a bind object bound to a mouse axis")
   {
-    bool pressed  = false;
-    bool released = false;
-    double delta  = 0.0;
+    bool handled = false;
+    double delta = 0.0;
     nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() { pressed = true; },
-        [&]() { released = true; },
+    auto bind = nebula::bind::create([&]() {},
+        [&]() {},
         [&](double d) {
-          INFO("delta = ", delta);
-          INFO("d = ", d);
+          handled = true;
           delta += d;
-          INFO("delta = ", delta);
         },
         "Category",
         "Name");
@@ -207,7 +201,8 @@ SCENARIO("class bind")
 
       THEN("the deltaHandler code should have run")
       {
-        REQUIRE(delta == 1.0);
+        REQUIRE(handled == true);
+        REQUIRE(delta == 0.0);
       }
     }
 
@@ -217,6 +212,7 @@ SCENARIO("class bind")
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
+        REQUIRE(handled == false);
         REQUIRE(delta == 0.0);
       }
     }
@@ -224,13 +220,15 @@ SCENARIO("class bind")
 
   GIVEN("a bind object bound to a joystick/controller axis")
   {
-    bool pressed  = false;
-    bool released = false;
-    double delta  = 0.0;
+    bool handled = false;
+    double delta = 0.0;
     nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() { pressed = true; },
-        [&]() { released = true; },
-        [&](double d) { delta += d; },
+    auto bind = nebula::bind::create([&]() {},
+        [&]() {},
+        [&](double d) {
+          handled = true;
+          delta += d;
+        },
         "Category",
         "Name");
     // the integer used as the mouse button is intended to be a GLFW constant,
@@ -244,6 +242,7 @@ SCENARIO("class bind")
 
       THEN("the deltaHandler code should have run")
       {
+        REQUIRE(handled == true);
         REQUIRE(delta == 1.0);
       }
     }
@@ -254,6 +253,7 @@ SCENARIO("class bind")
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
+        REQUIRE(handled == false);
         REQUIRE(delta == 0.0);
       }
     }
@@ -264,6 +264,7 @@ SCENARIO("class bind")
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
+        REQUIRE(handled == false);
         REQUIRE(delta == 0.0);
       }
     }
