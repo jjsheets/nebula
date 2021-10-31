@@ -9,6 +9,8 @@
 #include <set>
 #include <limits>
 #include <algorithm>
+#include <ios>
+#include <iomanip>
 
 // Logging system includes
 #include "loguru.hpp"
@@ -252,6 +254,7 @@ void graphics::pickPhysicalDevice()
     LOG_S(ERROR) << "Vulkan: failed to find a suitable GPU";
     throw std::runtime_error("Vulkan: failed to find a suitable GPU");
   }
+  logPhysicalDevice();
 }
 
 bool graphics::deviceIsSuitable(VkPhysicalDevice device)
@@ -549,6 +552,80 @@ void graphics::createImageViews()
       LOG_S(ERROR) << "Vulkan: failed to create image views";
       throw std::runtime_error("Vulkan: failed to create image views");
     }
+  }
+}
+
+void graphics::logMemoryType(VkMemoryType &mType)
+{
+  if (mType.propertyFlags == 0)
+    return;
+  std::string flags = "";
+  if (mType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+    flags += ", device local";
+  if (mType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+    flags += ", host visible";
+  if (mType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+    flags += ", host coherent";
+  if (mType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
+    flags += ", host cached";
+  if (mType.propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)
+    flags += ", lazy alloc";
+  if (mType.propertyFlags & VK_MEMORY_PROPERTY_PROTECTED_BIT)
+    flags += ", protected";
+  if (mType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD)
+    flags += ", device coherent";
+  if (mType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_UNCACHED_BIT_AMD)
+    flags += ", device uncached";
+  LOG_S(INFO) << "  Heap " << mType.heapIndex << ": flags " << std::hex
+              << std::setfill('0') << std::setw(4) << std::uppercase
+              << mType.propertyFlags << flags;
+}
+
+void graphics::logMemoryHeap(VkMemoryHeap &mHeap, uint32_t i)
+{
+  std::string flags = "";
+  if (mHeap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+    flags += ", device local";
+  if (mHeap.flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT)
+    flags += ", multi-instance";
+  double size = (double)(mHeap.size) / 1048576.0;
+  LOG_S(INFO) << "  Heap " << i << ": " << size << "MB" << flags;
+}
+
+void graphics::logPhysicalDevice()
+{
+  LOG_SCOPE_FUNCTION(9);
+  VkPhysicalDeviceProperties props;
+  vkGetPhysicalDeviceProperties(_physicalDevice, &props);
+  LOG_S(INFO) << "Device: " << props.deviceName;
+  std::string dType = "Other";
+  if (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+    dType = "Integrated";
+  else if (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+    dType = "Discrete";
+  else if (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU)
+    dType = "Virtual";
+  else if (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+    dType = "CPU";
+  LOG_S(INFO) << "Device Type: " << dType;
+  LOG_S(INFO) << "API v" << VK_VERSION_MAJOR(props.apiVersion) << "."
+              << VK_VERSION_MINOR(props.apiVersion) << "."
+              << VK_VERSION_PATCH(props.apiVersion);
+  LOG_S(INFO) << "Driver v" << VK_VERSION_MAJOR(props.driverVersion) << "."
+              << VK_VERSION_MINOR(props.driverVersion) << "."
+              << VK_VERSION_PATCH(props.driverVersion);
+  LOG_S(INFO) << "vID:dID " << std::hex << std::setw(4) << std::setfill('0')
+              << std::uppercase << (props.vendorID & 0xFFFF) << ":"
+              << (props.deviceID & 0xFFFF);
+  VkPhysicalDeviceMemoryProperties mem;
+  vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &mem);
+  LOG_S(INFO) << "Heap Sizes";
+  for (uint32_t i = 0; i < mem.memoryHeapCount; i++) {
+    logMemoryHeap(mem.memoryHeaps[i], i);
+  }
+  LOG_S(INFO) << "Heap Flags";
+  for (uint32_t i = 0; i < mem.memoryTypeCount; i++) {
+    logMemoryType(mem.memoryTypes[i]);
   }
 }
 
