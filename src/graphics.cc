@@ -5,12 +5,12 @@
 
 // Exception includes
 #include "exceptions.h"
-#include <string>
 #include <set>
 #include <limits>
 #include <algorithm>
 #include <ios>
 #include <iomanip>
+#include <fstream>
 
 // Logging system includes
 #include "loguru.hpp"
@@ -627,6 +627,70 @@ void graphics::logPhysicalDevice()
   for (uint32_t i = 0; i < mem.memoryTypeCount; i++) {
     logMemoryType(mem.memoryTypes[i]);
   }
+}
+
+graphics::pipeline::pipeline(VkDevice device,
+    const std::string &vertShader,
+    const std::string &fragShader)
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  auto vertShaderCode             = readFile(vertShader);
+  auto fragShaderCode             = readFile(fragShader);
+  VkShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
+  VkShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
+  VkPipelineShaderStageCreateInfo vertShaderStageInfo {};
+  vertShaderStageInfo.sType
+      = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
+  vertShaderStageInfo.module = vertShaderModule;
+  vertShaderStageInfo.pName  = "main";
+  VkPipelineShaderStageCreateInfo fragShaderStageInfo {};
+  fragShaderStageInfo.sType
+      = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
+  fragShaderStageInfo.module = fragShaderModule;
+  fragShaderStageInfo.pName  = "main";
+  VkPipelineShaderStageCreateInfo shaderStages[]
+      = {vertShaderStageInfo, fragShaderStageInfo};
+  vkDestroyShaderModule(device, fragShaderModule, nullptr);
+  vkDestroyShaderModule(device, vertShaderModule, nullptr);
+}
+
+graphics::pipeline::~pipeline() { }
+
+std::vector<char> graphics::pipeline::readFile(const std::string &filename)
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  std::ifstream file(filename, std::ios::ate | std::ios::binary);
+  if (!file.is_open()) {
+    LOG_S(ERROR) << "failed to open file: " << filename;
+    throw std::runtime_error("failed to open file: " + filename);
+  }
+  LOG_S(INFO) << "opened shader file: " << filename;
+  size_t fileSize = (size_t)file.tellg();
+  std::vector<char> buffer(fileSize);
+  file.seekg(0);
+  file.read(buffer.data(), fileSize);
+  file.close();
+  return buffer;
+}
+
+VkShaderModule graphics::pipeline::createShaderModule(
+    VkDevice device, const std::vector<char> &code)
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  VkShaderModuleCreateInfo createInfo {};
+  createInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+  createInfo.codeSize = code.size();
+  createInfo.pCode    = reinterpret_cast<const uint32_t *>(code.data());
+  VkShaderModule shaderModule;
+  if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create shader module";
+    throw std::runtime_error("Vulkan: failed to create shader module");
+  }
+  return shaderModule;
 }
 
 } // namespace nebula
