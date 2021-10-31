@@ -24,7 +24,8 @@ graphics::graphics(uint32_t width,
     : _width(width), _height(height), _window(nullptr), _instance(nullptr),
       _useValidationLayers(useValidationLayers),
       _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE),
-      _surface(VK_NULL_HANDLE), _swapChain(VK_NULL_HANDLE)
+      _surface(VK_NULL_HANDLE), _swapChain(VK_NULL_HANDLE),
+      _renderPass(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
   initGLFW(keyCallback);
@@ -37,11 +38,19 @@ graphics::graphics(uint32_t width,
   createLogicalDevice();
   createSwapChain();
   createImageViews();
+  _pipeline = new pipeline(_logicalDevice,
+      "shaders/vert.spv",
+      "shaders/frag.spv",
+      _swapChainExtent,
+      _renderPass);
 }
 
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  if (_renderPass) {
+    vkDestroyRenderPass(_logicalDevice, _renderPass, nullptr);
+  }
   for (auto imageView : _swapChainImageViews) {
     vkDestroyImageView(_logicalDevice, imageView, nullptr);
   }
@@ -632,13 +641,16 @@ void graphics::logPhysicalDevice()
 graphics::pipeline::pipeline(VkDevice device,
     const std::string &vertShader,
     const std::string &fragShader,
-    VkExtent2D &swapChainExtent)
+    VkExtent2D &swapChainExtent,
+    VkRenderPass renderPass)
+    : _device(device), _pipelineLayout(VK_NULL_HANDLE),
+      _graphicsPipeline(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
   auto vertShaderCode             = readFile(vertShader);
   auto fragShaderCode             = readFile(fragShader);
-  VkShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
-  VkShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
+  VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+  VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
   VkPipelineShaderStageCreateInfo vertShaderStageInfo {};
   vertShaderStageInfo.sType
@@ -656,6 +668,7 @@ graphics::pipeline::pipeline(VkDevice device,
 
   VkPipelineShaderStageCreateInfo shaderStages[]
       = {vertShaderStageInfo, fragShaderStageInfo};
+
   VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
   vertexInputInfo.sType
       = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -717,32 +730,56 @@ graphics::pipeline::pipeline(VkDevice device,
   colorBlending.attachmentCount = 1;
   colorBlending.pAttachments    = &colorBlendAttachment;
 
-  VkDynamicState dynamicStates[]
-      = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH};
-
-  VkPipelineDynamicStateCreateInfo dynamicState {};
-  dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-  dynamicState.dynamicStateCount = 2;
-  dynamicState.pDynamicStates    = dynamicStates;
-
-  VkPipelineLayout pipelineLayout;
-
   VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
   if (vkCreatePipelineLayout(
-          device, &pipelineLayoutInfo, nullptr, &pipelineLayout)
+          _device, &pipelineLayoutInfo, nullptr, &_pipelineLayout)
       != VK_SUCCESS)
   {
     LOG_S(ERROR) << "Vulkan: failed to create pipeline layout";
     throw std::runtime_error("Vulkan: failed to create pipeline layout");
   }
 
-  vkDestroyShaderModule(device, fragShaderModule, nullptr);
-  vkDestroyShaderModule(device, vertShaderModule, nullptr);
+  VkGraphicsPipelineCreateInfo pipelineInfo {};
+  pipelineInfo.sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+  pipelineInfo.stageCount = 2;
+  pipelineInfo.pStages    = shaderStages;
+  pipelineInfo.pVertexInputState   = &vertexInputInfo;
+  pipelineInfo.pInputAssemblyState = &inputAssembly;
+  pipelineInfo.pViewportState      = &viewportState;
+  pipelineInfo.pRasterizationState = &rasterizer;
+  pipelineInfo.pMultisampleState   = &multisampling;
+  pipelineInfo.pColorBlendState    = &colorBlending;
+  pipelineInfo.layout              = _pipelineLayout;
+  pipelineInfo.renderPass          = renderPass;
+  pipelineInfo.subpass             = 0;
+
+  if (vkCreateGraphicsPipelines(_device,
+          VK_NULL_HANDLE,
+          1,
+          &pipelineInfo,
+          nullptr,
+          &_graphicsPipeline)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create graphics pipeline";
+    throw std::runtime_error("Vulkan: failed to create graphics pipeline");
+  }
+
+  vkDestroyShaderModule(_device, fragShaderModule, nullptr);
+  vkDestroyShaderModule(_device, vertShaderModule, nullptr);
 }
 
-graphics::pipeline::~pipeline() { }
+graphics::pipeline::~pipeline()
+{
+  if (_graphicsPipeline) {
+    vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
+  }
+  if (_pipelineLayout) {
+    vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
+  }
+}
 
 std::vector<char> graphics::pipeline::readFile(const std::string &filename)
 {
@@ -762,7 +799,7 @@ std::vector<char> graphics::pipeline::readFile(const std::string &filename)
 }
 
 VkShaderModule graphics::pipeline::createShaderModule(
-    VkDevice device, const std::vector<char> &code)
+    const std::vector<char> &code)
 {
   LOG_SCOPE_FUNCTION(INFO);
   VkShaderModuleCreateInfo createInfo {};
@@ -770,13 +807,45 @@ VkShaderModule graphics::pipeline::createShaderModule(
   createInfo.codeSize = code.size();
   createInfo.pCode    = reinterpret_cast<const uint32_t *>(code.data());
   VkShaderModule shaderModule;
-  if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule)
+  if (vkCreateShaderModule(_device, &createInfo, nullptr, &shaderModule)
       != VK_SUCCESS)
   {
     LOG_S(ERROR) << "Vulkan: failed to create shader module";
     throw std::runtime_error("Vulkan: failed to create shader module");
   }
   return shaderModule;
+}
+
+void graphics::createRenderPass()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  VkAttachmentDescription colorAttachment {};
+  colorAttachment.format        = _swapChainImageFormat;
+  colorAttachment.samples       = VK_SAMPLE_COUNT_1_BIT;
+  colorAttachment.loadOp        = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  colorAttachment.storeOp       = VK_ATTACHMENT_STORE_OP_STORE;
+  colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  colorAttachment.finalLayout   = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+  VkAttachmentReference colorAttachmentRef {};
+  colorAttachmentRef.attachment = 0;
+  colorAttachmentRef.layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+  VkSubpassDescription subpass {};
+  subpass.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
+  subpass.colorAttachmentCount = 1;
+  subpass.pColorAttachments    = &colorAttachmentRef;
+  VkRenderPassCreateInfo renderPassInfo {};
+  renderPassInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+  renderPassInfo.attachmentCount = 1;
+  renderPassInfo.pAttachments    = &colorAttachment;
+  renderPassInfo.subpassCount    = 1;
+  renderPassInfo.pSubpasses      = &subpass;
+
+  if (vkCreateRenderPass(_logicalDevice, &renderPassInfo, nullptr, &_renderPass)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create render pass";
+    throw std::runtime_error("Vulkan: failed to create render pass");
+  }
 }
 
 } // namespace nebula

@@ -14,6 +14,25 @@
 namespace nebula {
 
 class graphics {
+public:
+  class pipeline {
+  private:
+    VkDevice _device;
+    VkPipelineLayout _pipelineLayout;
+    VkPipeline _graphicsPipeline;
+
+    static std::vector<char> readFile(const std::string &filename);
+    VkShaderModule createShaderModule(const std::vector<char> &code);
+
+  public:
+    pipeline(VkDevice device,
+        const std::string &vertShader,
+        const std::string &fragShader,
+        VkExtent2D &swapChainExtent,
+        VkRenderPass renderPass);
+    ~pipeline();
+  };
+
 private:
   uint32_t _width;
   uint32_t _height;
@@ -31,6 +50,8 @@ private:
   VkFormat _swapChainImageFormat;
   VkExtent2D _swapChainExtent;
   std::vector<VkImageView> _swapChainImageViews;
+  pipeline *_pipeline;
+  VkRenderPass _renderPass;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -59,6 +80,7 @@ private:
   void logMemoryType(VkMemoryType &mType);
   void logMemoryHeap(VkMemoryHeap &mHeap, uint32_t i);
   void logPhysicalDevice();
+  void createRenderPass();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -93,20 +115,6 @@ public:
   {
     return _window;
   }
-
-  class pipeline {
-  private:
-    static std::vector<char> readFile(const std::string &filename);
-    VkShaderModule createShaderModule(
-        VkDevice device, const std::vector<char> &code);
-
-  public:
-    pipeline(VkDevice device,
-        const std::string &vertShader,
-        const std::string &fragShader,
-        VkExtent2D &swapChainExtent);
-    ~pipeline();
-  };
 };
 
 } // namespace nebula
