@@ -55,6 +55,9 @@ private:
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
   void createSwapChain();
   void createImageViews();
+  void logMemoryType(VkMemoryType &mType);
+  void logMemoryHeap(VkMemoryHeap &mHeap, uint32_t i);
+  void logPhysicalDevice();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
