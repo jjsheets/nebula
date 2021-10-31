@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <optional>
+#include <string>
 
 namespace nebula {
 
@@ -92,6 +93,19 @@ public:
   {
     return _window;
   }
+
+  class pipeline {
+  private:
+    static std::vector<char> readFile(const std::string &filename);
+    VkShaderModule createShaderModule(
+        VkDevice device, const std::vector<char> &code);
+
+  public:
+    pipeline(VkDevice device,
+        const std::string &vertShader,
+        const std::string &fragShader);
+    ~pipeline();
+  };
 };
 
 } // namespace nebula
