@@ -50,6 +50,7 @@ private:
   VkFormat _swapChainImageFormat;
   VkExtent2D _swapChainExtent;
   std::vector<VkImageView> _swapChainImageViews;
+  std::vector<VkFramebuffer> _swapChainFramebuffers;
   pipeline *_pipeline;
   VkRenderPass _renderPass;
 
@@ -81,6 +82,7 @@ private:
   void logMemoryHeap(VkMemoryHeap &mHeap, uint32_t i);
   void logPhysicalDevice();
   void createRenderPass();
+  void createFramebuffers();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

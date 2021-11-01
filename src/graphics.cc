@@ -43,11 +43,15 @@ graphics::graphics(uint32_t width,
       "shaders/frag.spv",
       _swapChainExtent,
       _renderPass);
+  createFramebuffers();
 }
 
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  for (auto framebuffer : _swapChainFramebuffers) {
+    vkDestroyFramebuffer(_logicalDevice, framebuffer, nullptr);
+  }
   if (_renderPass) {
     vkDestroyRenderPass(_logicalDevice, _renderPass, nullptr);
   }
@@ -845,6 +849,33 @@ void graphics::createRenderPass()
   {
     LOG_S(ERROR) << "Vulkan: failed to create render pass";
     throw std::runtime_error("Vulkan: failed to create render pass");
+  }
+}
+
+void graphics::createFramebuffers()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  _swapChainFramebuffers.resize(_swapChainImageViews.size());
+  for (size_t i = 0; i < _swapChainImageViews.size(); i++) {
+    VkImageView attachments[] = {_swapChainImageViews[i]};
+    VkFramebufferCreateInfo framebufferInfo {};
+    framebufferInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferInfo.renderPass      = _renderPass;
+    framebufferInfo.attachmentCount = 1;
+    framebufferInfo.pAttachments    = attachments;
+    framebufferInfo.width           = _swapChainExtent.width;
+    framebufferInfo.height          = _swapChainExtent.height;
+    framebufferInfo.layers          = 1;
+
+    if (vkCreateFramebuffer(_logicalDevice,
+            &framebufferInfo,
+            nullptr,
+            &_swapChainFramebuffers[i])
+        != VK_SUCCESS)
+    {
+      LOG_S(ERROR) << "Vulkan: failed to create framebuffer";
+      throw std::runtime_error("Vulkan: failed to create framebuffer");
+    }
   }
 }
 
