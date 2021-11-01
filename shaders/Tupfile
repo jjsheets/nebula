@@ -1,0 +1,6 @@
+include_rules
+
+: foreach ../src/*.vert |> !glslc |> %B.vert.spv
+: foreach ../src/*.frag |> !glslc |> %B.frag.spv
+
+.gitignore

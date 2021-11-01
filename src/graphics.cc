@@ -25,7 +25,7 @@ graphics::graphics(uint32_t width,
       _useValidationLayers(useValidationLayers),
       _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE),
       _surface(VK_NULL_HANDLE), _swapChain(VK_NULL_HANDLE),
-      _renderPass(VK_NULL_HANDLE)
+      _renderPass(VK_NULL_HANDLE), _commandPool(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
   initGLFW(keyCallback);
@@ -38,20 +38,27 @@ graphics::graphics(uint32_t width,
   createLogicalDevice();
   createSwapChain();
   createImageViews();
+  createRenderPass();
   _pipeline = new pipeline(_logicalDevice,
-      "shaders/vert.spv",
-      "shaders/frag.spv",
+      "shaders/shader.vert.spv",
+      "shaders/shader.frag.spv",
       _swapChainExtent,
       _renderPass);
   createFramebuffers();
+  createCommandPool();
+  createCommandBuffers();
 }
 
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  if (_commandPool) {
+    vkDestroyCommandPool(_logicalDevice, _commandPool, nullptr);
+  }
   for (auto framebuffer : _swapChainFramebuffers) {
     vkDestroyFramebuffer(_logicalDevice, framebuffer, nullptr);
   }
+  delete _pipeline;
   if (_renderPass) {
     vkDestroyRenderPass(_logicalDevice, _renderPass, nullptr);
   }
@@ -875,6 +882,67 @@ void graphics::createFramebuffers()
     {
       LOG_S(ERROR) << "Vulkan: failed to create framebuffer";
       throw std::runtime_error("Vulkan: failed to create framebuffer");
+    }
+  }
+}
+
+void graphics::createCommandPool()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  queueFamilyIndices queueFamilies(_physicalDevice, _surface);
+  VkCommandPoolCreateInfo poolInfo {};
+  poolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+  poolInfo.queueFamilyIndex = queueFamilies._graphicsFamily.value();
+  if (vkCreateCommandPool(_logicalDevice, &poolInfo, nullptr, &_commandPool)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create command pool";
+    throw std::runtime_error("Vulkan: failed to create command pool");
+  }
+}
+
+void graphics::createCommandBuffers()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  _commandBuffers.resize(_swapChainFramebuffers.size());
+  VkCommandBufferAllocateInfo allocInfo {};
+  allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  allocInfo.commandPool        = _commandPool;
+  allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  allocInfo.commandBufferCount = (uint32_t)_commandBuffers.size();
+  if (vkAllocateCommandBuffers(
+          _logicalDevice, &allocInfo, _commandBuffers.data())
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to allocate command buffers";
+    throw std::runtime_error("Vulkan: failed to allocate command buffers");
+  }
+  for (size_t i = 0; i < _commandBuffers.size(); i++) {
+    VkCommandBufferBeginInfo beginInfo {};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    if (vkBeginCommandBuffer(_commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+      LOG_S(ERROR) << "Vulkan: failed to begin recording command buffer";
+      throw std::runtime_error(
+          "Vulkan: failed to begin recording command buffer");
+    }
+    VkRenderPassBeginInfo renderPassInfo {};
+    renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass        = _renderPass;
+    renderPassInfo.framebuffer       = _swapChainFramebuffers[i];
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = _swapChainExtent;
+    VkClearValue clearColor          = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+    renderPassInfo.clearValueCount   = 1;
+    renderPassInfo.pClearValues      = &clearColor;
+    vkCmdBeginRenderPass(
+        _commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBindPipeline(
+        _commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, *_pipeline);
+    vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
+    vkCmdEndRenderPass(_commandBuffers[i]);
+    if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
+      LOG_S(ERROR) << "Vulkan: failed to record command buffer";
+      throw std::runtime_error("Vulkan: failed to record command buffer");
     }
   }
 }

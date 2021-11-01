@@ -50,6 +50,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y tup libvulkan-dev libxi-dev libxxf86vm-dev libreadline-dev xorg-dev lcov
+          mkdir external/glslc
+          cd external/glslc
+          curl -fsS "https://storage.googleapis.com/shaderc/badges/build_link_linux_clang_release.html" | awk -v 'RS=<' -F\> '/^meta http-equiv="refresh"/ && $1 ~ /url=/{split($1,a,"[?=\"]");exit} END{print "url=\""a[7]"\""}' | curl -f --remote-name-all -K-
+          tar -xf install.tgz
 
       - name: Install tools and dependencies (Windows)
         if: matrix.os == 'windows-latest'

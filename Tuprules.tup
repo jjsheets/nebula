@@ -42,12 +42,15 @@ LDFLAGS += -fuse-ld=lld
 LDFLAGS += -v
 LDFLAGS += -lc++ -lc++abi -lole32
 LDFLAGS += `llvm-config --system-libs --libs core support`
+GLSLC = ../external/glslc/install/bin/glslc.exe
 else
 CC = g++
 AR = ar
 LD = g++
+GLSLC = ../external/glslc/install/bin/glslc
 endif
 
 !cc = |> $(CC) $(CFLAGS) -c %f -o %o |>
 !ar = |> $(AR) crs %o %f |>
 !ld = |> $(LD) %f $(LDFLAGS) -o %o |>
+!glslc = |> $(GLSLC) %f -o %o |>

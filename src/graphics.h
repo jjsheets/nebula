@@ -31,6 +31,10 @@ public:
         VkExtent2D &swapChainExtent,
         VkRenderPass renderPass);
     ~pipeline();
+    operator VkPipeline()
+    {
+      return _graphicsPipeline;
+    }
   };
 
 private:
@@ -53,6 +57,8 @@ private:
   std::vector<VkFramebuffer> _swapChainFramebuffers;
   pipeline *_pipeline;
   VkRenderPass _renderPass;
+  VkCommandPool _commandPool;
+  std::vector<VkCommandBuffer> _commandBuffers;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -83,6 +89,8 @@ private:
   void logPhysicalDevice();
   void createRenderPass();
   void createFramebuffers();
+  void createCommandPool();
+  void createCommandBuffers();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
