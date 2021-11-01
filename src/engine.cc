@@ -146,6 +146,7 @@ void engine::loop()
   LOG_SCOPE_FUNCTION(INFO);
   while (!glfwWindowShouldClose(*_graphics)) {
     glfwPollEvents();
+    _graphics->drawFrame();
   }
 }
 

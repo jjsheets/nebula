@@ -59,11 +59,17 @@ private:
   VkRenderPass _renderPass;
   VkCommandPool _commandPool;
   std::vector<VkCommandBuffer> _commandBuffers;
+  std::vector<VkSemaphore> _renderFinished;
+  std::vector<VkSemaphore> _imageAvailable;
+  std::vector<VkFence> _inFlightFence;
+  std::vector<VkFence> _inFlightImage;
+  size_t _currentFrame;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
   const std::vector<const char *> _deviceExtensions
       = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  const size_t _maxFramesInFlight = 2;
 
   void initGLFW(GLFWkeyfun keyCallback);
   void createVulkanInstance();
@@ -91,6 +97,7 @@ private:
   void createFramebuffers();
   void createCommandPool();
   void createCommandBuffers();
+  void createSyncObjects();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -121,6 +128,7 @@ public:
       GLFWkeyfun keyCallback,
       bool useValidationLayers);
   ~graphics();
+  void drawFrame();
   operator GLFWwindow *()
   {
     return _window;
