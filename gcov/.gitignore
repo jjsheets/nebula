@@ -1,0 +1,7 @@
+*.gcov
+log/*.log
+src/*
+*.png
+*.css
+*.html
+*.info
