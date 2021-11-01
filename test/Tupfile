@@ -1,14 +1,14 @@
 include_rules
 
-: foreach ../src/*.cc ^../src/main.cc |> !cc |> %B.o
+: foreach ../src/*.cc ^../src/main.cc |> !cc -fprofile-arcs -ftest-coverage |> %B.o | %B.gcno
 ifeq (@(TUP_PLATFORM),win32)
 : ../external/loguru/loguru.cpp |> !cc -D _WIN32 -I/mingw64/x86_64-w64-mingw32/include |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc -D _WIN32 |> %B.o
-: *.o ../external/lua/liblua.a |> !ld |> test.exe
+: *.o ../external/lua/liblua.a |> !ld -lgcov --coverage |> test.exe
 else
 : ../external/loguru/loguru.cpp |> !cc |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc |> %B.o
-: *.o ../external/lua/liblua.a |> !ld |> test
+: *.o ../external/lua/liblua.a |> !ld -lgcov --coverage |> test
 endif
 
 .gitignore
