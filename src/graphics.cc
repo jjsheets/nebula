@@ -26,7 +26,7 @@ graphics::graphics(uint32_t width,
       _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE),
       _surface(VK_NULL_HANDLE), _swapChain(VK_NULL_HANDLE),
       _renderPass(VK_NULL_HANDLE), _commandPool(VK_NULL_HANDLE),
-      _currentFrame(0)
+      _currentFrame(0), _framebufferResized(false)
 {
   LOG_SCOPE_FUNCTION(INFO);
   initGLFW(keyCallback);
@@ -62,21 +62,9 @@ graphics::~graphics()
     vkDestroySemaphore(_logicalDevice, _imageAvailable[i], nullptr);
     vkDestroyFence(_logicalDevice, _inFlightFence[i], nullptr);
   }
+  cleanupSwapChain();
   if (_commandPool) {
     vkDestroyCommandPool(_logicalDevice, _commandPool, nullptr);
-  }
-  for (auto framebuffer : _swapChainFramebuffers) {
-    vkDestroyFramebuffer(_logicalDevice, framebuffer, nullptr);
-  }
-  delete _pipeline;
-  if (_renderPass) {
-    vkDestroyRenderPass(_logicalDevice, _renderPass, nullptr);
-  }
-  for (auto imageView : _swapChainImageViews) {
-    vkDestroyImageView(_logicalDevice, imageView, nullptr);
-  }
-  if (_swapChain) {
-    vkDestroySwapchainKHR(_logicalDevice, _swapChain, nullptr);
   }
   if (_logicalDevice) {
     vkDestroyDevice(_logicalDevice, nullptr);
@@ -114,7 +102,7 @@ void graphics::initGLFW(GLFWkeyfun keyCallback)
   }
   LOG_S(INFO) << "GLFW library loaded";
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   _window = glfwCreateWindow(_width, _height, "Nebula", nullptr, nullptr);
   if (!_window) {
     LOG_S(ERROR) << "GLFW: Window creation failed";
@@ -123,7 +111,16 @@ void graphics::initGLFW(GLFWkeyfun keyCallback)
   }
   LOG_S(INFO) << "GLFW: Game window created (" << _width << "x" << _height
               << ")";
+  glfwSetWindowUserPointer(_window, this);
+  glfwSetFramebufferSizeCallback(_window, framebufferResizeCallback);
   glfwSetKeyCallback(_window, keyCallback);
+}
+
+void graphics::framebufferResizeCallback(
+    GLFWwindow *window, int width, int height)
+{
+  auto gfx = reinterpret_cast<graphics *>(glfwGetWindowUserPointer(window));
+  gfx->_framebufferResized = true;
 }
 
 void graphics::createVulkanInstance()
@@ -554,6 +551,51 @@ void graphics::createSwapChain()
       _logicalDevice, _swapChain, &imageCount, _swapChainImages.data());
   _swapChainImageFormat = surfaceFormat.format;
   _swapChainExtent      = extent;
+}
+
+void graphics::recreateSwapChain()
+{
+  LOG_SCOPE_FUNCTION(1);
+  int width = 0, height = 0;
+  glfwGetFramebufferSize(_window, &width, &height);
+  while (width == 0 || height == 0) {
+    glfwGetFramebufferSize(_window, &width, &height);
+    glfwWaitEvents();
+  }
+  vkDeviceWaitIdle(_logicalDevice);
+  cleanupSwapChain();
+  createSwapChain();
+  createImageViews();
+  createRenderPass();
+  _pipeline = new pipeline(_logicalDevice,
+      "shaders/shader.vert.spv",
+      "shaders/shader.frag.spv",
+      _swapChainExtent,
+      _renderPass);
+  createFramebuffers();
+  createCommandBuffers();
+}
+
+void graphics::cleanupSwapChain()
+{
+  LOG_SCOPE_FUNCTION(1);
+  for (auto framebuffer : _swapChainFramebuffers) {
+    vkDestroyFramebuffer(_logicalDevice, framebuffer, nullptr);
+  }
+  vkFreeCommandBuffers(_logicalDevice,
+      _commandPool,
+      static_cast<uint32_t>(_commandBuffers.size()),
+      _commandBuffers.data());
+  delete _pipeline;
+  if (_renderPass) {
+    vkDestroyRenderPass(_logicalDevice, _renderPass, nullptr);
+  }
+  for (auto imageView : _swapChainImageViews) {
+    vkDestroyImageView(_logicalDevice, imageView, nullptr);
+  }
+  if (_swapChain) {
+    vkDestroySwapchainKHR(_logicalDevice, _swapChain, nullptr);
+  }
 }
 
 void graphics::createImageViews()
@@ -1005,12 +1047,19 @@ void graphics::drawFrame()
       VK_TRUE,
       std::numeric_limits<uint64_t>::max());
   uint32_t imageIndex;
-  vkAcquireNextImageKHR(_logicalDevice,
+  VkResult result = vkAcquireNextImageKHR(_logicalDevice,
       _swapChain,
       std::numeric_limits<uint64_t>::max(),
       _imageAvailable[_currentFrame],
       VK_NULL_HANDLE,
       &imageIndex);
+  if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    recreateSwapChain();
+    return;
+  } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+    LOG_S(ERROR) << "Vulkan: failed to acquire swap chain image";
+    throw std::runtime_error("Vulkan: failed to acquire swap chain image");
+  }
   if (_inFlightImage[imageIndex] != VK_NULL_HANDLE) {
     vkWaitForFences(_logicalDevice,
         1,
@@ -1049,7 +1098,16 @@ void graphics::drawFrame()
   presentInfo.swapchainCount     = 1;
   presentInfo.pSwapchains        = swapChains;
   presentInfo.pImageIndices      = &imageIndex;
-  vkQueuePresentKHR(_presentQueue, &presentInfo);
+  result = vkQueuePresentKHR(_presentQueue, &presentInfo);
+  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR
+      || _framebufferResized)
+  {
+    _framebufferResized = false;
+    recreateSwapChain();
+  } else if (result != VK_SUCCESS) {
+    LOG_S(ERROR) << "Vulkan: failed to present swap chain image";
+    throw std::runtime_error("Vulkan: failed to present swap chain image");
+  }
   _currentFrame = (_currentFrame + 1) % _maxFramesInFlight;
 }
 
