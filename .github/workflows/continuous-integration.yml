@@ -171,7 +171,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-          files: gcov/test.gcov
+          files: gcov/test.info
           name: codecov-nebula
           fail_ci_if_error: false
           verbose: true
