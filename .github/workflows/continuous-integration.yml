@@ -165,6 +165,7 @@ jobs:
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o temp.info
           lcov -e temp.info /home/jeff/Projects/nebula/src/* -o test.info
+          cat test.info
 
       - uses: codecov/codecov-action@v2
         if: matrix.os == 'ubuntu-latest'
