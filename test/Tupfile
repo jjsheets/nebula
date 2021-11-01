@@ -1,7 +1,7 @@
 include_rules
 
 ifeq (@(TUP_PLATFORM),win32)
-: foreach ../src/*.cc ^../src/main.cc |> !cc |> %B.o | %B.gcno
+: foreach ../src/*.cc ^../src/main.cc |> !cc |> %B.o
 : ../external/loguru/loguru.cpp |> !cc -D _WIN32 -I/mingw64/x86_64-w64-mingw32/include |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc -D _WIN32 |> %B.o
 : *.o ../external/lua/liblua.a |> !ld |> test.exe
