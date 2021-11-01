@@ -64,6 +64,7 @@ private:
   std::vector<VkFence> _inFlightFence;
   std::vector<VkFence> _inFlightImage;
   size_t _currentFrame;
+  bool _framebufferResized;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -89,6 +90,8 @@ private:
       const std::vector<VkPresentModeKHR> &availablePresentModes);
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
   void createSwapChain();
+  void recreateSwapChain();
+  void cleanupSwapChain();
   void createImageViews();
   void logMemoryType(VkMemoryType &mType);
   void logMemoryHeap(VkMemoryHeap &mHeap, uint32_t i);
@@ -104,6 +107,8 @@ private:
       VkDebugUtilsMessageTypeFlagsEXT messageType,
       const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
       void *pUserData);
+  static void framebufferResizeCallback(
+      GLFWwindow *window, int width, int height);
 
   struct queueFamilyIndices {
     std::optional<uint32_t> _graphicsFamily;
