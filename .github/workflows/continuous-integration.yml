@@ -164,6 +164,7 @@ jobs:
           cd gcov
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info
+          lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
           cat test.info
 
       - uses: codecov/codecov-action@v2

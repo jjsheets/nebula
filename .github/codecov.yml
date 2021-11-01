@@ -16,6 +16,9 @@ parsers:
       method: no
       macro: no
 
+fixes:
+  - "/home/runner/work/nebula/::"
+
 comment:
   layout: "reach,diff,flags,files,footer"
   behavior: default
