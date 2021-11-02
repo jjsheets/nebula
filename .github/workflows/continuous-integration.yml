@@ -144,16 +144,6 @@ jobs:
           cd ../..
 
       - name: Fetch SQLite3 Library (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          cd external
-          curl https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip -o sql.zip
-          7z x -bso0 -bsp0 sql.zip
-          mv sqlite-amalgamation-3360000 sqlite-build
-
-      - name: Build SQLite3 Library (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: msys2 {0}
         run: |
           cd external
           curl https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip -o sql.zip
