@@ -150,8 +150,17 @@ jobs:
           make yaml-cpp
           cd ../..
 
-      - name: Build SQLite3 Library
-        if: steps.cache-sqlite3.outputs.cache-hit != 'true'
+      - name: Build SQLite3 Library (Ubuntu)
+        if: (steps.cache-yaml.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
+        run: |
+          mkdir external/sqlite-build
+          cd external/sqlite-build
+          ../sqlite/configure
+          make sqlite3.c
+
+      - name: Build SQLite3 Library (Windows)
+        if: (steps.cache-yaml.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        shell: msys2 {0}
         run: |
           mkdir external/sqlite-build
           cd external/sqlite-build
