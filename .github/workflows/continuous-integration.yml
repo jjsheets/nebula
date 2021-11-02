@@ -95,8 +95,10 @@ jobs:
         id: cache-sqlite3
         uses: actions/cache@v2
         with:
-          path: external/sqlite-build
-          key: ${{ runner.os }}-sqlite-1-${{ hashFiles('sqlitestatus') }}
+          path: |
+            external/sqlite-build/sqlite3.c
+            external/sqlite-build/sqlite3.h
+          key: ${{ runner.os }}-sqlite-2-${{ hashFiles('sqlitestatus') }}
 
       - name: Cache Handling (GLFW, Ubuntu)
         if: matrix.os != 'windows-latest'
@@ -151,7 +153,7 @@ jobs:
           cd ../..
 
       - name: Build SQLite3 Library (Ubuntu)
-        if: (steps.cache-yaml.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
+        if: (steps.cache-sqlite3.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
         run: |
           mkdir external/sqlite-build
           cd external/sqlite-build
@@ -159,7 +161,7 @@ jobs:
           make sqlite3.c
 
       - name: Build SQLite3 Library (Windows)
-        if: (steps.cache-yaml.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        if: (steps.cache-sqlite3.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
         shell: msys2 {0}
         run: |
           mkdir external/sqlite-build
