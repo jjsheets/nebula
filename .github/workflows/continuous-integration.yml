@@ -72,6 +72,7 @@ jobs:
           git submodule status external/lua >luastatus
           git submodule status external/yaml-cpp >yaml-cppstatus
           git submodule status external/glfw >glfwstatus
+          git submodule status external/sqlite >sqlitestatus
 
       - name: Cache Handling (lua)
         id: cache-lua
@@ -89,6 +90,13 @@ jobs:
             external/yaml-cpp/libyaml-cpp.a
             external/yaml-cpp/include/yaml-cpp/dll.h
           key: ${{ runner.os }}-yaml-cpp-1-${{ hashFiles('yaml-cppstatus') }}
+
+      - name: Cache Handling (sqlite3)
+        id: cache-sqlite3
+        uses: actions/cache@v2
+        with:
+          path: external/sqlite-build
+          key: ${{ runner.os }}-sqlite-1-${{ hashFiles('sqlitestatus') }}
 
       - name: Cache Handling (GLFW, Ubuntu)
         if: matrix.os != 'windows-latest'
@@ -141,6 +149,14 @@ jobs:
           cmake -G "MSYS Makefiles" -D_CMAKE_TOOLCHAIN_PREFIX=llvm- .
           make yaml-cpp
           cd ../..
+
+      - name: Build SQLite3 Library
+        if: steps.cache-sqlite3.outputs.cache-hit != 'true'
+        run: |
+          mkdir external/sqlite-build
+          cd external/sqlite-build
+          ../sqlite/configure
+          make sqlite3.c
 
       - name: Build GLFW Library (Ubuntu)
         if: (steps.cache-glfw.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')

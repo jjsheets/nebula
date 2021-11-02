@@ -7,17 +7,16 @@
 #include <stdexcept>
 #include <string>
 
+struct sqlite3;
+
+namespace nebula {
+
 class glfwException : public std::runtime_error {
   std::string _description;
   int _code;
 
 public:
-  explicit glfwException() : std::runtime_error("")
-  {
-    const char *_desc;
-    _code        = glfwGetError(&_desc);
-    _description = _desc;
-  }
+  explicit glfwException();
   explicit glfwException(const glfwException &other) noexcept
       : std::runtime_error("")
   {
@@ -40,4 +39,33 @@ public:
   }
 };
 
+class sqliteException : public std::runtime_error {
+  std::string _description;
+  int _code;
+
+public:
+  explicit sqliteException(sqlite3 *db);
+  explicit sqliteException(int err);
+  sqliteException(const sqliteException &other) : std::runtime_error("")
+  {
+    _description = other._description;
+    _code        = other._code;
+  }
+  virtual const char *what() const noexcept
+  {
+    return _description.c_str();
+  }
+  sqliteException &operator=(const sqliteException &other) noexcept
+  {
+    _description = other._description;
+    _code        = other._code;
+    return *this;
+  }
+  bool operator==(int other) noexcept
+  {
+    return _code == other;
+  }
+};
+
+} // namespace nebula
 #endif // NEBULA_EXCEPTIONS_H
