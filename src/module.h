@@ -30,6 +30,11 @@ public:
     return _identifier;
   }
 
+  const std::string &name() const
+  {
+    return _name;
+  }
+
   const std::vector<std::string> &dependencies() const
   {
     return _dependencies;

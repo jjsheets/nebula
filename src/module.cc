@@ -9,6 +9,50 @@
 // Logging system includes
 #include "loguru.hpp"
 
+// Unit Testing includes
+#include "doctest.h"
+
+#ifndef DOCTEST_CONFIG_DISABLE
+
+SCENARIO("class module")
+{
+  GIVEN("an invalid module path/module path without manifest")
+  {
+    auto path = "test/invalid";
+    THEN("exception is thrown when creating a module with the path")
+    {
+      REQUIRE_THROWS(nebula::module(path));
+    }
+  }
+  GIVEN("a module with a manifest that lacks a module section")
+  {
+    auto path = "test/no-module-section";
+    THEN("exception is thrown when creating a module with the path")
+    {
+      REQUIRE_THROWS(nebula::module(path));
+    }
+  }
+  GIVEN("a module with a manifest that lacks an identifier")
+  {
+    auto path = "test/no-identifier";
+    THEN("exception is thrown when creating a module with the path")
+    {
+      REQUIRE_THROWS(nebula::module(path));
+    }
+  }
+  GIVEN("a module with a manifest that lacks a name")
+  {
+    auto path = "test/no-name";
+    auto mod  = nebula::module(path);
+    THEN("the name should equal the module's identifier")
+    {
+      REQUIRE(mod.name() == mod.identifier());
+    }
+  }
+}
+
+#endif
+
 #define NEBULA_SEMVER "0.1.0"
 
 namespace nebula {
