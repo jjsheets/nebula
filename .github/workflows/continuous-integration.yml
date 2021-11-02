@@ -91,15 +91,6 @@ jobs:
             external/yaml-cpp/include/yaml-cpp/dll.h
           key: ${{ runner.os }}-yaml-cpp-1-${{ hashFiles('yaml-cppstatus') }}
 
-      - name: Cache Handling (sqlite3)
-        id: cache-sqlite3
-        uses: actions/cache@v2
-        with:
-          path: |
-            external/sqlite-build/sqlite3.c
-            external/sqlite-build/sqlite3.h
-          key: ${{ runner.os }}-sqlite-2-${{ hashFiles('sqlitestatus') }}
-
       - name: Cache Handling (GLFW, Ubuntu)
         if: matrix.os != 'windows-latest'
         id: cache-glfw
@@ -152,24 +143,22 @@ jobs:
           make yaml-cpp
           cd ../..
 
-      - name: Build SQLite3 Library (Ubuntu)
-        if: (steps.cache-sqlite3.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
+      - name: Fetch SQLite3 Library (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          mkdir external/sqlite-build
-          cd external/sqlite-build
-          ../sqlite/configure
-          make sqlite3.c
+          cd external
+          curl https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip -o sql.zip
+          7z x -bso0 -bsp0 sql.zip
+          mv sqlite-amalgamation-3360000 sqlite-build
 
       - name: Build SQLite3 Library (Windows)
-        if: (steps.cache-sqlite3.outputs.cache-hit != 'true') && (matrix.os == 'windows-latest')
+        if: matrix.os == 'windows-latest'
         shell: msys2 {0}
         run: |
-          mkdir external/sqlite-build
-          cd external/sqlite
-          autoconf
-          cd ../sqlite-build
-          ../sqlite/configure
-          make sqlite3.c
+          cd external
+          curl https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip -o sql.zip
+          7z x -bso0 -bsp0 sql.zip
+          mv sqlite-amalgamation-3360000 sqlite-build
 
       - name: Build GLFW Library (Ubuntu)
         if: (steps.cache-glfw.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
