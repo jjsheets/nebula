@@ -172,6 +172,7 @@ jobs:
       - name: Run tests
         if: matrix.os == 'ubuntu-latest'
         run: |
+          mkdir /home/runner/.local/share
           test/test
           cd gcov
           gcov -o ../test ../src/*.cc -t >test.gcov
