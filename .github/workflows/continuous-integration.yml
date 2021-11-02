@@ -165,7 +165,9 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir external/sqlite-build
-          cd external/sqlite-build
+          cd external/sqlite
+          autoconf
+          cd ../sqlite-build
           ../sqlite/configure
           make sqlite3.c
 
