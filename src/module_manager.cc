@@ -118,9 +118,6 @@ void moduleManager::resolveModules()
 void moduleManager::resolveModule(module &mod)
 {
   LOG_SCOPE_FUNCTION(INFO);
-  if (_resolved.find(mod.identifier()) != _resolved.end()) {
-    return;
-  }
   _unresolved.insert(mod.identifier());
   for (auto &dep : mod.dependencies()) {
     LOG_S(INFO) << "Dependency: " << dep;
