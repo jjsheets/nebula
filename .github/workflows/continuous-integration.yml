@@ -174,7 +174,7 @@ jobs:
         run: |
           ls /home
           ls /home/runner
-          ls /home/runner/.local
+          mkdir /home/runner/.local
           mkdir /home/runner/.local/share
           test/test
           cd gcov
