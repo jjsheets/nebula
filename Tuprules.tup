@@ -9,13 +9,13 @@ CFLAGS += -I../external/cute_headers
 CFLAGS += -I../external/PlatformFolders/sago
 CFLAGS += -I../external/semver/include
 CFLAGS += -I../external/yaml-cpp/include
+CFLAGS += -I../external/sqlite-build
 ifeq (@(TUP_PLATFORM),win32)
 CFLAGS += -I../VULKAN_SDK/include
 CFLAGS += `pkg-config --cflags glfw3`
 else
 CFLAGS += -I../external/glfw/include
 endif
-CFLAGS += -std=c++17
 CFLAGS += -DLOGURU_WITH_STREAMS=1
 ifeq (@(TUP_PLATFORM),win32)
 LDFLAGS += `pkg-config --libs glfw3`
@@ -34,6 +34,7 @@ LDFLAGS += -lyaml-cpp
 ifeq (@(TUP_PLATFORM),win32)
 CFLAGS += -target x86_64-w64-mingw32
 CC = clang++
+C = clang
 AR = llvm-ar
 LD = clang++
 LDFLAGS += -target x86_64-w64-mingw32
@@ -45,12 +46,14 @@ LDFLAGS += `llvm-config --system-libs --libs core support`
 GLSLC = ../external/glslc/install/bin/glslc.exe
 else
 CC = g++
+C = gcc
 AR = ar
 LD = g++
 GLSLC = ../external/glslc/install/bin/glslc
 endif
 
-!cc = |> $(CC) $(CFLAGS) -c %f -o %o |>
+!cc = |> $(CC) $(CFLAGS) -std=c++17 -c %f -o %o |>
+!c = |> $(C) $(CFLAGS) -std=gnu17 -c %f -o %o |>
 !ar = |> $(AR) crs %o %f |>
 !ld = |> $(LD) %f $(LDFLAGS) -o %o |>
 !glslc = |> $(GLSLC) %f -o %o |>

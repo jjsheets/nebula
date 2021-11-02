@@ -72,6 +72,7 @@ jobs:
           git submodule status external/lua >luastatus
           git submodule status external/yaml-cpp >yaml-cppstatus
           git submodule status external/glfw >glfwstatus
+          git submodule status external/sqlite >sqlitestatus
 
       - name: Cache Handling (lua)
         id: cache-lua
@@ -141,6 +142,13 @@ jobs:
           cmake -G "MSYS Makefiles" -D_CMAKE_TOOLCHAIN_PREFIX=llvm- .
           make yaml-cpp
           cd ../..
+
+      - name: Fetch SQLite3 Library (Ubuntu)
+        run: |
+          cd external
+          curl https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip -o sql.zip
+          7z x -bso0 -bsp0 sql.zip
+          mv sqlite-amalgamation-3360000 sqlite-build
 
       - name: Build GLFW Library (Ubuntu)
         if: (steps.cache-glfw.outputs.cache-hit != 'true') && (matrix.os == 'ubuntu-latest')
