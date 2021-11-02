@@ -41,7 +41,10 @@ public:
   ~moduleManager() { }
 
   void addModulePath(const std::string &path, bool user);
-  std::vector<module> &modules();
+  std::vector<module> &modules()
+  {
+    return _modules;
+  }
   void resolveModules();
 
 #ifndef DOCTEST_CONFIG_DISABLE
