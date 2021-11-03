@@ -15,6 +15,32 @@
 // Logging system includes
 #include "loguru.hpp"
 
+#ifndef DOCTEST_CONFIG_DISABLE
+  #include <doctest.h>
+  #include <doctest/trompeloeil.hpp>
+  #include "../test/vulkan-mock.h"
+
+SCENARIO("class graphics" * doctest::may_fail())
+{
+  GIVEN("a graphics object")
+  {
+    // Set up the expectations for this test in the mock object
+    vkMock.mockGraphics();
+
+    nebula::graphics gfx(
+        1600, 900, [](GLFWwindow *, int, int, int, int) {}, true);
+    THEN("it should not throw when a frame is drawn")
+    {
+      REQUIRE_NOTHROW(gfx.drawFrame());
+    }
+
+    // Clear all expectations for this test from the mock object
+    vkMock.clearExpectations();
+  }
+}
+
+#endif
+
 namespace nebula {
 
 graphics::graphics(uint32_t width,
@@ -114,6 +140,14 @@ void graphics::initGLFW(GLFWkeyfun keyCallback)
   glfwSetWindowUserPointer(_window, this);
   glfwSetFramebufferSizeCallback(_window, framebufferResizeCallback);
   glfwSetKeyCallback(_window, keyCallback);
+}
+
+void graphics::setClose(bool close)
+{
+  if (close)
+    glfwSetWindowShouldClose(_window, GLFW_TRUE);
+  else
+    glfwSetWindowShouldClose(_window, GLFW_FALSE);
 }
 
 void graphics::framebufferResizeCallback(

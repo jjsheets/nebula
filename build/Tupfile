@@ -7,12 +7,12 @@ ifeq (@(TUP_PLATFORM),win32)
 : ../external/loguru/loguru.cpp |> !cc -D _WIN32 -I/mingw64/x86_64-w64-mingw32/include |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc -D _WIN32 |> %B.o
 : ../external/sqlite-build/sqlite3.c |> !c |> %B.o
-: *.o ../external/lua/liblua.a |> !ld |> nebula.exe
+: *.o ../external/lua/liblua.a |> !ld $(BUILD_LDFLAGS) |> nebula.exe
 else
 : ../external/loguru/loguru.cpp |> !cc |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc |> %B.o
 : ../external/sqlite-build/sqlite3.c |> !c |> %B.o
-: *.o ../external/lua/liblua.a |> !ld |> nebula
+: *.o ../external/lua/liblua.a |> !ld $(BUILD_LDFLAGS) |> nebula
 endif
 
 .gitignore

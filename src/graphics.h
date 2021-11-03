@@ -138,6 +138,7 @@ public:
   {
     return _window;
   }
+  void setClose(bool close);
 };
 
 } // namespace nebula
