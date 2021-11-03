@@ -596,6 +596,13 @@ VkResult vkCreateDebugUtilsMessengerEXT(VkInstance a,
   assert(vkMock);
   return vkMock->vkCreateDebugUtilsMessengerEXT(a, b, c, d);
 }
+void vkDestroyDebugUtilsMessengerEXT(
+    VkInstance a, VkDebugUtilsMessengerEXT b, const VkAllocationCallbacks *c)
+{
+  auto vkMock = vulkan_mock::instance();
+  assert(vkMock);
+  return vkMock->vkDestroyDebugUtilsMessengerEXT(a, b, c);
+}
 }
 
 void vulkan_mock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
@@ -661,6 +668,34 @@ void vulkan_mock::genImgHandles(uint32_t n, VkImage *images)
   }
 }
 
+void vulkan_mock::makePipelines(
+    uint32_t n, const VkGraphicsPipelineCreateInfo *info, VkPipeline *p)
+{
+  for (uint32_t i = 0; i < n; i++) {
+    p[i] = reinterpret_cast<VkPipeline>(
+        const_cast<VkGraphicsPipelineCreateInfo *>(info));
+  }
+}
+
+void vulkan_mock::fillCmdBuffer(uint32_t n, VkCommandBuffer *bufs)
+{
+  for (uint32_t i = 0; i < n; i++) {
+    bufs[i] = reinterpret_cast<VkCommandBuffer>(0xE01 + i);
+  }
+}
+
+bool vulkan_mock::validCmdBuffer(VkCommandBuffer &b)
+{
+  return (0xE00 < reinterpret_cast<uint64_t>(b))
+      && (reinterpret_cast<uint64_t>(b) < 0xF00);
+}
+
+void vulkan_mock::nextImage(uint32_t *n)
+{
+  *n = testDrawImage++;
+  testDrawImage %= testSwapChainImageCount;
+}
+
 void vulkan_mock::mockGraphics()
 {
   testWindow         = reinterpret_cast<GLFWwindow *>(0x400);
@@ -671,6 +706,9 @@ void vulkan_mock::mockGraphics()
   testLogDev         = reinterpret_cast<VkDevice>(0x900);
   testCombinedQueue  = reinterpret_cast<VkQueue>(0xA00);
   testSwapChain      = reinterpret_cast<VkSwapchainKHR>(0xB00);
+  testRenderPass     = reinterpret_cast<VkRenderPass>(0xC00);
+  testPipeLayout     = reinterpret_cast<VkPipelineLayout>(0xD00);
+  testCmdPool        = reinterpret_cast<VkCommandPool>(0xE00);
   testSurfaceExt     = "VK_KHR_surface";
   testSurfaceExts[0] = testSurfaceExt;
   testSurfaceExts[1] = nullptr;
@@ -804,5 +842,117 @@ void vulkan_mock::mockGraphics()
       NAMED_ALLOW_CALL(*this,
           vkCreateImageView(testLogDev, _, nullptr, trompeloeil::ne(nullptr)))
           .SIDE_EFFECT(*_4 = reinterpret_cast<VkImageView>(_2->image))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateRenderPass(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = testRenderPass)
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateShaderModule(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<const VkShaderModule>(
+                           const_cast<uint32_t *>(_2->pCode)))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreatePipelineLayout(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = testPipeLayout)
+          .RETURN(VK_SUCCESS));
+  expectations.push(NAMED_ALLOW_CALL(
+      *this, vkCreateGraphicsPipelines(testLogDev, nullptr, _, _, nullptr, _))
+                        .SIDE_EFFECT(makePipelines(_3, _4, _6))
+                        .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyShaderModule(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateFramebuffer(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<VkFramebuffer>(
+                           const_cast<VkImageView>(_2->pAttachments[0])))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateCommandPool(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = testCmdPool)
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkAllocateCommandBuffers(testLogDev, _, _))
+          .SIDE_EFFECT(fillCmdBuffer(_2->commandBufferCount, _3))
+          .RETURN(VK_SUCCESS));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkBeginCommandBuffer(_, _))
+                        .WITH(validCmdBuffer(_1))
+                        .RETURN(VK_SUCCESS));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkCmdBeginRenderPass(_, _, _))
+                        .WITH(validCmdBuffer(_1)));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkCmdBindPipeline(_, _, _))
+                        .WITH(validCmdBuffer(_1)));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkCmdDraw(_, _, _, _, _))
+                        .WITH(validCmdBuffer(_1)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCmdEndRenderPass(_)).WITH(validCmdBuffer(_1)));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkEndCommandBuffer(_))
+                        .WITH(validCmdBuffer(_1))
+                        .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateSemaphore(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<VkSemaphore>(_4))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateFence(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<VkFence>(_4))
+          .RETURN(VK_SUCCESS));
+  expectations.push(NAMED_ALLOW_CALL(*this, glfwGetWindowSize(testWindow, _, _))
+                        .SIDE_EFFECT(*_2 = width)
+                        .SIDE_EFFECT(*_3 = height));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, glfwGetWindowAttrib(testWindow, GLFW_DECORATED))
+          .RETURN(true));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDeviceWaitIdle(testLogDev)).RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroySemaphore(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyFence(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyFramebuffer(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkFreeCommandBuffers(testLogDev, _, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyPipeline(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyPipelineLayout(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyRenderPass(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyImageView(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroySwapchainKHR(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyCommandPool(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyDevice(testLogDev, nullptr)));
+  expectations.push(
+      NAMED_REQUIRE_CALL(*this,
+          vkGetInstanceProcAddr(
+              testVkInstance, "vkDestroyDebugUtilsMessengerEXT"))
+          .RETURN((PFN_vkVoidFunction)(&::vkDestroyDebugUtilsMessengerEXT)));
+  expectations.push(NAMED_ALLOW_CALL(
+      *this, vkDestroyDebugUtilsMessengerEXT(testVkInstance, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroySurfaceKHR(testVkInstance, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyInstance(testVkInstance, nullptr)));
+  expectations.push(NAMED_ALLOW_CALL(*this, glfwDestroyWindow(testWindow)));
+  expectations.push(NAMED_ALLOW_CALL(*this, glfwTerminate()));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkWaitForFences(testLogDev, _, _, _, _))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkAcquireNextImageKHR(testLogDev, _, _, _, _, _))
+          .SIDE_EFFECT(nextImage(_6))
+          .RETURN(VK_SUCCESS));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkResetFences(testLogDev, _, _))
+                        .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkQueueSubmit(testCombinedQueue, _, _, _))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkQueuePresentKHR(testCombinedQueue, _))
           .RETURN(VK_SUCCESS));
 }

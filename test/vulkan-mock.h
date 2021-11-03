@@ -20,11 +20,15 @@ private:
   VkDevice testLogDev;
   VkQueue testCombinedQueue;
   VkSwapchainKHR testSwapChain;
+  VkRenderPass testRenderPass;
+  VkPipelineLayout testPipeLayout;
+  VkCommandPool testCmdPool;
   const char *testSurfaceExt;
   const char *testSurfaceExts[2];
   void *windowUP = nullptr;
   uint32_t testSwapChainImageCount;
-  uint32_t testImageCur = 0;
+  uint32_t testImageCur  = 0;
+  uint32_t testDrawImage = 0;
   std::stack<std::unique_ptr<trompeloeil::expectation>> expectations;
   int width;
   int height;
@@ -36,6 +40,11 @@ private:
   void fillDevExtProps(VkExtensionProperties &props);
   void fillPhysDevMemProps(VkPhysicalDeviceMemoryProperties &props);
   void genImgHandles(uint32_t n, VkImage *images);
+  void makePipelines(
+      uint32_t n, const VkGraphicsPipelineCreateInfo *info, VkPipeline *p);
+  void fillCmdBuffer(uint32_t n, VkCommandBuffer *bufs);
+  bool validCmdBuffer(VkCommandBuffer &b);
+  void nextImage(uint32_t *n);
 
 public:
   static vulkan_mock *&instance()
@@ -231,6 +240,9 @@ public:
           const VkDebugUtilsMessengerCreateInfoEXT *,
           const VkAllocationCallbacks *,
           VkDebugUtilsMessengerEXT *));
+  MAKE_MOCK3(vkDestroyDebugUtilsMessengerEXT,
+      void(
+          VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks *));
 };
 
 extern vulkan_mock vkMock;

@@ -32,7 +32,7 @@ SCENARIO("class engine" * doctest::may_fail())
     // simulate command line arguments
     char argv0[] = "nebula";
     char argv1[] = "-v"; // This and the next option disable logging to stdout
-    char argv2[] = "INFO";
+    char argv2[] = "OFF";
     char *argv[] = {argv0, argv1, argv2, NULL};
 
     nebula::engine testEngine(3, argv);
