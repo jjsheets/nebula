@@ -1,6 +1,6 @@
 include_rules
 
-CFLAGS += -D DOCTEST_CONFIG_DISABLE
+CFLAGS += -D DOCTEST_CONFIG_DISABLE -O2
 
 : foreach ../src/*.cc ^../src/test.cc |> !cc |> %B.o
 ifeq (@(TUP_PLATFORM),win32)

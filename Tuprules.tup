@@ -1,6 +1,5 @@
 
 CFLAGS += -Wall
-CFLAGS += -O2
 CFLAGS += -I../src
 CFLAGS += -I../external/doctest/doctest
 CFLAGS += -I../external/loguru

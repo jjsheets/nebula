@@ -1,6 +1,7 @@
 include_rules
 
 CFLAGS += -I../external/trompeloeil/include
+CFLAGS += -Og
 
 ifeq (@(TUP_PLATFORM),win32)
 : foreach *.cc |> !cc |> %B.o

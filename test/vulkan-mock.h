@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include <string>
+#include <cassert>
 
 class vulkan_mock {
 private:
@@ -15,16 +16,45 @@ private:
   VkInstance testVkInstance;
   VkDebugUtilsMessengerEXT testDUMEXT;
   VkSurfaceKHR testSurface;
+  VkPhysicalDevice testPhysDev;
+  VkDevice testLogDev;
+  VkQueue testCombinedQueue;
+  VkSwapchainKHR testSwapChain;
   const char *testSurfaceExt;
   const char *testSurfaceExts[2];
   void *windowUP = nullptr;
+  uint32_t testSwapChainImageCount;
+  uint32_t testImageCur = 0;
   std::stack<std::unique_ptr<trompeloeil::expectation>> expectations;
   int width;
   int height;
   std::string title;
 
+  void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
+  void fillSurfFmt(VkSurfaceFormatKHR &fmt);
+  void fillPhysDevProps(VkPhysicalDeviceProperties &props);
+  void fillDevExtProps(VkExtensionProperties &props);
+  void fillPhysDevMemProps(VkPhysicalDeviceMemoryProperties &props);
+  void genImgHandles(uint32_t n, VkImage *images);
+
 public:
-  void clearExpectations();
+  static vulkan_mock *&instance()
+  {
+    static vulkan_mock *obj = nullptr;
+    return obj;
+  }
+  vulkan_mock()
+  {
+    assert(instance() == nullptr);
+    instance() = this;
+  }
+  ~vulkan_mock()
+  {
+    assert(instance() == this);
+    instance() = nullptr;
+  }
+  vulkan_mock(const vulkan_mock &) = delete;
+  vulkan_mock &operator=(const vulkan_mock &) = delete;
   void mockGraphics();
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));

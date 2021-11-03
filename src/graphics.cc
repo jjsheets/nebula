@@ -24,7 +24,8 @@ SCENARIO("class graphics" * doctest::may_fail())
 {
   GIVEN("a graphics object")
   {
-    // Set up the expectations for this test in the mock object
+    // Set up the expectations for this test in a mock object
+    vulkan_mock vkMock;
     vkMock.mockGraphics();
 
     nebula::graphics gfx(
@@ -33,9 +34,6 @@ SCENARIO("class graphics" * doctest::may_fail())
     {
       REQUIRE_NOTHROW(gfx.drawFrame());
     }
-
-    // Clear all expectations for this test from the mock object
-    vkMock.clearExpectations();
   }
 }
 
@@ -721,7 +719,8 @@ void graphics::logPhysicalDevice()
               << VK_VERSION_MINOR(props.driverVersion) << "."
               << VK_VERSION_PATCH(props.driverVersion);
   LOG_S(INFO) << "vID:dID " << std::hex << std::setw(4) << std::setfill('0')
-              << std::uppercase << (props.vendorID & 0xFFFF) << ":"
+              << std::uppercase << (props.vendorID & 0xFFFF) << ":" << std::hex
+              << std::setw(4) << std::setfill('0') << std::uppercase
               << (props.deviceID & 0xFFFF);
   VkPhysicalDeviceMemoryProperties mem;
   vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &mem);

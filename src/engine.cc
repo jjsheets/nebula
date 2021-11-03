@@ -25,10 +25,14 @@ SCENARIO("class engine" * doctest::may_fail())
 {
   GIVEN("an engine object with only command line arguments")
   {
+    // Set up the expectations for this test in a mock object
+    vulkan_mock vkMock;
     vkMock.mockGraphics();
+
+    // simulate command line arguments
     char argv0[] = "nebula";
     char argv1[] = "-v"; // This and the next option disable logging to stdout
-    char argv2[] = "OFF";
+    char argv2[] = "INFO";
     char *argv[] = {argv0, argv1, argv2, NULL};
 
     nebula::engine testEngine(3, argv);
@@ -41,8 +45,6 @@ SCENARIO("class engine" * doctest::may_fail())
       REQUIRE(
           glfwGetWindowAttrib(testEngine.getWindowPointer(), GLFW_DECORATED));
     }
-
-    vkMock.clearExpectations();
   #if 0
     // This is for descriptive purposes only, until this can be coded with a
     // proper test
