@@ -169,7 +169,7 @@ jobs:
         run: |
           ./tup
 
-      - name: Run tests
+      - name: Run tests (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
           mkdir /home/runner/.local
@@ -179,9 +179,9 @@ jobs:
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info
           lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
-          cat test.info
+          cat test/test.log
 
-      - name: Run tests
+      - name: Run tests (Windows)
         if: matrix.os == 'windows-latest'
         shell: msys2 {0}
         run: |
@@ -190,7 +190,7 @@ jobs:
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info
           lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
-          cat test.info
+          cat test/test.log
 
       - uses: codecov/codecov-action@v2
         if: matrix.os == 'ubuntu-latest'
