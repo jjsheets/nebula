@@ -14,6 +14,7 @@ SCENARIO("class bind")
 {
   GIVEN("a bind object bound to a key")
   {
+    LOG_S(INFO) << "class bind test fixture";
     bool pressed  = false;
     bool released = false;
     nebula::bind::modifier modifier;
