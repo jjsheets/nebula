@@ -63,7 +63,7 @@ jobs:
           7z x -bso0 -bsp0 tup.zip
           mkdir external/glslc
           cd external/glslc
-          curl -fsS "https://storage.googleapis.com/shaderc/artifacts/prod/graphics_shader_compiler/shaderc/windows/continuous_release_2017/374/20210924-175819/install.zip"
+          curl "https://storage.googleapis.com/shaderc/artifacts/prod/graphics_shader_compiler/shaderc/windows/continuous_release_2017/374/20210924-175819/install.zip" -o install.zip
           7z x -bso0 -bsp0 install.zip
 
       - name: Install Vulkan SDK (Windows)
