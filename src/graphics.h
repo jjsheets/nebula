@@ -20,9 +20,34 @@ public:
     VkDevice _device;
     VkPipelineLayout _pipelineLayout;
     VkPipeline _graphicsPipeline;
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo;
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo;
+    VkPipelineVertexInputStateCreateInfo vertexInputInfo;
+    VkPipelineInputAssemblyStateCreateInfo inputAssembly;
+    VkViewport viewport;
+    VkRect2D scissor;
+    VkPipelineViewportStateCreateInfo viewportState;
+    VkPipelineRasterizationStateCreateInfo rasterizer;
+    VkPipelineMultisampleStateCreateInfo multisampling;
+    VkPipelineColorBlendAttachmentState colorBlendAttachment;
+    VkPipelineColorBlendStateCreateInfo colorBlending;
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo;
+    VkGraphicsPipelineCreateInfo pipelineInfo;
 
     static std::vector<char> readFile(const std::string &filename);
     VkShaderModule createShaderModule(const std::vector<char> &code);
+    void setupVertShader(
+        VkShaderModule &vertShaderModule, const char *entryPoint);
+    void setupFragShader(
+        VkShaderModule &fragShaderModule, const char *entryPoint);
+    void setupVertexInputState();
+    void setupInputAssemblyState();
+    void setupViewport(VkExtent2D &swapChainExtent);
+    void setupViewportState();
+    void setupRasterState();
+    void setupMultisampling();
+    void setupColorBlend();
+    void setupPipelineLayout(VkRenderPass renderPass);
 
   public:
     pipeline(VkDevice device,
