@@ -1,6 +1,8 @@
 include_rules
 
 ifeq (@(TUP_PLATFORM),win32)
+: foreach ../src/*.vert |> !glslc |> %B.vert.spv
+: foreach ../src/*.frag |> !glslc |> %B.frag.spv
 else
 : foreach ../src/*.vert |> !glslc |> %B.vert.spv
 : foreach ../src/*.frag |> !glslc |> %B.frag.spv

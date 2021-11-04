@@ -61,6 +61,10 @@ jobs:
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           7z x -bso0 -bsp0 tup.zip
+          mkdir external/glslc
+          cd external/glslc
+          curl -fsS "https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2017_release.html" | awk -v 'RS=<' -F\> '/^meta http-equiv="refresh"/ && $1 ~ /url=/{split($1,a,"[?=\"]");exit} END{print "url=\""a[7]"\""}' | curl -f --remote-name-all -K-
+          7z x -bso0 -bsp0 install.zip
 
       - name: Install Vulkan SDK (Windows)
         if: matrix.os == 'windows-latest'
