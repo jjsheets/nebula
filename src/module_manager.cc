@@ -73,6 +73,22 @@ SCENARIO("class moduleManager")
       }
     }
   }
+  GIVEN("a moduleManager object")
+  {
+    nebula::moduleManager modManager;
+    WHEN(
+        "a mod path without circular dependencies is added and all mods loaded")
+    {
+      modManager.addModulePath("test/no-circular-deps", false);
+      for (auto &mod : modManager.modules()) {
+        mod.load(true);
+      }
+      THEN("resolveModules should throw an error")
+      {
+        REQUIRE_NOTHROW(modManager.resolveModules());
+      }
+    }
+  }
 }
 
 #endif
