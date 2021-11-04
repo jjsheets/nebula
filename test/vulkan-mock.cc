@@ -747,9 +747,8 @@ void vulkan_mock::mockGraphics()
                         .SIDE_EFFECT(*_3 = testVkInstance)
                         .RETURN(VK_SUCCESS));
   expectations.push(
-      NAMED_REQUIRE_CALL(*this,
-          vkGetInstanceProcAddr(testVkInstance,
-              trompeloeil::re("^vkCreateDebugUtilsMessengerEXT$")))
+      NAMED_REQUIRE_CALL(*this, vkGetInstanceProcAddr(testVkInstance, _))
+          .WITH(std::strcmp(_2, "vkCreateDebugUtilsMessengerEXT") == 0)
           .RETURN((PFN_vkVoidFunction)(&::vkCreateDebugUtilsMessengerEXT)));
   expectations.push(NAMED_REQUIRE_CALL(
       *this, vkCreateDebugUtilsMessengerEXT(testVkInstance, _, nullptr, _))
@@ -928,9 +927,8 @@ void vulkan_mock::mockGraphics()
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkDestroyDevice(testLogDev, nullptr)));
   expectations.push(
-      NAMED_REQUIRE_CALL(*this,
-          vkGetInstanceProcAddr(testVkInstance,
-              trompeloeil::re("^vkDestroyDebugUtilsMessengerEXT$")))
+      NAMED_REQUIRE_CALL(*this, vkGetInstanceProcAddr(testVkInstance, _))
+          .WITH(std::strcmp(_2, "vkDestroyDebugUtilsMessengerEXT") == 0)
           .RETURN((PFN_vkVoidFunction)(&::vkDestroyDebugUtilsMessengerEXT)));
   expectations.push(NAMED_ALLOW_CALL(
       *this, vkDestroyDebugUtilsMessengerEXT(testVkInstance, _, nullptr)));
