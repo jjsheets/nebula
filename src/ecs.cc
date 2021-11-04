@@ -17,7 +17,7 @@ SCENARIO("class ecs")
 {
   GIVEN("an ecs object")
   {
-    nebula::ecs state();
+    REQUIRE_NOTHROW(nebula::ecs state());
   }
 }
 #endif

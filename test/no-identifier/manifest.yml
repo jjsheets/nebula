@@ -1,0 +1,7 @@
+module:
+  name: Game Playing Field
+  tags: core
+  core: true
+  include:
+  - components.yml
+  - systems.yml

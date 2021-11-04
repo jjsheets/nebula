@@ -1,6 +1,5 @@
 
 CFLAGS += -Wall
-CFLAGS += -O2
 CFLAGS += -I../src
 CFLAGS += -I../external/doctest/doctest
 CFLAGS += -I../external/loguru
@@ -18,16 +17,17 @@ CFLAGS += -I../external/glfw/include
 endif
 CFLAGS += -DLOGURU_WITH_STREAMS=1
 ifeq (@(TUP_PLATFORM),win32)
-LDFLAGS += `pkg-config --libs glfw3`
+BUILD_LDFLAGS += `pkg-config --libs glfw3`
 else
-LDFLAGS = -L../external/glfw/src
+BUILD_LDFLAGS = -L../external/glfw/src
 endif
 LDFLAGS += -DLOGURU_WITH_STREAMS=1
 LDFLAGS += -L../external/yaml-cpp
 ifeq (@(TUP_PLATFORM),win32)
-LDFLAGS += -L../VULKAN_SDK/lib -lvulkan-1
+BUILD_LDFLAGS += -L../VULKAN_SDK/lib -lvulkan-1
 else
-LDFLAGS += -lglfw3 -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+BUILD_LDFLAGS += -lglfw3 -lvulkan
+LDFLAGS += -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 endif
 LDFLAGS += -lyaml-cpp
 

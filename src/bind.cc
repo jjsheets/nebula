@@ -425,6 +425,93 @@ SCENARIO("class bind")
       }
     }
   }
+
+  GIVEN("multiple bind objects mapped to input events")
+  {
+    nebula::bind::modifier modifier;
+    auto bind1 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Keyboard Test");
+    auto bind2 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Mouse Button Test");
+    auto bind3 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Joystick Button Test");
+    auto bind4 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Mouse Axis Test");
+    auto bind5 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Joystick Axis Test");
+    bind1->bindKey(0, modifier);
+    bind2->bindMButton(0, modifier);
+    bind3->bindJButton(0, 0, modifier);
+    bind4->bindMAxis(0, modifier);
+    bind5->bindJAxis(0, 0, modifier);
+    WHEN("all binds are cleared")
+    {
+      nebula::bind::clearBinds();
+      THEN("none of the binds should be found")
+      {
+        REQUIRE(nebula::bind::findKey(0, modifier) == nullptr);
+        REQUIRE(nebula::bind::findBind("Category", "Keyboard Test") == nullptr);
+        REQUIRE(nebula::bind::findMButton(0, modifier) == nullptr);
+        REQUIRE(
+            nebula::bind::findBind("Category", "Mouse Button Test") == nullptr);
+        REQUIRE(nebula::bind::findJButton(0, 0, modifier) == nullptr);
+        REQUIRE(nebula::bind::findBind("Category", "Joystick Button Test")
+                == nullptr);
+        REQUIRE(nebula::bind::findMAxis(0, modifier) == nullptr);
+        REQUIRE(
+            nebula::bind::findBind("Category", "Mouse Axis Test") == nullptr);
+        REQUIRE(nebula::bind::findJAxis(0, 0, modifier) == nullptr);
+        REQUIRE(nebula::bind::findBind("Category", "Joystick Axis Test")
+                == nullptr);
+      }
+    }
+  }
+
+  GIVEN("multiple bind objects mapped to input events")
+  {
+    nebula::bind::modifier modifier;
+    auto bind1 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Keyboard Test");
+    auto bind2 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Mouse Button Test");
+    auto bind3 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Joystick Button Test");
+    auto bind4 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Mouse Axis Test");
+    auto bind5 = nebula::bind::create(
+        nullptr, nullptr, nullptr, "Category", "Joystick Axis Test");
+    bind1->bindKey(0, modifier);
+    bind2->bindMButton(0, modifier);
+    bind3->bindJButton(0, 0, modifier);
+    bind4->bindMAxis(0, modifier);
+    bind5->bindJAxis(0, 0, modifier);
+    WHEN("each event is mapped to new bind objects")
+    {
+      auto bind6 = nebula::bind::create(
+          nullptr, nullptr, nullptr, "Category", "Keyboard Test 2");
+      auto bind7 = nebula::bind::create(
+          nullptr, nullptr, nullptr, "Category", "Mouse Button Test 2");
+      auto bind8 = nebula::bind::create(
+          nullptr, nullptr, nullptr, "Category", "Joystick Button Test 2");
+      auto bind9 = nebula::bind::create(
+          nullptr, nullptr, nullptr, "Category", "Mouse Axis Test 2");
+      auto bind10 = nebula::bind::create(
+          nullptr, nullptr, nullptr, "Category", "Joystick Axis Test 2");
+      bind6->bindKey(0, modifier);
+      bind7->bindMButton(0, modifier);
+      bind8->bindJButton(0, 0, modifier);
+      bind9->bindMAxis(0, modifier);
+      bind10->bindJAxis(0, 0, modifier);
+      THEN("the new binds should be found instead")
+      {
+        REQUIRE(nebula::bind::findKey(0, modifier) == bind6);
+        REQUIRE(nebula::bind::findMButton(0, modifier) == bind7);
+        REQUIRE(nebula::bind::findJButton(0, 0, modifier) == bind8);
+        REQUIRE(nebula::bind::findMAxis(0, modifier) == bind9);
+        REQUIRE(nebula::bind::findJAxis(0, 0, modifier) == bind10);
+      }
+    }
+  }
 }
 #endif
 

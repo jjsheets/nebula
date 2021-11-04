@@ -15,6 +15,30 @@
 // Logging system includes
 #include "loguru.hpp"
 
+#ifndef DOCTEST_CONFIG_DISABLE
+  #include <doctest.h>
+  #include <doctest/trompeloeil.hpp>
+  #include "../test/vulkan-mock.h"
+
+SCENARIO("class graphics" * doctest::may_fail())
+{
+  GIVEN("a graphics object")
+  {
+    // Set up the expectations for this test in a mock object
+    vulkan_mock vkMock;
+    vkMock.mockGraphics();
+
+    nebula::graphics gfx(
+        1600, 900, [](GLFWwindow *, int, int, int, int) {}, true);
+    THEN("it should not throw when a frame is drawn")
+    {
+      REQUIRE_NOTHROW(gfx.drawFrame());
+    }
+  }
+}
+
+#endif
+
 namespace nebula {
 
 graphics::graphics(uint32_t width,
@@ -114,6 +138,14 @@ void graphics::initGLFW(GLFWkeyfun keyCallback)
   glfwSetWindowUserPointer(_window, this);
   glfwSetFramebufferSizeCallback(_window, framebufferResizeCallback);
   glfwSetKeyCallback(_window, keyCallback);
+}
+
+void graphics::setClose(bool close)
+{
+  if (close)
+    glfwSetWindowShouldClose(_window, GLFW_TRUE);
+  else
+    glfwSetWindowShouldClose(_window, GLFW_FALSE);
 }
 
 void graphics::framebufferResizeCallback(
@@ -687,7 +719,8 @@ void graphics::logPhysicalDevice()
               << VK_VERSION_MINOR(props.driverVersion) << "."
               << VK_VERSION_PATCH(props.driverVersion);
   LOG_S(INFO) << "vID:dID " << std::hex << std::setw(4) << std::setfill('0')
-              << std::uppercase << (props.vendorID & 0xFFFF) << ":"
+              << std::uppercase << (props.vendorID & 0xFFFF) << ":" << std::hex
+              << std::setw(4) << std::setfill('0') << std::uppercase
               << (props.deviceID & 0xFFFF);
   VkPhysicalDeviceMemoryProperties mem;
   vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &mem);

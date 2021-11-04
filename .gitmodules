@@ -25,3 +25,6 @@
 [submodule "external/glfw"]
 	path = external/glfw
 	url = https://github.com/glfw/glfw
+[submodule "external/trompeloeil"]
+	path = external/trompeloeil
+	url = https://github.com/rollbear/trompeloeil

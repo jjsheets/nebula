@@ -1,0 +1,9 @@
+module:
+  id: alpha
+  tags: core
+  core: true
+  dependencies:
+  - beta
+  include:
+  - components.yml
+  - systems.yml
