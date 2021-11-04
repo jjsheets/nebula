@@ -41,7 +41,7 @@ LDFLAGS += -target x86_64-w64-mingw32
 LDFLAGS += -stdlib=libstdc++
 LDFLAGS += -fuse-ld=lld
 LDFLAGS += -v
-LDFLAGS += -lc++ -lc++abi -lole32
+LDFLAGS += -lc++ -lc++abi -lole32 -lpthread
 LDFLAGS += `llvm-config --system-libs --libs core support`
 GLSLC = ../external/glslc/install/bin/glslc.exe
 else
