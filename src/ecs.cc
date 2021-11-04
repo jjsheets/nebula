@@ -17,7 +17,7 @@ SCENARIO("class ecs")
 {
   GIVEN("an ecs object")
   {
-    REQUIRE_NOTHROW(nebula::ecs state());
+    REQUIRE_NOTHROW(nebula::ecs state);
   }
 }
 #endif
@@ -36,7 +36,7 @@ ecs::ecs() : _db(nullptr)
   }
   sqlite3_stmt *insertEntityTable;
   if (sqlite3_prepare_v2(_db,
-          "INSERT TABLE entity (entity INTEGER PRIMARY KEY, id TEXT UNIQUE);",
+          "CREATE TABLE entity (entity INTEGER PRIMARY KEY, id TEXT UNIQUE);",
           -1,
           &insertEntityTable,
           nullptr)
@@ -46,11 +46,12 @@ ecs::ecs() : _db(nullptr)
     LOG_S(ERROR) << e.what();
     throw e;
   }
-  if (sqlite3_step(insertEntityTable) != SQLITE_OK) {
+  if (sqlite3_step(insertEntityTable) != SQLITE_DONE) {
     sqliteException e(_db);
     LOG_S(ERROR) << e.what();
     throw e;
   }
+  LOG_S(INFO) << "SQL: Entity table created";
   if (sqlite3_finalize(insertEntityTable) != SQLITE_OK) {
     sqliteException e(_db);
     LOG_S(ERROR) << e.what();
