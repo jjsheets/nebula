@@ -20,9 +20,34 @@ public:
     VkDevice _device;
     VkPipelineLayout _pipelineLayout;
     VkPipeline _graphicsPipeline;
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo;
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo;
+    VkPipelineVertexInputStateCreateInfo vertexInputInfo;
+    VkPipelineInputAssemblyStateCreateInfo inputAssembly;
+    VkViewport viewport;
+    VkRect2D scissor;
+    VkPipelineViewportStateCreateInfo viewportState;
+    VkPipelineRasterizationStateCreateInfo rasterizer;
+    VkPipelineMultisampleStateCreateInfo multisampling;
+    VkPipelineColorBlendAttachmentState colorBlendAttachment;
+    VkPipelineColorBlendStateCreateInfo colorBlending;
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo;
+    VkGraphicsPipelineCreateInfo pipelineInfo;
 
     static std::vector<char> readFile(const std::string &filename);
     VkShaderModule createShaderModule(const std::vector<char> &code);
+    void setupVertShader(
+        VkShaderModule &vertShaderModule, const char *entryPoint);
+    void setupFragShader(
+        VkShaderModule &fragShaderModule, const char *entryPoint);
+    void setupVertexInputState();
+    void setupInputAssemblyState();
+    void setupViewport(VkExtent2D &swapChainExtent);
+    void setupViewportState();
+    void setupRasterState();
+    void setupMultisampling();
+    void setupColorBlend();
+    void setupPipelineLayout(VkRenderPass renderPass);
 
   public:
     pipeline(VkDevice device,
@@ -101,6 +126,14 @@ private:
   void createCommandPool();
   void createCommandBuffers();
   void createSyncObjects();
+  void destroySynchronization();
+  void destroyLogicalDevice();
+  void destroyVulkanInstance();
+  void destroyGLFW();
+  void waitForFrame(size_t f);
+  void waitForImage(size_t f);
+  void submitQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[]);
+  void presentQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[]);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -117,6 +150,8 @@ private:
     queueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface);
     bool isComplete();
   };
+  void populateQueueCreateInfos(queueFamilyIndices &queueFamilies,
+      std::vector<VkDeviceQueueCreateInfo> &queueCreateInfos);
 
   struct swapChainSupportDetails {
     VkSurfaceCapabilitiesKHR _capabilities;
@@ -125,6 +160,7 @@ private:
 
     swapChainSupportDetails(VkPhysicalDevice device, VkSurfaceKHR surface);
     bool isSuitable();
+    uint32_t swapChainImageCount();
   };
 
 public:

@@ -1,0 +1,7 @@
+module:
+  id: beta
+  tags: core
+  core: true
+  include:
+  - components.yml
+  - systems.yml

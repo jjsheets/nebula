@@ -78,6 +78,16 @@ graphics::graphics(uint32_t width,
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  destroySynchronization();
+  cleanupSwapChain();
+  destroyLogicalDevice();
+  destroyVulkanInstance();
+  destroyGLFW();
+}
+
+void graphics::destroySynchronization()
+{
+  LOG_SCOPE_FUNCTION(INFO);
   if (_logicalDevice) {
     vkDeviceWaitIdle(_logicalDevice);
   }
@@ -86,13 +96,22 @@ graphics::~graphics()
     vkDestroySemaphore(_logicalDevice, _imageAvailable[i], nullptr);
     vkDestroyFence(_logicalDevice, _inFlightFence[i], nullptr);
   }
-  cleanupSwapChain();
+}
+
+void graphics::destroyLogicalDevice()
+{
+  LOG_SCOPE_FUNCTION(INFO);
   if (_commandPool) {
     vkDestroyCommandPool(_logicalDevice, _commandPool, nullptr);
   }
   if (_logicalDevice) {
     vkDestroyDevice(_logicalDevice, nullptr);
   }
+}
+
+void graphics::destroyVulkanInstance()
+{
+  LOG_SCOPE_FUNCTION(INFO);
   if (_useValidationLayers) {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
         _instance, "vkDestroyDebugUtilsMessengerEXT");
@@ -107,6 +126,11 @@ graphics::~graphics()
     vkDestroyInstance(_instance, nullptr);
     LOG_S(INFO) << "Vulkan: instance destroyed";
   }
+}
+
+void graphics::destroyGLFW()
+{
+  LOG_SCOPE_FUNCTION(INFO);
   if (_window) {
     glfwDestroyWindow(_window);
     LOG_S(INFO) << "GLFW: Game window destroyed";
@@ -142,10 +166,7 @@ void graphics::initGLFW(GLFWkeyfun keyCallback)
 
 void graphics::setClose(bool close)
 {
-  if (close)
-    glfwSetWindowShouldClose(_window, GLFW_TRUE);
-  else
-    glfwSetWindowShouldClose(_window, GLFW_FALSE);
+  glfwSetWindowShouldClose(_window, close);
 }
 
 void graphics::framebufferResizeCallback(
@@ -379,11 +400,9 @@ bool graphics::queueFamilyIndices::isComplete()
   return _graphicsFamily.has_value() && _presentFamily.has_value();
 }
 
-void graphics::createLogicalDevice()
+void graphics::populateQueueCreateInfos(queueFamilyIndices &queueFamilies,
+    std::vector<VkDeviceQueueCreateInfo> &queueCreateInfos)
 {
-  LOG_SCOPE_FUNCTION(INFO);
-  queueFamilyIndices queueFamilies(_physicalDevice, _surface);
-  std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
   std::set<uint32_t> uniqueQueueFamilies
       = {queueFamilies._graphicsFamily.value(),
           queueFamilies._presentFamily.value()};
@@ -396,6 +415,14 @@ void graphics::createLogicalDevice()
     queueCreateInfo.pQueuePriorities = &queuePriority;
     queueCreateInfos.push_back(queueCreateInfo);
   }
+}
+
+void graphics::createLogicalDevice()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  queueFamilyIndices queueFamilies(_physicalDevice, _surface);
+  std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+  populateQueueCreateInfos(queueFamilies, queueCreateInfos);
   VkPhysicalDeviceFeatures deviceFeatures {};
   VkDeviceCreateInfo createInfo {};
   createInfo.sType             = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -529,6 +556,16 @@ VkExtent2D graphics::chooseSwapExtent(
   }
 }
 
+uint32_t graphics::swapChainSupportDetails::swapChainImageCount()
+{
+  uint32_t imageCount = _capabilities.minImageCount + 1;
+  if (_capabilities.maxImageCount > 0
+      && imageCount > _capabilities.maxImageCount) {
+    imageCount = _capabilities.maxImageCount;
+  }
+  return imageCount;
+}
+
 void graphics::createSwapChain()
 {
   LOG_SCOPE_FUNCTION(INFO);
@@ -538,12 +575,7 @@ void graphics::createSwapChain()
   VkPresentModeKHR presentMode
       = chooseSwapPresentMode(swapChainSupport._presentModes);
   VkExtent2D extent   = chooseSwapExtent(swapChainSupport._capabilities);
-  uint32_t imageCount = swapChainSupport._capabilities.minImageCount + 1;
-  if (swapChainSupport._capabilities.maxImageCount > 0
-      && imageCount > swapChainSupport._capabilities.maxImageCount)
-  {
-    imageCount = swapChainSupport._capabilities.maxImageCount;
-  }
+  uint32_t imageCount = swapChainSupport.swapChainImageCount();
   VkSwapchainCreateInfoKHR createInfo {};
   createInfo.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
   createInfo.surface          = _surface;
@@ -556,7 +588,6 @@ void graphics::createSwapChain()
   queueFamilyIndices indices(_physicalDevice, _surface);
   uint32_t queueFamilyIndices[]
       = {indices._graphicsFamily.value(), indices._presentFamily.value()};
-
   if (indices._graphicsFamily != indices._presentFamily) {
     createInfo.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;
     createInfo.queueFamilyIndexCount = 2;
@@ -748,109 +779,20 @@ graphics::pipeline::pipeline(VkDevice device,
   VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
   VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-  VkPipelineShaderStageCreateInfo vertShaderStageInfo {};
-  vertShaderStageInfo.sType
-      = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-  vertShaderStageInfo.module = vertShaderModule;
-  vertShaderStageInfo.pName  = "main";
-
-  VkPipelineShaderStageCreateInfo fragShaderStageInfo {};
-  fragShaderStageInfo.sType
-      = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-  fragShaderStageInfo.module = fragShaderModule;
-  fragShaderStageInfo.pName  = "main";
-
+  setupVertShader(vertShaderModule, "main");
+  setupFragShader(fragShaderModule, "main");
   VkPipelineShaderStageCreateInfo shaderStages[]
       = {vertShaderStageInfo, fragShaderStageInfo};
-
-  VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
-  vertexInputInfo.sType
-      = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputInfo.vertexBindingDescriptionCount   = 0;
-  vertexInputInfo.vertexAttributeDescriptionCount = 0;
-
-  VkPipelineInputAssemblyStateCreateInfo inputAssembly {};
-  inputAssembly.sType
-      = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-  inputAssembly.topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-  inputAssembly.primitiveRestartEnable = VK_FALSE;
-
-  VkViewport viewport {};
-  viewport.x        = 0.0f;
-  viewport.y        = 0.0f;
-  viewport.width    = (float)swapChainExtent.width;
-  viewport.height   = (float)swapChainExtent.height;
-  viewport.minDepth = 0.0f;
-  viewport.maxDepth = 1.0f;
-
-  VkRect2D scissor {};
-  scissor.offset = {0, 0};
-  scissor.extent = swapChainExtent;
-
-  VkPipelineViewportStateCreateInfo viewportState {};
-  viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-  viewportState.viewportCount = 1;
-  viewportState.pViewports    = &viewport;
-  viewportState.scissorCount  = 1;
-  viewportState.pScissors     = &scissor;
-
-  VkPipelineRasterizationStateCreateInfo rasterizer {};
-  rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-  rasterizer.depthClampEnable        = VK_FALSE;
-  rasterizer.rasterizerDiscardEnable = VK_FALSE;
-  rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
-  rasterizer.lineWidth               = 1.0f;
-  rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
-  rasterizer.frontFace               = VK_FRONT_FACE_CLOCKWISE;
-  rasterizer.depthBiasEnable         = VK_FALSE;
-
-  VkPipelineMultisampleStateCreateInfo multisampling {};
-  multisampling.sType
-      = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-  multisampling.sampleShadingEnable  = VK_FALSE;
-  multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-  VkPipelineColorBlendAttachmentState colorBlendAttachment {};
-  colorBlendAttachment.colorWriteMask
-      = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
-      | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-  colorBlendAttachment.blendEnable = VK_FALSE;
-
-  VkPipelineColorBlendStateCreateInfo colorBlending {};
-  colorBlending.sType
-      = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-  colorBlending.logicOpEnable   = VK_FALSE;
-  colorBlending.logicOp         = VK_LOGIC_OP_COPY;
-  colorBlending.attachmentCount = 1;
-  colorBlending.pAttachments    = &colorBlendAttachment;
-
-  VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
-  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-
-  if (vkCreatePipelineLayout(
-          _device, &pipelineLayoutInfo, nullptr, &_pipelineLayout)
-      != VK_SUCCESS)
-  {
-    LOG_S(ERROR) << "Vulkan: failed to create pipeline layout";
-    throw std::runtime_error("Vulkan: failed to create pipeline layout");
-  }
-
-  VkGraphicsPipelineCreateInfo pipelineInfo {};
-  pipelineInfo.sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+  setupVertexInputState();
+  setupInputAssemblyState();
+  setupViewport(swapChainExtent);
+  setupViewportState();
+  setupRasterState();
+  setupMultisampling();
+  setupColorBlend();
+  setupPipelineLayout(renderPass);
   pipelineInfo.stageCount = 2;
   pipelineInfo.pStages    = shaderStages;
-  pipelineInfo.pVertexInputState   = &vertexInputInfo;
-  pipelineInfo.pInputAssemblyState = &inputAssembly;
-  pipelineInfo.pViewportState      = &viewportState;
-  pipelineInfo.pRasterizationState = &rasterizer;
-  pipelineInfo.pMultisampleState   = &multisampling;
-  pipelineInfo.pColorBlendState    = &colorBlending;
-  pipelineInfo.layout              = _pipelineLayout;
-  pipelineInfo.renderPass          = renderPass;
-  pipelineInfo.subpass             = 0;
-
   if (vkCreateGraphicsPipelines(_device,
           VK_NULL_HANDLE,
           1,
@@ -862,13 +804,139 @@ graphics::pipeline::pipeline(VkDevice device,
     LOG_S(ERROR) << "Vulkan: failed to create graphics pipeline";
     throw std::runtime_error("Vulkan: failed to create graphics pipeline");
   }
-
   vkDestroyShaderModule(_device, fragShaderModule, nullptr);
   vkDestroyShaderModule(_device, vertShaderModule, nullptr);
 }
 
+void graphics::pipeline::setupVertShader(
+    VkShaderModule &vertShaderModule, const char *entryPoint)
+{
+  vertShaderStageInfo = {};
+  vertShaderStageInfo.sType
+      = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
+  vertShaderStageInfo.module = vertShaderModule;
+  vertShaderStageInfo.pName  = entryPoint;
+}
+
+void graphics::pipeline::setupFragShader(
+    VkShaderModule &fragShaderModule, const char *entryPoint)
+{
+  fragShaderStageInfo = {};
+  fragShaderStageInfo.sType
+      = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
+  fragShaderStageInfo.module = fragShaderModule;
+  fragShaderStageInfo.pName  = entryPoint;
+}
+
+void graphics::pipeline::setupVertexInputState()
+{
+  vertexInputInfo = {};
+  vertexInputInfo.sType
+      = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+  vertexInputInfo.vertexBindingDescriptionCount   = 0;
+  vertexInputInfo.vertexAttributeDescriptionCount = 0;
+}
+
+void graphics::pipeline::setupInputAssemblyState()
+{
+  inputAssembly = {};
+  inputAssembly.sType
+      = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+  inputAssembly.topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+  inputAssembly.primitiveRestartEnable = VK_FALSE;
+}
+
+void graphics::pipeline::setupViewport(VkExtent2D &swapChainExtent)
+{
+  viewport          = {};
+  viewport.x        = 0.0f;
+  viewport.y        = 0.0f;
+  viewport.width    = (float)swapChainExtent.width;
+  viewport.height   = (float)swapChainExtent.height;
+  viewport.minDepth = 0.0f;
+  viewport.maxDepth = 1.0f;
+  scissor           = {};
+  scissor.offset    = {0, 0};
+  scissor.extent    = swapChainExtent;
+}
+
+void graphics::pipeline::setupViewportState()
+{
+  viewportState       = {};
+  viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+  viewportState.viewportCount = 1;
+  viewportState.pViewports    = &viewport;
+  viewportState.scissorCount  = 1;
+  viewportState.pScissors     = &scissor;
+}
+
+void graphics::pipeline::setupRasterState()
+{
+  rasterizer       = {};
+  rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+  rasterizer.depthClampEnable        = VK_FALSE;
+  rasterizer.rasterizerDiscardEnable = VK_FALSE;
+  rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
+  rasterizer.lineWidth               = 1.0f;
+  rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
+  rasterizer.frontFace               = VK_FRONT_FACE_CLOCKWISE;
+  rasterizer.depthBiasEnable         = VK_FALSE;
+}
+
+void graphics::pipeline::setupMultisampling()
+{
+  multisampling = {};
+  multisampling.sType
+      = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+  multisampling.sampleShadingEnable  = VK_FALSE;
+  multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+}
+
+void graphics::pipeline::setupColorBlend()
+{
+  colorBlendAttachment = {};
+  colorBlendAttachment.colorWriteMask
+      = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
+      | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+  colorBlendAttachment.blendEnable = VK_FALSE;
+  colorBlending                    = {};
+  colorBlending.sType
+      = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+  colorBlending.logicOpEnable   = VK_FALSE;
+  colorBlending.logicOp         = VK_LOGIC_OP_COPY;
+  colorBlending.attachmentCount = 1;
+  colorBlending.pAttachments    = &colorBlendAttachment;
+}
+
+void graphics::pipeline::setupPipelineLayout(VkRenderPass renderPass)
+{
+  pipelineLayoutInfo       = {};
+  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  if (vkCreatePipelineLayout(
+          _device, &pipelineLayoutInfo, nullptr, &_pipelineLayout)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create pipeline layout";
+    throw std::runtime_error("Vulkan: failed to create pipeline layout");
+  }
+  pipelineInfo       = {};
+  pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+  pipelineInfo.pVertexInputState   = &vertexInputInfo;
+  pipelineInfo.pInputAssemblyState = &inputAssembly;
+  pipelineInfo.pViewportState      = &viewportState;
+  pipelineInfo.pRasterizationState = &rasterizer;
+  pipelineInfo.pMultisampleState   = &multisampling;
+  pipelineInfo.pColorBlendState    = &colorBlending;
+  pipelineInfo.layout              = _pipelineLayout;
+  pipelineInfo.renderPass          = renderPass;
+  pipelineInfo.subpass             = 0;
+}
+
 graphics::pipeline::~pipeline()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   if (_graphicsPipeline) {
     vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
   }
@@ -944,7 +1012,6 @@ void graphics::createRenderPass()
   renderPassInfo.pSubpasses      = &subpass;
   renderPassInfo.dependencyCount = 1;
   renderPassInfo.pDependencies   = &dependency;
-
   if (vkCreateRenderPass(_logicalDevice, &renderPassInfo, nullptr, &_renderPass)
       != VK_SUCCESS)
   {
@@ -967,7 +1034,6 @@ void graphics::createFramebuffers()
     framebufferInfo.width           = _swapChainExtent.width;
     framebufferInfo.height          = _swapChainExtent.height;
     framebufferInfo.layers          = 1;
-
     if (vkCreateFramebuffer(_logicalDevice,
             &framebufferInfo,
             nullptr,
@@ -1071,14 +1137,77 @@ void graphics::createSyncObjects()
   }
 }
 
+void graphics::waitForFrame(size_t f)
+{
+  vkWaitForFences(_logicalDevice,
+      1,
+      &_inFlightFence[f],
+      VK_TRUE,
+      std::numeric_limits<uint64_t>::max());
+}
+
+void graphics::waitForImage(size_t f)
+{
+  vkWaitForFences(_logicalDevice,
+      1,
+      &_inFlightImage[f],
+      VK_TRUE,
+      std::numeric_limits<uint64_t>::max());
+}
+
+void graphics::submitQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[])
+{
+  LOG_SCOPE_FUNCTION(9);
+  VkSubmitInfo submitInfo {};
+  submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+  VkSemaphore waitSemaphores[] = {_imageAvailable[_currentFrame]};
+  VkPipelineStageFlags waitStages[]
+      = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+  submitInfo.waitSemaphoreCount   = 1;
+  submitInfo.pWaitSemaphores      = waitSemaphores;
+  submitInfo.pWaitDstStageMask    = waitStages;
+  submitInfo.commandBufferCount   = 1;
+  submitInfo.pCommandBuffers      = &_commandBuffers[imageIndex];
+  submitInfo.signalSemaphoreCount = 1;
+  submitInfo.pSignalSemaphores    = signalSemaphores;
+  vkResetFences(_logicalDevice, 1, &_inFlightFence[_currentFrame]);
+  if (vkQueueSubmit(
+          _graphicsQueue, 1, &submitInfo, _inFlightFence[_currentFrame])
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to submit draw command buffer";
+    throw std::runtime_error("Vulkan: failed to submit draw command buffer");
+  }
+}
+
+void graphics::presentQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[])
+{
+  LOG_SCOPE_FUNCTION(9);
+  VkPresentInfoKHR presentInfo {};
+  presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  presentInfo.waitSemaphoreCount = 1;
+  presentInfo.pWaitSemaphores    = signalSemaphores;
+  VkSwapchainKHR swapChains[]    = {_swapChain};
+  presentInfo.swapchainCount     = 1;
+  presentInfo.pSwapchains        = swapChains;
+  presentInfo.pImageIndices      = &imageIndex;
+  VkResult result = vkQueuePresentKHR(_presentQueue, &presentInfo);
+  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR
+      || _framebufferResized)
+  {
+    _framebufferResized = false;
+    recreateSwapChain();
+  } else if (result != VK_SUCCESS) {
+    LOG_S(ERROR) << "Vulkan: failed to present swap chain image";
+    throw std::runtime_error("Vulkan: failed to present swap chain image");
+  }
+}
+
 void graphics::drawFrame()
 {
   LOG_SCOPE_FUNCTION(9);
-  vkWaitForFences(_logicalDevice,
-      1,
-      &_inFlightFence[_currentFrame],
-      VK_TRUE,
-      std::numeric_limits<uint64_t>::max());
+  waitForFrame(_currentFrame);
   uint32_t imageIndex;
   VkResult result = vkAcquireNextImageKHR(_logicalDevice,
       _swapChain,
@@ -1094,53 +1223,12 @@ void graphics::drawFrame()
     throw std::runtime_error("Vulkan: failed to acquire swap chain image");
   }
   if (_inFlightImage[imageIndex] != VK_NULL_HANDLE) {
-    vkWaitForFences(_logicalDevice,
-        1,
-        &_inFlightImage[imageIndex],
-        VK_TRUE,
-        std::numeric_limits<uint64_t>::max());
+    waitForImage(imageIndex);
   }
-  _inFlightImage[imageIndex] = _inFlightFence[_currentFrame];
-  VkSubmitInfo submitInfo {};
-  submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-  VkSemaphore waitSemaphores[] = {_imageAvailable[_currentFrame]};
-  VkPipelineStageFlags waitStages[]
-      = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-  submitInfo.waitSemaphoreCount   = 1;
-  submitInfo.pWaitSemaphores      = waitSemaphores;
-  submitInfo.pWaitDstStageMask    = waitStages;
-  submitInfo.commandBufferCount   = 1;
-  submitInfo.pCommandBuffers      = &_commandBuffers[imageIndex];
-  VkSemaphore signalSemaphores[]  = {_renderFinished[_currentFrame]};
-  submitInfo.signalSemaphoreCount = 1;
-  submitInfo.pSignalSemaphores    = signalSemaphores;
-  vkResetFences(_logicalDevice, 1, &_inFlightFence[_currentFrame]);
-  if (vkQueueSubmit(
-          _graphicsQueue, 1, &submitInfo, _inFlightFence[_currentFrame])
-      != VK_SUCCESS)
-  {
-    LOG_S(ERROR) << "Vulkan: failed to submit draw command buffer";
-    throw std::runtime_error("Vulkan: failed to submit draw command buffer");
-  }
-  VkPresentInfoKHR presentInfo {};
-  presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-  presentInfo.waitSemaphoreCount = 1;
-  presentInfo.pWaitSemaphores    = signalSemaphores;
-  VkSwapchainKHR swapChains[]    = {_swapChain};
-  presentInfo.swapchainCount     = 1;
-  presentInfo.pSwapchains        = swapChains;
-  presentInfo.pImageIndices      = &imageIndex;
-  result = vkQueuePresentKHR(_presentQueue, &presentInfo);
-  if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR
-      || _framebufferResized)
-  {
-    _framebufferResized = false;
-    recreateSwapChain();
-  } else if (result != VK_SUCCESS) {
-    LOG_S(ERROR) << "Vulkan: failed to present swap chain image";
-    throw std::runtime_error("Vulkan: failed to present swap chain image");
-  }
+  _inFlightImage[imageIndex]     = _inFlightFence[_currentFrame];
+  VkSemaphore signalSemaphores[] = {_renderFinished[_currentFrame]};
+  submitQueue(imageIndex, signalSemaphores);
+  presentQueue(imageIndex, signalSemaphores);
   _currentFrame = (_currentFrame + 1) % _maxFramesInFlight;
 }
 
