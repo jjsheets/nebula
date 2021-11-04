@@ -3,6 +3,7 @@
 
 #include "bind.h"
 
+#include "loguru.hpp"
 // Unit Testing includes
 #include "doctest.h"
 
@@ -622,8 +623,10 @@ bool bind::press()
 {
   if (_pressHandler) {
     _pressHandler();
+    LOG_S(INFO) << "_pressHandler() executed";
     return true;
   } else {
+    LOG_S(INFO) << "_pressHandler() not executed";
     return false;
   }
 }
@@ -632,8 +635,10 @@ bool bind::release()
 {
   if (_releaseHandler) {
     _releaseHandler();
+    LOG_S(INFO) << "_releaseHandler() executed";
     return true;
   } else {
+    LOG_S(INFO) << "_releaseHandler() not executed";
     return false;
   }
 }
@@ -642,8 +647,10 @@ bool bind::delta(double delta)
 {
   if (_deltaHandler) {
     _deltaHandler(delta);
+    LOG_S(INFO) << "_deltaHandler() executed";
     return true;
   } else {
+    LOG_S(INFO) << "_deltaHandler() not executed";
     return false;
   }
 }
@@ -652,6 +659,7 @@ void bind::keyboardEvent(int key, action event, modifier mods)
 {
   const auto keyBind = findKey(key, mods);
   if (keyBind) {
+    LOG_S(INFO) << "Found: " << keyBind->_category << ": " << keyBind->_name;
     if (event == action::press)
       keyBind->press();
     else
@@ -663,6 +671,7 @@ void bind::mouseButtonEvent(int mBtn, action event, modifier mods)
 {
   const auto mBtnBind = findMButton(mBtn, mods);
   if (mBtnBind) {
+    LOG_S(INFO) << "Found: " << mBtnBind->_category << ": " << mBtnBind->_name;
     if (event == action::press)
       mBtnBind->press();
     else
@@ -674,6 +683,8 @@ void bind::mouseAxisEvent(int mAxis, double delta, modifier mods)
 {
   const auto mAxisBind = findMAxis(mAxis, mods);
   if (mAxisBind) {
+    LOG_S(INFO) << "Found: " << mAxisBind->_category << ": "
+                << mAxisBind->_name;
     mAxisBind->delta(delta);
   }
 }
@@ -682,6 +693,7 @@ void bind::joystickButtonEvent(int jid, int jBtn, action event, modifier mods)
 {
   const auto jBtnBind = findJButton(jid, jBtn, mods);
   if (jBtnBind) {
+    LOG_S(INFO) << "Found: " << jBtnBind->_category << ": " << jBtnBind->_name;
     if (event == action::press)
       jBtnBind->press();
     else
@@ -693,6 +705,8 @@ void bind::joystickAxisEvent(int jid, int jAxis, double delta, modifier mods)
 {
   const auto jAxisBind = findJAxis(jid, jAxis, mods);
   if (jAxisBind) {
+    LOG_S(INFO) << "Found: " << jAxisBind->_category << ": "
+                << jAxisBind->_name;
     jAxisBind->delta(delta);
   }
 }

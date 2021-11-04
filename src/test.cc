@@ -17,7 +17,12 @@ int main(int argc, char **argv)
   std::cerr << std::flush;
   doctest::Context context;
   context.applyCommandLine(argc, argv);
-  int res = context.run(); // run
+  int res = context.run();
+  loguru::shutdown();
+  std::ifstream log("test/test.log");
+  for (std::string line; std::getline(log, line);) {
+    std::cout << line << std::endl;
+  }
   if (context.shouldExit())
     return res;
   // If any other code needs to be performed after doctests have completed,
