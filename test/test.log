@@ -1,0 +1,320 @@
+arguments: test/test
+Current dir: /home/jeff/Projects/nebula
+File verbosity level: 9
+date       time         ( uptime  ) [ thread name/id ]                   file:line     v| 
+2021-11-04 11:49:07.727 (   0.000s) [main thread     ]             loguru.cpp:827   INFO| Logging to 'test/test.log', mode: 'w', verbosity: 9
+2021-11-04 11:49:07.727 (   0.000s) [main thread     ]                 ecs.cc:29    INFO| { ecs
+2021-11-04 11:49:07.727 (   0.001s) [main thread     ]                 ecs.cc:54    INFO| .   SQL: Entity table created
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]                 ecs.cc:29    INFO| } 0.000 s: ecs
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]                 ecs.cc:64    INFO| { ~ecs
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]                 ecs.cc:64    INFO| } 0.000 s: ~ecs
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]              engine.cc:94    INFO| { engine
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]              engine.cc:96    INFO| .   Lua 5.4.4
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]              engine.cc:104   INFO| .   Lua: scripting library loaded
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:55    INFO| .   { graphics
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:144   INFO| .   .   { initGLFW
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:145   INFO| .   .   .   GLFW GLFW Mocked
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:151   INFO| .   .   .   GLFW library loaded
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:160   INFO| .   .   .   GLFW: Game window created (1600x900)
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:144   INFO| .   .   } 0.000 s: initGLFW
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:181   INFO| .   .   { createVulkanInstance
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:219      1| .   .   .   { checkValidationLayerSupport
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:219      1| .   .   .   } 0.000 s: checkValidationLayerSupport
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:241      1| .   .   .   { getRequiredExtensions
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:241      1| .   .   .   } 0.000 s: getRequiredExtensions
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:283      1| .   .   .   { setDebugMessengerCreateInfo
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:283      1| .   .   .   } 0.000 s: setDebugMessengerCreateInfo
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:214   INFO| .   .   .   Vulkan: instance created
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:181   INFO| .   .   } 0.000 s: createVulkanInstance
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:300      1| .   .   { setValidationCallback
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:283      1| .   .   .   { setDebugMessengerCreateInfo
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:283      1| .   .   .   } 0.000 s: setDebugMessengerCreateInfo
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:300      1| .   .   } 0.000 s: setValidationCallback
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:460   INFO| .   .   { createSurface
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:460   INFO| .   .   } 0.000 s: createSurface
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:318   INFO| .   .   { pickPhysicalDevice
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:342      1| .   .   .   { deviceIsSuitable
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:374      1| .   .   .   .   { queueFamilyIndices
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:399      2| .   .   .   .   .   { isComplete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:399      2| .   .   .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:374      1| .   .   .   .   } 0.000 s: queueFamilyIndices
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:472      1| .   .   .   .   { swapChainSupportDetails
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]         vulkan-mock.cc:610      1| .   .   .   .   .   { fillSurfCaps
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]         vulkan-mock.cc:610      1| .   .   .   .   .   } 0.000 s: fillSurfCaps
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:472      1| .   .   .   .   } 0.000 s: swapChainSupportDetails
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:399      2| .   .   .   .   { isComplete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:399      2| .   .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:351      2| .   .   .   .   { checkDeviceExtensionSupport
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:351      2| .   .   .   .   } 0.000 s: checkDeviceExtensionSupport
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:493      2| .   .   .   .   { isSuitable
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:493      2| .   .   .   .   } 0.000 s: isSuitable
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:342      1| .   .   .   } 0.000 s: deviceIsSuitable
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:732      9| .   .   .   { logPhysicalDevice
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:735   INFO| .   .   .   .   Device: nebula test device
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:745   INFO| .   .   .   .   Device Type: Discrete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:746   INFO| .   .   .   .   API v1.2.155
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:749   INFO| .   .   .   .   Driver v1.0.0
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:752   INFO| .   .   .   .   vID:dID 0000:0000
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:758   INFO| .   .   .   .   Heap Sizes
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:727   INFO| .   .   .   .     Heap 0: 8192MB, device local
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:762   INFO| .   .   .   .   Heap Flags
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:714   INFO| .   .   .   .     Heap 0: flags 0007, device local, host visible, host coherent
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:732      9| .   .   .   } 0.000 s: logPhysicalDevice
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:318   INFO| .   .   } 0.000 s: pickPhysicalDevice
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:422   INFO| .   .   { createLogicalDevice
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:374      1| .   .   .   { queueFamilyIndices
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:399      2| .   .   .   .   { isComplete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:399      2| .   .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:374      1| .   .   .   } 0.000 s: queueFamilyIndices
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:449   INFO| .   .   .   Vulkan: logical device created
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:422   INFO| .   .   } 0.000 s: createLogicalDevice
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:571   INFO| .   .   { createSwapChain
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:472      1| .   .   .   { swapChainSupportDetails
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]         vulkan-mock.cc:610      1| .   .   .   .   { fillSurfCaps
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]         vulkan-mock.cc:610      1| .   .   .   .   } 0.000 s: fillSurfCaps
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:472      1| .   .   .   } 0.000 s: swapChainSupportDetails
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:500      1| .   .   .   { chooseSwapSurfaceFormat
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:505   INFO| .   .   .   .   Format: BGRA, 32-bit
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:506   INFO| .   .   .   .   Color Space: SRGB, Non-linear
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:500      1| .   .   .   } 0.000 s: chooseSwapSurfaceFormat
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:519      1| .   .   .   { chooseSwapPresentMode
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:526   INFO| .   .   .   .   Present Mode: FIFO
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:519      1| .   .   .   } 0.000 s: chooseSwapPresentMode
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:533      1| .   .   .   { chooseSwapExtent
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:536   INFO| .   .   .   .   Swap Chain Extent: 2560x1440
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:533      1| .   .   .   } 0.000 s: chooseSwapExtent
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:374      1| .   .   .   { queueFamilyIndices
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:399      2| .   .   .   .   { isComplete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:399      2| .   .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:374      1| .   .   .   } 0.000 s: queueFamilyIndices
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:571   INFO| .   .   } 0.000 s: createSwapChain
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:666   INFO| .   .   { createImageViews
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:666   INFO| .   .   } 0.000 s: createImageViews
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:985   INFO| .   .   { createRenderPass
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:985   INFO| .   .   } 0.000 s: createRenderPass
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:776   INFO| .   .   { pipeline
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:950   INFO| .   .   .   { readFile
+2021-11-04 11:49:07.728 (   0.001s) [main thread     ]            graphics.cc:956   INFO| .   .   .   .   opened shader file: shaders/shader.vert.spv
+2021-11-04 11:49:07.728 (   0.002s) [main thread     ]            graphics.cc:950   INFO| .   .   .   } 0.000 s: readFile
+2021-11-04 11:49:07.728 (   0.002s) [main thread     ]            graphics.cc:950   INFO| .   .   .   { readFile
+2021-11-04 11:49:07.728 (   0.002s) [main thread     ]            graphics.cc:956   INFO| .   .   .   .   opened shader file: shaders/shader.frag.spv
+2021-11-04 11:49:07.728 (   0.002s) [main thread     ]            graphics.cc:950   INFO| .   .   .   } 0.000 s: readFile
+2021-11-04 11:49:07.728 (   0.002s) [main thread     ]            graphics.cc:968   INFO| .   .   .   { createShaderModule
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:968   INFO| .   .   .   } 0.000 s: createShaderModule
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:968   INFO| .   .   .   { createShaderModule
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:968   INFO| .   .   .   } 0.000 s: createShaderModule
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:776   INFO| .   .   } 0.000 s: pipeline
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:1025  INFO| .   .   { createFramebuffers
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:1025  INFO| .   .   } 0.000 s: createFramebuffers
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:1051  INFO| .   .   { createCommandPool
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:374      1| .   .   .   { queueFamilyIndices
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:399      2| .   .   .   .   { isComplete
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:399      2| .   .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:374      1| .   .   .   } 0.000 s: queueFamilyIndices
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:1051  INFO| .   .   } 0.000 s: createCommandPool
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:1066  INFO| .   .   { createCommandBuffers
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:1066  INFO| .   .   } 0.000 s: createCommandBuffers
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:1112  INFO| .   .   { createSyncObjects
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:1112  INFO| .   .   } 0.000 s: createSyncObjects
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:55    INFO| .   } 0.001 s: graphics
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]              engine.cc:94    INFO| } 0.001 s: engine
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]              engine.cc:112   INFO| { ~engine
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:80    INFO| .   { ~graphics
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:90    INFO| .   .   { destroySynchronization
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:90    INFO| .   .   } 0.000 s: destroySynchronization
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:644      1| .   .   { cleanupSwapChain
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:939   INFO| .   .   .   { ~pipeline
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:939   INFO| .   .   .   } 0.000 s: ~pipeline
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:644      1| .   .   } 0.000 s: cleanupSwapChain
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:103   INFO| .   .   { destroyLogicalDevice
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:103   INFO| .   .   } 0.000 s: destroyLogicalDevice
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:114   INFO| .   .   { destroyVulkanInstance
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:127   INFO| .   .   .   Vulkan: instance destroyed
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:114   INFO| .   .   } 0.000 s: destroyVulkanInstance
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:133   INFO| .   .   { destroyGLFW
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:136   INFO| .   .   .   GLFW: Game window destroyed
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:139   INFO| .   .   .   GLFW: Terminated
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:133   INFO| .   .   } 0.000 s: destroyGLFW
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:80    INFO| .   } 0.000 s: ~graphics
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]              engine.cc:117   INFO| .   Lua: scripting library closed
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]              engine.cc:112   INFO| } 0.000 s: ~engine
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:55    INFO| { graphics
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:144   INFO| .   { initGLFW
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:145   INFO| .   .   GLFW GLFW Mocked
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:151   INFO| .   .   GLFW library loaded
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:160   INFO| .   .   GLFW: Game window created (1600x900)
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:144   INFO| .   } 0.000 s: initGLFW
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:181   INFO| .   { createVulkanInstance
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:219      1| .   .   { checkValidationLayerSupport
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:219      1| .   .   } 0.000 s: checkValidationLayerSupport
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:241      1| .   .   { getRequiredExtensions
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:241      1| .   .   } 0.000 s: getRequiredExtensions
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:283      1| .   .   { setDebugMessengerCreateInfo
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:283      1| .   .   } 0.000 s: setDebugMessengerCreateInfo
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:214   INFO| .   .   Vulkan: instance created
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:181   INFO| .   } 0.000 s: createVulkanInstance
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:300      1| .   { setValidationCallback
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:283      1| .   .   { setDebugMessengerCreateInfo
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:283      1| .   .   } 0.000 s: setDebugMessengerCreateInfo
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:300      1| .   } 0.000 s: setValidationCallback
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:460   INFO| .   { createSurface
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:460   INFO| .   } 0.000 s: createSurface
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:318   INFO| .   { pickPhysicalDevice
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:342      1| .   .   { deviceIsSuitable
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:374      1| .   .   .   { queueFamilyIndices
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:399      2| .   .   .   .   { isComplete
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:399      2| .   .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:374      1| .   .   .   } 0.000 s: queueFamilyIndices
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:472      1| .   .   .   { swapChainSupportDetails
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]         vulkan-mock.cc:610      1| .   .   .   .   { fillSurfCaps
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]         vulkan-mock.cc:610      1| .   .   .   .   } 0.000 s: fillSurfCaps
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:472      1| .   .   .   } 0.000 s: swapChainSupportDetails
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:399      2| .   .   .   { isComplete
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:399      2| .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:351      2| .   .   .   { checkDeviceExtensionSupport
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:351      2| .   .   .   } 0.000 s: checkDeviceExtensionSupport
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:493      2| .   .   .   { isSuitable
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:493      2| .   .   .   } 0.000 s: isSuitable
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:342      1| .   .   } 0.000 s: deviceIsSuitable
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:732      9| .   .   { logPhysicalDevice
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:735   INFO| .   .   .   Device: nebula test device
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:745   INFO| .   .   .   Device Type: Discrete
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:746   INFO| .   .   .   API v1.2.155
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:749   INFO| .   .   .   Driver v1.0.0
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:752   INFO| .   .   .   vID:dID 0000:0000
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:758   INFO| .   .   .   Heap Sizes
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:727   INFO| .   .   .     Heap 0: 8192MB, device local
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:762   INFO| .   .   .   Heap Flags
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:714   INFO| .   .   .     Heap 0: flags 0007, device local, host visible, host coherent
+2021-11-04 11:49:07.729 (   0.002s) [main thread     ]            graphics.cc:732      9| .   .   } 0.000 s: logPhysicalDevice
+2021-11-04 11:49:07.729 (   0.003s) [main thread     ]            graphics.cc:318   INFO| .   } 0.000 s: pickPhysicalDevice
+2021-11-04 11:49:07.729 (   0.003s) [main thread     ]            graphics.cc:422   INFO| .   { createLogicalDevice
+2021-11-04 11:49:07.729 (   0.003s) [main thread     ]            graphics.cc:374      1| .   .   { queueFamilyIndices
+2021-11-04 11:49:07.729 (   0.003s) [main thread     ]            graphics.cc:399      2| .   .   .   { isComplete
+2021-11-04 11:49:07.729 (   0.003s) [main thread     ]            graphics.cc:399      2| .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.729 (   0.003s) [main thread     ]            graphics.cc:374      1| .   .   } 0.000 s: queueFamilyIndices
+2021-11-04 11:49:07.729 (   0.003s) [main thread     ]            graphics.cc:449   INFO| .   .   Vulkan: logical device created
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:422   INFO| .   } 0.000 s: createLogicalDevice
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:571   INFO| .   { createSwapChain
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:472      1| .   .   { swapChainSupportDetails
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]         vulkan-mock.cc:610      1| .   .   .   { fillSurfCaps
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]         vulkan-mock.cc:610      1| .   .   .   } 0.000 s: fillSurfCaps
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:472      1| .   .   } 0.000 s: swapChainSupportDetails
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:500      1| .   .   { chooseSwapSurfaceFormat
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:505   INFO| .   .   .   Format: BGRA, 32-bit
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:506   INFO| .   .   .   Color Space: SRGB, Non-linear
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:500      1| .   .   } 0.000 s: chooseSwapSurfaceFormat
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:519      1| .   .   { chooseSwapPresentMode
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:526   INFO| .   .   .   Present Mode: FIFO
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:519      1| .   .   } 0.000 s: chooseSwapPresentMode
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:533      1| .   .   { chooseSwapExtent
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:536   INFO| .   .   .   Swap Chain Extent: 2560x1440
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:533      1| .   .   } 0.000 s: chooseSwapExtent
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:374      1| .   .   { queueFamilyIndices
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:399      2| .   .   .   { isComplete
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:399      2| .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:374      1| .   .   } 0.000 s: queueFamilyIndices
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:571   INFO| .   } 0.000 s: createSwapChain
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:666   INFO| .   { createImageViews
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:666   INFO| .   } 0.000 s: createImageViews
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:985   INFO| .   { createRenderPass
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:985   INFO| .   } 0.000 s: createRenderPass
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:776   INFO| .   { pipeline
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:950   INFO| .   .   { readFile
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:956   INFO| .   .   .   opened shader file: shaders/shader.vert.spv
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:950   INFO| .   .   } 0.000 s: readFile
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:950   INFO| .   .   { readFile
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:956   INFO| .   .   .   opened shader file: shaders/shader.frag.spv
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:950   INFO| .   .   } 0.000 s: readFile
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:968   INFO| .   .   { createShaderModule
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:968   INFO| .   .   } 0.000 s: createShaderModule
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:968   INFO| .   .   { createShaderModule
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:968   INFO| .   .   } 0.000 s: createShaderModule
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:776   INFO| .   } 0.000 s: pipeline
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1025  INFO| .   { createFramebuffers
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1025  INFO| .   } 0.000 s: createFramebuffers
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1051  INFO| .   { createCommandPool
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:374      1| .   .   { queueFamilyIndices
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:399      2| .   .   .   { isComplete
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:399      2| .   .   .   } 0.000 s: isComplete
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:374      1| .   .   } 0.000 s: queueFamilyIndices
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1051  INFO| .   } 0.000 s: createCommandPool
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1066  INFO| .   { createCommandBuffers
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1066  INFO| .   } 0.000 s: createCommandBuffers
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1112  INFO| .   { createSyncObjects
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1112  INFO| .   } 0.000 s: createSyncObjects
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:55    INFO| } 0.001 s: graphics
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1209     9| { drawFrame
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1160     9| .   { submitQueue
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1160     9| .   } 0.000 s: submitQueue
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1186     9| .   { presentQueue
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1186     9| .   } 0.000 s: presentQueue
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:1209     9| } 0.000 s: drawFrame
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:80    INFO| { ~graphics
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:90    INFO| .   { destroySynchronization
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:90    INFO| .   } 0.000 s: destroySynchronization
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:644      1| .   { cleanupSwapChain
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:939   INFO| .   .   { ~pipeline
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:939   INFO| .   .   } 0.000 s: ~pipeline
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:644      1| .   } 0.000 s: cleanupSwapChain
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:103   INFO| .   { destroyLogicalDevice
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:103   INFO| .   } 0.000 s: destroyLogicalDevice
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:114   INFO| .   { destroyVulkanInstance
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:127   INFO| .   .   Vulkan: instance destroyed
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:114   INFO| .   } 0.000 s: destroyVulkanInstance
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:133   INFO| .   { destroyGLFW
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:136   INFO| .   .   GLFW: Game window destroyed
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:139   INFO| .   .   GLFW: Terminated
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:133   INFO| .   } 0.000 s: destroyGLFW
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]            graphics.cc:80    INFO| } 0.000 s: ~graphics
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]              module.cc:67     ERR| Manifest file is missing or corrupt:
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]              module.cc:68     ERR|   test/invalid/manifest.yml
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]              module.cc:72     ERR| Manifest file lacks module section:
+2021-11-04 11:49:07.730 (   0.003s) [main thread     ]              module.cc:73     ERR|   test/no-module-section/manifest.yml
+2021-11-04 11:49:07.731 (   0.004s) [main thread     ]              module.cc:77     ERR| Manifest file lacks identifier:
+2021-11-04 11:49:07.731 (   0.004s) [main thread     ]              module.cc:78     ERR|   test/no-identifier/manifest.yml
+2021-11-04 11:49:07.731 (   0.004s) [main thread     ]      module_manager.cc:100   INFO| { addModulePath
+2021-11-04 11:49:07.731 (   0.004s) [main thread     ]      module_manager.cc:115   INFO| .   { loadManifests
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:115   INFO| .   } 0.001 s: loadManifests
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:110   INFO| .   Added Module Path: /home/jeff/Projects/nebula/samples/asteroids/data
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:100   INFO| } 0.001 s: addModulePath
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:100   INFO| { addModulePath
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:115   INFO| .   { loadManifests
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:115   INFO| .   } 0.000 s: loadManifests
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:110   INFO| .   Added Module Path: /home/jeff/.local/share/MyGame
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:100   INFO| } 0.000 s: addModulePath
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:100   INFO| { addModulePath
+2021-11-04 11:49:07.732 (   0.005s) [main thread     ]      module_manager.cc:115   INFO| .   { loadManifests
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:115   INFO| .   } 0.001 s: loadManifests
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:110   INFO| .   Added Module Path: /home/jeff/Projects/nebula/test/circular-deps
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:100   INFO| } 0.001 s: addModulePath
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:125   INFO| { resolveModules
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:127   INFO| .   Module: alpha
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:136   INFO| .   { resolveModule
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:139   INFO| .   .   Dependency: beta
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:141   INFO| .   .     Dependency not already resolved
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:146   INFO| .   .     No Circular dependency detected, resolving beta
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:136   INFO| .   .   { resolveModule
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:139   INFO| .   .   .   Dependency: alpha
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:141   INFO| .   .   .     Dependency not already resolved
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:143    ERR| .   .   .   Circular module dependency detected
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:136   INFO| .   .   } 0.000 s: resolveModule
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:136   INFO| .   } 0.000 s: resolveModule
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:125   INFO| } 0.000 s: resolveModules
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:100   INFO| { addModulePath
+2021-11-04 11:49:07.733 (   0.006s) [main thread     ]      module_manager.cc:115   INFO| .   { loadManifests
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:115   INFO| .   } 0.001 s: loadManifests
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:110   INFO| .   Added Module Path: /home/jeff/Projects/nebula/test/no-circular-deps
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:100   INFO| } 0.001 s: addModulePath
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:125   INFO| { resolveModules
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:127   INFO| .   Module: alpha
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:136   INFO| .   { resolveModule
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:139   INFO| .   .   Dependency: beta
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:141   INFO| .   .     Dependency not already resolved
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:146   INFO| .   .     No Circular dependency detected, resolving beta
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:136   INFO| .   .   { resolveModule
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:136   INFO| .   .   } 0.000 s: resolveModule
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:136   INFO| .   } 0.000 s: resolveModule
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:127   INFO| .   Module: beta
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]      module_manager.cc:125   INFO| } 0.000 s: resolveModules
+2021-11-04 11:49:07.734 (   0.007s) [main thread     ]             loguru.cpp:523   INFO| atexit

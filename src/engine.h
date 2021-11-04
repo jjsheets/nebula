@@ -22,7 +22,7 @@ private:
       GLFWwindow *window, int key, int scancode, int action, int mods);
 
 public:
-  engine(int argc, char *argv[]);
+  engine();
   ~engine();
   void exit();
   void loop();
