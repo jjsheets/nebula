@@ -101,6 +101,14 @@ private:
   void createCommandPool();
   void createCommandBuffers();
   void createSyncObjects();
+  void destroySynchronization();
+  void destroyLogicalDevice();
+  void destroyVulkanInstance();
+  void destroyGLFW();
+  void waitForFrame(size_t f);
+  void waitForImage(size_t f);
+  void submitQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[]);
+  void presentQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[]);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -117,6 +125,8 @@ private:
     queueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface);
     bool isComplete();
   };
+  void populateQueueCreateInfos(queueFamilyIndices &queueFamilies,
+      std::vector<VkDeviceQueueCreateInfo> &queueCreateInfos);
 
   struct swapChainSupportDetails {
     VkSurfaceCapabilitiesKHR _capabilities;
@@ -125,6 +135,7 @@ private:
 
     swapChainSupportDetails(VkPhysicalDevice device, VkSurfaceKHR surface);
     bool isSuitable();
+    uint32_t swapChainImageCount();
   };
 
 public:
