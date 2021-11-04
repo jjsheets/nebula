@@ -175,22 +175,22 @@ jobs:
           mkdir /home/runner/.local
           mkdir /home/runner/.local/share
           test/test
+          cat test/test.log
           cd gcov
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info
           lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
-          cat test/test.log
 
       - name: Run tests (Windows)
         if: matrix.os == 'windows-latest'
         shell: msys2 {0}
         run: |
           test/test
+          cat test/test.log
           cd gcov
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info
           lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
-          cat test/test.log
 
       - uses: codecov/codecov-action@v2
         if: matrix.os == 'ubuntu-latest'
