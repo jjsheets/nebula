@@ -607,7 +607,6 @@ void vkDestroyDebugUtilsMessengerEXT(
 
 void vulkan_mock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
 {
-  LOG_SCOPE_FUNCTION(1);
   caps.minImageCount           = 1;
   caps.maxImageCount           = 0;
   caps.currentExtent.width     = 2560;
@@ -747,7 +746,7 @@ void vulkan_mock::mockGraphics()
                         .SIDE_EFFECT(*_3 = testVkInstance)
                         .RETURN(VK_SUCCESS));
   expectations.push(
-      NAMED_REQUIRE_CALL(*this, vkGetInstanceProcAddr(testVkInstance, _))
+      NAMED_ALLOW_CALL(*this, vkGetInstanceProcAddr(testVkInstance, _))
           .WITH(std::strcmp(_2, "vkCreateDebugUtilsMessengerEXT") == 0)
           .RETURN((PFN_vkVoidFunction)(&::vkCreateDebugUtilsMessengerEXT)));
   expectations.push(NAMED_REQUIRE_CALL(
@@ -927,7 +926,7 @@ void vulkan_mock::mockGraphics()
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkDestroyDevice(testLogDev, nullptr)));
   expectations.push(
-      NAMED_REQUIRE_CALL(*this, vkGetInstanceProcAddr(testVkInstance, _))
+      NAMED_ALLOW_CALL(*this, vkGetInstanceProcAddr(testVkInstance, _))
           .WITH(std::strcmp(_2, "vkDestroyDebugUtilsMessengerEXT") == 0)
           .RETURN((PFN_vkVoidFunction)(&::vkDestroyDebugUtilsMessengerEXT)));
   expectations.push(NAMED_ALLOW_CALL(
