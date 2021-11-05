@@ -39,9 +39,10 @@ private:
   int _glfwShouldClose = GLFW_FALSE;
   std::function<void(GLFWwindow *, int, int, int, int)> _keyCB;
   std::queue<std::function<void()>> _evBuffer;
-  uint64_t _loopCount  = 0;
-  uint64_t _loopMax    = 60 * 5;
-  bool _separateQueues = false;
+  uint64_t _loopCount             = 0;
+  uint64_t _loopMax               = 60 * 5;
+  bool _separateQueues            = false;
+  bool _useAlternateSurfaceFormat = false;
 
   void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
   void fillSurfFmt(VkSurfaceFormatKHR &fmt);
@@ -79,6 +80,7 @@ public:
   void maxLoop(uint64_t m);
   void pollEvents();
   void enableSeparateQueues();
+  void enableAltSurfaceFormat();
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());

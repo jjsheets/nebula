@@ -41,6 +41,7 @@ SCENARIO("class graphics")
     // Set up the expectations for this test in a mock object
     vulkan_mock vkMock;
     vkMock.enableSeparateQueues();
+    vkMock.enableAltSurfaceFormat();
     vkMock.mockGraphics();
 
     nebula::graphics gfx(
@@ -409,12 +410,8 @@ graphics::queueFamilyIndices::queueFamilyIndices(
   }
   if (_graphicsFamily)
     LOG_S(1) << "graphicsFamily: " << _graphicsFamily.value();
-  else
-    LOG_S(1) << "graphicsFamily: none";
   if (_presentFamily)
     LOG_S(1) << "presentFamily: " << _presentFamily.value();
-  else
-    LOG_S(1) << "presentFamily: none";
 }
 
 bool graphics::queueFamilyIndices::isComplete()

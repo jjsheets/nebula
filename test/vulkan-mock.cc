@@ -629,8 +629,13 @@ void vulkan_mock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
 
 void vulkan_mock::fillSurfFmt(VkSurfaceFormatKHR &fmt)
 {
-  fmt.format     = VK_FORMAT_B8G8R8A8_SRGB;
-  fmt.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+  if (!_useAlternateSurfaceFormat) {
+    fmt.format     = VK_FORMAT_R8G8B8A8_SRGB;
+    fmt.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+  } else {
+    fmt.format     = VK_FORMAT_B8G8R8A8_SRGB;
+    fmt.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+  }
 }
 
 void vulkan_mock::fillPhysDevProps(VkPhysicalDeviceProperties &props)
@@ -739,6 +744,11 @@ void vulkan_mock::pollEvents()
 void vulkan_mock::enableSeparateQueues()
 {
   _separateQueues = true;
+}
+
+void vulkan_mock::enableAltSurfaceFormat()
+{
+  _useAlternateSurfaceFormat = true;
 }
 
 void vulkan_mock::mockGraphics()
