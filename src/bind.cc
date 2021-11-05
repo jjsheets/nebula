@@ -49,13 +49,13 @@ SCENARIO("class bind")
       REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
           0, nebula::bind::action::release, modifier));
 
-      THEN("the pressHandler and releaseHandler code should have run")
-      {
-        REQUIRE(pressed == true);
-        REQUIRE(released == true);
-        pressed  = false;
-        released = false;
-      }
+      // THEN("the pressHandler and releaseHandler code should have run")
+      //{
+      REQUIRE(pressed == true);
+      REQUIRE(released == true);
+      pressed  = false;
+      released = false;
+      //}
     }
 
     WHEN("a different key is pressed and released")
