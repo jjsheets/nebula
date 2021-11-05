@@ -42,6 +42,9 @@ SCENARIO("class graphics")
     vulkan_mock vkMock;
     vkMock.enableSeparateQueues();
     vkMock.enableAltSurfaceFormat();
+    vkMock.enableMailobxPresentMode();
+    vkMock.enableAltSurfaceCaps();
+    vkMock.setPhysDeviceType(VK_PHYSICAL_DEVICE_TYPE_CPU);
     vkMock.mockGraphics();
 
     nebula::graphics gfx(
@@ -712,8 +715,6 @@ void graphics::createImageViews()
 
 void graphics::logMemoryType(VkMemoryType &mType)
 {
-  if (mType.propertyFlags == 0)
-    return;
   std::string flags = "";
   if (mType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
     flags += ", device local";

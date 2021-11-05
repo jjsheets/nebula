@@ -43,6 +43,11 @@ private:
   uint64_t _loopMax               = 60 * 5;
   bool _separateQueues            = false;
   bool _useAlternateSurfaceFormat = false;
+  VkPresentModeKHR _presentMode   = VK_PRESENT_MODE_FIFO_KHR;
+  uint32_t _surfWidth             = 2560;
+  uint32_t _surfHeight            = 1440;
+  uint32_t _maxImageCount         = 1;
+  VkPhysicalDeviceType _gpuType   = VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
 
   void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
   void fillSurfFmt(VkSurfaceFormatKHR &fmt);
@@ -81,6 +86,9 @@ public:
   void pollEvents();
   void enableSeparateQueues();
   void enableAltSurfaceFormat();
+  void enableMailobxPresentMode();
+  void enableAltSurfaceCaps();
+  void setPhysDeviceType(VkPhysicalDeviceType t);
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());

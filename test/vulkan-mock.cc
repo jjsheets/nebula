@@ -613,9 +613,9 @@ void vkDestroyDebugUtilsMessengerEXT(
 void vulkan_mock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
 {
   caps.minImageCount           = 1;
-  caps.maxImageCount           = 0;
-  caps.currentExtent.width     = 2560;
-  caps.currentExtent.height    = 1440;
+  caps.maxImageCount           = _maxImageCount;
+  caps.currentExtent.width     = _surfWidth;
+  caps.currentExtent.height    = _surfHeight;
   caps.minImageExtent.width    = 1;
   caps.minImageExtent.height   = 1;
   caps.maxImageExtent.width    = 2560;
@@ -645,7 +645,7 @@ void vulkan_mock::fillPhysDevProps(VkPhysicalDeviceProperties &props)
   props.vendorID      = 0;
   props.deviceID      = 0;
   // Provide a discrete gpu, even though this is a test fixture
-  props.deviceType = VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+  props.deviceType = _gpuType;
   std::strcpy(props.deviceName, "nebula test device");
   for (int i = 0; i < VK_UUID_SIZE; i++) {
     props.pipelineCacheUUID[i] = 0;
@@ -749,6 +749,23 @@ void vulkan_mock::enableSeparateQueues()
 void vulkan_mock::enableAltSurfaceFormat()
 {
   _useAlternateSurfaceFormat = true;
+}
+
+void vulkan_mock::enableMailobxPresentMode()
+{
+  _presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+}
+
+void vulkan_mock::enableAltSurfaceCaps()
+{
+  _maxImageCount = 0;
+  _surfWidth     = std::numeric_limits<uint32_t>::max();
+  _surfHeight    = std::numeric_limits<uint32_t>::max();
+}
+
+void vulkan_mock::setPhysDeviceType(VkPhysicalDeviceType t)
+{
+  _gpuType = t;
 }
 
 void vulkan_mock::mockGraphics()
@@ -901,7 +918,7 @@ void vulkan_mock::mockGraphics()
   expectations.push(NAMED_ALLOW_CALL(*this,
       vkGetPhysicalDeviceSurfacePresentModesKHR(
           testPhysDev, testSurface, _, trompeloeil::ne(nullptr)))
-                        .SIDE_EFFECT(*_4 = VK_PRESENT_MODE_FIFO_KHR)
+                        .SIDE_EFFECT(*_4 = _presentMode)
                         .RETURN(VK_SUCCESS));
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkGetPhysicalDeviceProperties(testPhysDev, _))
@@ -1053,4 +1070,8 @@ void vulkan_mock::mockGraphics()
           .SIDE_EFFECT(_glfwShouldClose = _2));
   expectations.push(
       NAMED_ALLOW_CALL(*this, glfwPollEvents()).SIDE_EFFECT(pollEvents()));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, glfwGetFramebufferSize(testWindow, _, _))
+          .SIDE_EFFECT(*_2 = width)
+          .SIDE_EFFECT(*_3 = height));
 }
