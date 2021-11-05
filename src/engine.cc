@@ -21,7 +21,7 @@
   #include <doctest/trompeloeil.hpp>
   #include "../test/vulkan-mock.h"
 
-SCENARIO("class engine" * doctest::may_fail())
+SCENARIO("class engine")
 {
   GIVEN("an engine object with only command line arguments")
   {
@@ -40,20 +40,37 @@ SCENARIO("class engine" * doctest::may_fail())
       REQUIRE(
           glfwGetWindowAttrib(testEngine.getWindowPointer(), GLFW_DECORATED));
     }
-    // This is for descriptive purposes only, until this can be coded with a
-    // proper test
-    THEN("it should stop its loop if told to by the OS")
-    {
-      // When the user hits Alt-F4 or the close button, GLFW handles the events
-      // that the OS sends by internally calling glfwSetWindowShouldClose().
-      glfwSetWindowShouldClose(testEngine.getWindowPointer(), true);
-      testEngine.loop();
-    }
+  }
+  GIVEN("an engine object with only command line arguments")
+  {
+    vulkan_mock vkMock;
+    vkMock.mockGraphics();
+    vkMock.maxLoop(10);
 
-    THEN("it should stop its loop if told to by using engine::exit()")
+    nebula::engine testEngine;
+    WHEN("The escape key is pressed")
+    {
+      vkMock.simKeyPress(GLFW_KEY_ESCAPE, 0, true);
+      THEN("it should stop its loop")
+      {
+        testEngine.loop();
+      }
+    }
+  }
+  GIVEN("an engine object with only command line arguments")
+  {
+    vulkan_mock vkMock;
+    vkMock.mockGraphics();
+    vkMock.maxLoop(10);
+
+    nebula::engine testEngine;
+    WHEN("exit() is called on the engine")
     {
       testEngine.exit();
-      testEngine.loop();
+      THEN("it should stop its loop")
+      {
+        testEngine.loop();
+      }
     }
   }
 }
