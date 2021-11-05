@@ -28,6 +28,7 @@ SCENARIO("class engine" * doctest::may_fail())
     // Set up the expectations for this test in a mock object
     vulkan_mock vkMock;
     vkMock.mockGraphics();
+    vkMock.simKeyPress(GLFW_KEY_ESCAPE, 0, true);
 
     nebula::engine testEngine;
     THEN("it should have a 1600 x 900 GLFW window with a border")
@@ -39,7 +40,6 @@ SCENARIO("class engine" * doctest::may_fail())
       REQUIRE(
           glfwGetWindowAttrib(testEngine.getWindowPointer(), GLFW_DECORATED));
     }
-  #if 0
     // This is for descriptive purposes only, until this can be coded with a
     // proper test
     THEN("it should stop its loop if told to by the OS")
@@ -55,7 +55,6 @@ SCENARIO("class engine" * doctest::may_fail())
       testEngine.exit();
       testEngine.loop();
     }
-  #endif
   }
 }
 #endif
