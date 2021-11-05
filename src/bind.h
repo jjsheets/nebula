@@ -13,106 +13,93 @@
 
 namespace nebula {
 
-class bind {
+class bindManager {
 public:
-  enum struct action
-  {
-    press,
-    release
+  class bind {
+  private:
+    std::function<void()> _pressHandler;
+    std::function<void()> _releaseHandler;
+    std::function<void(double)> _deltaHandler;
+    const std::string _category;
+    const std::string _name;
+    std::optional<std::pair<int, int>> _keyBind;
+    std::optional<std::pair<int, int>> _mBtnBind;
+    std::optional<std::tuple<int, int, int>> _cBtnBind;
+    std::optional<std::pair<int, int>> _mAxisBind;
+    std::optional<std::tuple<int, int, int>> _cAxisBind;
+
+    friend class bindManager;
+
+    void press();
+    void release();
+    void delta(double d);
+
+  public:
+    bind()
+        : _pressHandler(nullptr), _releaseHandler(nullptr),
+          _deltaHandler(nullptr), _category(""), _name("")
+    {
+    }
+    bind(std::function<void()> pressHandler,
+        std::function<void()> releaseHandler,
+        std::function<void(double)> deltaHandler,
+        const std::string &category,
+        const std::string &name)
+        : _pressHandler(pressHandler), _releaseHandler(releaseHandler),
+          _deltaHandler(deltaHandler), _category(category), _name(name)
+    {
+    }
+    std::string combinedName();
   };
-  union modifier {
-    struct {
-      bool shift  : 1;
-      bool ctrl   : 1;
-      bool alt    : 1;
-      bool super  : 1;
-      bool left   : 1;
-      bool middle : 1;
-      bool right  : 1;
-    };
-    int bits;
+  class modifier {
+  public:
+    operator int()
+    {
+      return 0;
+    }
   };
 
 private:
-  std::function<void()> _pressHandler;       // argument is repetition count
-  std::function<void()> _releaseHandler;     // argument is repetition count
-  std::function<void(double)> _deltaHandler; // argument is delta on an axis
-  std::optional<int> _key;   // optional, because this may not be bound to a key
-  std::optional<int> _mBtn;  // optional, similar reasons
-  std::optional<int> _mAxis; // 0 = x, 1 = y, 2 = scroll x, 3 = scroll y
-  std::optional<int> _jid;   // when bound to a joystick, this is the GLFW jid
-  std::optional<int> _jBtn;  // joystick button to bind to
-  std::optional<int> _jAxis; // joystick axis to bind to
-  modifier _modifiers;
-  std::string _category;
-  std::string _name;
-  std::string _bind;
-  bool _bound;
-
-  static std::map<std::tuple<int, int>, std::weak_ptr<bind>> _keyBinds;
-  static std::map<std::tuple<int, int>, std::weak_ptr<bind>> _mBtnBinds;
-  static std::map<std::tuple<int, int>, std::weak_ptr<bind>> _mAxisBinds;
-  static std::map<std::tuple<int, int, int>, std::weak_ptr<bind>> _jBtnBinds;
-  static std::map<std::tuple<int, int, int>, std::weak_ptr<bind>> _jAxisBinds;
-
-  static std::map<std::string, std::shared_ptr<bind>> _bindList;
-
-  bind()
-      : _pressHandler(nullptr), _releaseHandler(nullptr),
-        _deltaHandler(nullptr), _category(""), _name(""), _bind(""),
-        _bound(false)
-  {
-  }
-  bind(std::function<void()> pressHandler,
-      std::function<void()> releaseHandler,
-      std::function<void(double)> deltaHandler,
-      const std::string &category,
-      const std::string &name)
-      : _pressHandler(pressHandler), _releaseHandler(releaseHandler),
-        _deltaHandler(deltaHandler), _category(category), _name(name),
-        _bind(""), _bound(false)
-  {
-  }
-  void press();
-  void release();
-  void delta(double delta);
+  std::map<std::string, bindManager::bind> _bindList;
+  std::map<std::pair<int, int>, bindManager::bind &> _keyList;
+  std::map<std::pair<int, int>, bindManager::bind &> _mBtnList;
+  std::map<std::tuple<int, int, int>, bindManager::bind &> _cBtnList;
+  std::map<std::pair<int, int>, bindManager::bind &> _mAxisList;
+  std::map<std::tuple<int, int, int>, bindManager::bind &> _cAxisList;
 
 public:
-  void bindKey(int key, modifier mods);
-  void bindMButton(int mBtn, modifier mods);
-  void bindMAxis(int mAxis, modifier mods);
-  void bindJButton(int jid, int jBtn, modifier mods);
-  void bindJAxis(int jid, int jAxis, modifier mods);
-  void unbind();
-  bool bound()
-  {
-    return _bound;
-  }
-  std::string combinedName()
-  {
-    return _category + ":" + _name;
-  }
-
-  static std::shared_ptr<bind> create(std::function<void()> pressHandler,
+  bindManager::bind &create(std::function<void()> pressHandler,
       std::function<void()> releaseHandler,
       std::function<void(double)> deltaHandler,
       const std::string &category,
       const std::string &name);
-  static void keyboardEvent(int key, action event, modifier mods);
-  static void mouseButtonEvent(int mBtn, action event, modifier mods);
-  static void mouseAxisEvent(int mAxis, double delta, modifier mods);
-  static void joystickButtonEvent(
-      int jid, int jBtn, action event, modifier mods);
-  static void joystickAxisEvent(
-      int jid, int jAxis, double delta, modifier mods);
-  static std::shared_ptr<bind> findKey(int key, modifier mods);
-  static std::shared_ptr<bind> findMButton(int mBtn, modifier mods);
-  static std::shared_ptr<bind> findMAxis(int mAxis, modifier mods);
-  static std::shared_ptr<bind> findJButton(int jid, int jBtn, modifier mods);
-  static std::shared_ptr<bind> findJAxis(int jid, int jAxis, modifier mods);
-  static std::shared_ptr<bind> findBind(
-      const std::string &category, const std::string &name);
-  static void clearBinds();
+  void bindKey(bindManager::bind &b, int key, modifier mod);
+  void bindMBtn(bindManager::bind &b, int mBtn, modifier mod);
+  void bindCBtn(bindManager::bind &b, int cID, int cBtn, modifier mod);
+  void bindMAxis(bindManager::bind &b, int mAxis, modifier mod);
+  void bindCAxis(bindManager::bind &b, int cID, int cAxis, modifier mod);
+  bool keyBindIs(int key, modifier mod, bindManager::bind &b);
+  bool mBtnBindIs(int mBtn, modifier mod, bindManager::bind &b);
+  bool cBtnBindIs(int cID, int cBtn, modifier mod, bindManager::bind &b);
+  bool mAxisBindIs(int mAxis, modifier mod, bindManager::bind &b);
+  bool cAxisBindIs(int cID, int cAxis, modifier mod, bindManager::bind &b);
+  bool bindExists(const std::string &category, const std::string &name);
+  bool keyBindExists(int key, modifier mod);
+  bool mBtnBindExists(int mBtn, modifier mod);
+  bool cBtnBindExists(int cID, int cBtn, modifier mod);
+  bool mAxisBindExists(int mAxis, modifier mod);
+  bool cAxisBindExists(int cID, int cAxis, modifier mod);
+  void keyboardPress(int key, modifier mod);
+  void keyboardRelease(int key, modifier mod);
+  void mButtonPress(int mBtn, modifier mod);
+  void mButtonRelease(int mBtn, modifier mod);
+  void cButtonPress(int cID, int cBtn, modifier mod);
+  void cButtonRelease(int cID, int cBtn, modifier mod);
+  void mAxisDelta(int mAxis, modifier mod, double delta);
+  void cAxisDelta(int cID, int cAxis, modifier mod, double delta);
+  void clearBinds();
+  bool bound(bindManager::bind &b);
+  void unbind(bindManager::bind &b);
 };
 
 } // namespace nebula
