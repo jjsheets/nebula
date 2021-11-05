@@ -23,7 +23,7 @@
 
 SCENARIO("class engine")
 {
-  GIVEN("an engine object with only command line arguments")
+  GIVEN("an engine object")
   {
     // Set up the expectations for this test in a mock object
     vulkan_mock vkMock;
@@ -41,7 +41,7 @@ SCENARIO("class engine")
           glfwGetWindowAttrib(testEngine.getWindowPointer(), GLFW_DECORATED));
     }
   }
-  GIVEN("an engine object with only command line arguments")
+  GIVEN("an engine object")
   {
     vulkan_mock vkMock;
     vkMock.mockGraphics();
@@ -57,7 +57,7 @@ SCENARIO("class engine")
       }
     }
   }
-  GIVEN("an engine object with only command line arguments")
+  GIVEN("an engine object")
   {
     vulkan_mock vkMock;
     vkMock.mockGraphics();
