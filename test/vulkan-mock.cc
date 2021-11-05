@@ -768,6 +768,13 @@ void vulkan_mock::setPhysDeviceType(VkPhysicalDeviceType t)
   _gpuType = t;
 }
 
+void vulkan_mock::framebufferResize(int newW, int newH)
+{
+  width  = newW;
+  height = newH;
+  _fbResizeCB(testWindow, newW, newH);
+}
+
 void vulkan_mock::mockGraphics()
 {
   testWindow     = reinterpret_cast<GLFWwindow *>(0x400);
@@ -804,6 +811,7 @@ void vulkan_mock::mockGraphics()
           .LR_SIDE_EFFECT(windowUP = _2));
   expectations.push(
       NAMED_REQUIRE_CALL(*this, glfwSetFramebufferSizeCallback(testWindow, _))
+          .SIDE_EFFECT(_fbResizeCB = _2)
           .RETURN(nullptr));
   expectations.push(NAMED_REQUIRE_CALL(*this, glfwSetKeyCallback(testWindow, _))
                         .SIDE_EFFECT(_keyCB = _2)
@@ -1074,4 +1082,7 @@ void vulkan_mock::mockGraphics()
       NAMED_ALLOW_CALL(*this, glfwGetFramebufferSize(testWindow, _, _))
           .SIDE_EFFECT(*_2 = width)
           .SIDE_EFFECT(*_3 = height));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, glfwGetWindowUserPointer(testWindow))
+          .RETURN(windowUP));
 }

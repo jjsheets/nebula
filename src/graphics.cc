@@ -49,6 +49,7 @@ SCENARIO("class graphics")
 
     nebula::graphics gfx(
         1600, 900, [](GLFWwindow *, int, int, int, int) {}, false);
+    vkMock.framebufferResize(1280, 720);
     THEN("it should not throw when a frame is drawn")
     {
       REQUIRE_NOTHROW(gfx.drawFrame());

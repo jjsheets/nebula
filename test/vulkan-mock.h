@@ -48,6 +48,7 @@ private:
   uint32_t _surfHeight            = 1440;
   uint32_t _maxImageCount         = 1;
   VkPhysicalDeviceType _gpuType   = VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+  std::function<void(GLFWwindow *, int, int)> _fbResizeCB;
 
   void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
   void fillSurfFmt(VkSurfaceFormatKHR &fmt);
@@ -89,6 +90,7 @@ public:
   void enableMailobxPresentMode();
   void enableAltSurfaceCaps();
   void setPhysDeviceType(VkPhysicalDeviceType t);
+  void framebufferResize(int newW, int newH);
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());
