@@ -17,8 +17,15 @@ SCENARIO("class bind")
     bool pressed  = false;
     bool released = false;
     nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() { pressed = true; },
-        [&]() { released = true; },
+    auto bind = nebula::bind::create(
+        [&]() {
+          LOG_S(INFO) << "press event";
+          pressed = true;
+        },
+        [&]() {
+          LOG_S(INFO) << "release event";
+          released = true;
+        },
         [&](double d) {},
         "Category",
         "Keyboard Test");
@@ -101,8 +108,15 @@ SCENARIO("class bind")
     bool pressed  = false;
     bool released = false;
     nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() { pressed = true; },
-        [&]() { released = true; },
+    auto bind = nebula::bind::create(
+        [&]() {
+          LOG_S(INFO) << "press event";
+          pressed = true;
+        },
+        [&]() {
+          LOG_S(INFO) << "release event";
+          released = true;
+        },
         [&](double d) {},
         "Category",
         "Mouse Button Test");
@@ -183,8 +197,15 @@ SCENARIO("class bind")
     bool pressed  = false;
     bool released = false;
     nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() { pressed = true; },
-        [&]() { released = true; },
+    auto bind = nebula::bind::create(
+        [&]() {
+          LOG_S(INFO) << "press event";
+          pressed = true;
+        },
+        [&]() {
+          LOG_S(INFO) << "release event";
+          released = true;
+        },
         [&](double d) {},
         "Category",
         "Joystick Button Test");
@@ -282,6 +303,7 @@ SCENARIO("class bind")
     auto bind = nebula::bind::create([&]() {},
         [&]() {},
         [&](double d) {
+          LOG_S(INFO) << "delta event";
           handled = true;
           delta += d;
         },
@@ -358,6 +380,7 @@ SCENARIO("class bind")
     auto bind = nebula::bind::create([&]() {},
         [&]() {},
         [&](double d) {
+          LOG_S(INFO) << "delta event";
           handled = true;
           delta += d;
         },
