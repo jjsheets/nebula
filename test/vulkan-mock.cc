@@ -695,6 +695,16 @@ void vulkan_mock::nextImage(uint32_t *n)
   testDrawImage %= testSwapChainImageCount;
 }
 
+void vulkan_mock::simKeyPress(int key, int mod, bool release)
+{
+  _evBuffer.emplace(
+      [key, mod, this]() { _keyCB(testWindow, key, key, GLFW_PRESS, mod); });
+  if (release)
+    _evBuffer.emplace([key, mod, this]() {
+      _keyCB(testWindow, key, key, GLFW_RELEASE, mod);
+    });
+}
+
 void vulkan_mock::mockGraphics()
 {
   testWindow         = reinterpret_cast<GLFWwindow *>(0x400);
@@ -728,6 +738,7 @@ void vulkan_mock::mockGraphics()
       NAMED_REQUIRE_CALL(*this, glfwSetFramebufferSizeCallback(testWindow, _))
           .RETURN(nullptr));
   expectations.push(NAMED_REQUIRE_CALL(*this, glfwSetKeyCallback(testWindow, _))
+                        .SIDE_EFFECT(_keyCB = _2)
                         .RETURN(nullptr));
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkEnumerateInstanceLayerProperties(_, nullptr))
@@ -952,4 +963,9 @@ void vulkan_mock::mockGraphics()
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkQueuePresentKHR(testCombinedQueue, _))
           .RETURN(VK_SUCCESS));
+  expectations.push(NAMED_ALLOW_CALL(*this, glfwWindowShouldClose(testWindow))
+                        .RETURN(_glfwShouldClose));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, glfwSetWindowShouldClose(testWindow, _))
+          .SIDE_EFFECT(_glfwShouldClose = _2));
 }

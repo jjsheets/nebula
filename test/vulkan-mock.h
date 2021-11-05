@@ -9,6 +9,7 @@
 
 #include <string>
 #include <cassert>
+#include <queue>
 
 class vulkan_mock {
 private:
@@ -33,6 +34,9 @@ private:
   int width;
   int height;
   std::string title;
+  int _glfwShouldClose = GLFW_FALSE;
+  std::function<void(GLFWwindow *, int, int, int, int)> _keyCB;
+  std::queue<std::function<void()>> _evBuffer;
 
   void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
   void fillSurfFmt(VkSurfaceFormatKHR &fmt);
@@ -65,6 +69,7 @@ public:
   vulkan_mock(const vulkan_mock &) = delete;
   vulkan_mock &operator=(const vulkan_mock &) = delete;
   void mockGraphics();
+  void simKeyPress(int key, int mod, bool release);
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());
