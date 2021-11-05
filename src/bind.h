@@ -73,9 +73,9 @@ private:
         _bind(""), _bound(false)
   {
   }
-  bool press();
-  bool release();
-  bool delta(double delta);
+  void press();
+  void release();
+  void delta(double delta);
 
 public:
   void bindKey(int key, modifier mods);

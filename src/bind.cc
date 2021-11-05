@@ -14,7 +14,6 @@ SCENARIO("class bind")
 {
   GIVEN("a bind object bound to a key")
   {
-    LOG_S(INFO) << "FOO 1";
     bool pressed  = false;
     bool released = false;
     nebula::bind::modifier modifier;
@@ -23,48 +22,35 @@ SCENARIO("class bind")
         [&](double d) {},
         "Category",
         "Keyboard Test");
-    LOG_S(INFO) << "FOO 2";
     // the integer used as the key is intended to be a GLFW constant, but its
     // value doesn't matter for testing purposes
     bind->bindKey(0, modifier);
-    LOG_S(INFO) << "FOO 3";
 
     THEN("it should report as bound")
     {
-      LOG_S(INFO) << "FOO 4";
       REQUIRE(bind->bound() == true);
-      LOG_S(INFO) << "FOO 5";
       REQUIRE(!!nebula::bind::findBind("Category", "Keyboard Test"));
-      LOG_S(INFO) << "FOO 6";
       REQUIRE(!!nebula::bind::findKey(0, modifier));
-      LOG_S(INFO) << "FOO 7";
       REQUIRE(nebula::bind::findKey(0, modifier).get() == bind.get());
-      LOG_S(INFO) << "FOO 8";
     }
 
     THEN("it should report its name in <Category>:<Name> format")
     {
-      LOG_S(INFO) << "FOO 9";
       REQUIRE(bind->combinedName() == "Category:Keyboard Test");
-      LOG_S(INFO) << "FOO 10";
     }
 
     WHEN("the key is pressed and released")
     {
-      LOG_S(INFO) << "FOO 11";
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::keyboardEvent(0, nebula::bind::action::press, modifier);
-      LOG_S(INFO) << "FOO 12";
-      nebula::bind::keyboardEvent(0, nebula::bind::action::release, modifier);
-      LOG_S(INFO) << "FOO 13";
+      REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
+          0, nebula::bind::action::press, modifier));
+      REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
+          0, nebula::bind::action::release, modifier));
 
       THEN("the pressHandler and releaseHandler code should have run")
       {
-        LOG_S(INFO) << "FOO 14";
         REQUIRE(pressed == true);
-        LOG_S(INFO) << "FOO 15";
         REQUIRE(released == true);
-        LOG_S(INFO) << "FOO 16";
       }
       pressed  = false;
       released = false;
@@ -72,8 +58,10 @@ SCENARIO("class bind")
 
     WHEN("a different key is pressed and released")
     {
-      nebula::bind::keyboardEvent(1, nebula::bind::action::press, modifier);
-      nebula::bind::keyboardEvent(1, nebula::bind::action::release, modifier);
+      REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
+          1, nebula::bind::action::press, modifier));
+      REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
+          1, nebula::bind::action::release, modifier));
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -96,8 +84,10 @@ SCENARIO("class bind")
 
       THEN("it should not react to the key it was bound to")
       {
-        nebula::bind::keyboardEvent(0, nebula::bind::action::press, modifier);
-        nebula::bind::keyboardEvent(0, nebula::bind::action::release, modifier);
+        REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
+            0, nebula::bind::action::press, modifier));
+        REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
+            0, nebula::bind::action::release, modifier));
         REQUIRE(pressed == false);
         REQUIRE(released == false);
       }
@@ -134,9 +124,10 @@ SCENARIO("class bind")
     WHEN("the button is pressed and released")
     {
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::mouseButtonEvent(0, nebula::bind::action::press, modifier);
-      nebula::bind::mouseButtonEvent(
-          0, nebula::bind::action::release, modifier);
+      REQUIRE_NOTHROW(nebula::bind::mouseButtonEvent(
+          0, nebula::bind::action::press, modifier));
+      REQUIRE_NOTHROW(nebula::bind::mouseButtonEvent(
+          0, nebula::bind::action::release, modifier));
 
       THEN("the pressHandler and releaseHandler code should have run")
       {
@@ -149,9 +140,10 @@ SCENARIO("class bind")
 
     WHEN("a different button is pressed and released")
     {
-      nebula::bind::mouseButtonEvent(1, nebula::bind::action::press, modifier);
-      nebula::bind::mouseButtonEvent(
-          1, nebula::bind::action::release, modifier);
+      REQUIRE_NOTHROW(nebula::bind::mouseButtonEvent(
+          1, nebula::bind::action::press, modifier));
+      REQUIRE_NOTHROW(nebula::bind::mouseButtonEvent(
+          1, nebula::bind::action::release, modifier));
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -174,10 +166,10 @@ SCENARIO("class bind")
 
       THEN("it should not react to the button it was bound to")
       {
-        nebula::bind::mouseButtonEvent(
-            0, nebula::bind::action::press, modifier);
-        nebula::bind::mouseButtonEvent(
-            0, nebula::bind::action::release, modifier);
+        REQUIRE_NOTHROW(nebula::bind::mouseButtonEvent(
+            0, nebula::bind::action::press, modifier));
+        REQUIRE_NOTHROW(nebula::bind::mouseButtonEvent(
+            0, nebula::bind::action::release, modifier));
         REQUIRE(pressed == false);
         REQUIRE(released == false);
       }
@@ -214,10 +206,10 @@ SCENARIO("class bind")
     WHEN("the button is pressed and released")
     {
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::joystickButtonEvent(
-          0, 0, nebula::bind::action::press, modifier);
-      nebula::bind::joystickButtonEvent(
-          0, 0, nebula::bind::action::release, modifier);
+      REQUIRE_NOTHROW(nebula::bind::joystickButtonEvent(
+          0, 0, nebula::bind::action::press, modifier));
+      REQUIRE_NOTHROW(nebula::bind::joystickButtonEvent(
+          0, 0, nebula::bind::action::release, modifier));
 
       THEN("the pressHandler and releaseHandler code should have run")
       {
@@ -230,10 +222,10 @@ SCENARIO("class bind")
 
     WHEN("a different button is pressed and released")
     {
-      nebula::bind::joystickButtonEvent(
-          0, 1, nebula::bind::action::press, modifier);
-      nebula::bind::joystickButtonEvent(
-          0, 1, nebula::bind::action::release, modifier);
+      REQUIRE_NOTHROW(nebula::bind::joystickButtonEvent(
+          0, 1, nebula::bind::action::press, modifier));
+      REQUIRE_NOTHROW(nebula::bind::joystickButtonEvent(
+          0, 1, nebula::bind::action::release, modifier));
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -244,10 +236,10 @@ SCENARIO("class bind")
 
     WHEN("the right button on the wrong controller is pressed and released")
     {
-      nebula::bind::joystickButtonEvent(
-          1, 0, nebula::bind::action::press, modifier);
-      nebula::bind::joystickButtonEvent(
-          1, 0, nebula::bind::action::release, modifier);
+      REQUIRE_NOTHROW(nebula::bind::joystickButtonEvent(
+          1, 0, nebula::bind::action::press, modifier));
+      REQUIRE_NOTHROW(nebula::bind::joystickButtonEvent(
+          1, 0, nebula::bind::action::release, modifier));
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -270,10 +262,10 @@ SCENARIO("class bind")
 
       THEN("it should not react to the button it was bound to")
       {
-        nebula::bind::joystickButtonEvent(
-            0, 0, nebula::bind::action::press, modifier);
-        nebula::bind::joystickButtonEvent(
-            0, 0, nebula::bind::action::release, modifier);
+        REQUIRE_NOTHROW(nebula::bind::joystickButtonEvent(
+            0, 0, nebula::bind::action::press, modifier));
+        REQUIRE_NOTHROW(nebula::bind::joystickButtonEvent(
+            0, 0, nebula::bind::action::release, modifier));
         REQUIRE(pressed == false);
         REQUIRE(released == false);
       }
@@ -313,7 +305,7 @@ SCENARIO("class bind")
     WHEN("the axis is moved")
     {
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::mouseAxisEvent(0, 1.0, modifier);
+      REQUIRE_NOTHROW(nebula::bind::mouseAxisEvent(0, 1.0, modifier));
 
       THEN("the deltaHandler code should have run")
       {
@@ -325,7 +317,7 @@ SCENARIO("class bind")
 
     WHEN("a different axis is moved")
     {
-      nebula::bind::mouseAxisEvent(1, 1.0, modifier);
+      REQUIRE_NOTHROW(nebula::bind::mouseAxisEvent(1, 1.0, modifier));
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -348,7 +340,7 @@ SCENARIO("class bind")
 
       THEN("it should not react to the axis it was bound to")
       {
-        nebula::bind::mouseAxisEvent(0, 1.0, modifier);
+        REQUIRE_NOTHROW(nebula::bind::mouseAxisEvent(0, 1.0, modifier));
         REQUIRE(handled == false);
         REQUIRE(delta == 0.0);
       }
@@ -389,7 +381,7 @@ SCENARIO("class bind")
     {
       handled = false;
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::joystickAxisEvent(0, 0, 1.0, modifier);
+      REQUIRE_NOTHROW(nebula::bind::joystickAxisEvent(0, 0, 1.0, modifier));
 
       THEN("the deltaHandler code should have run")
       {
@@ -401,7 +393,7 @@ SCENARIO("class bind")
     WHEN("a different axis is moved")
     {
       handled = false;
-      nebula::bind::joystickAxisEvent(0, 1, 1.0, modifier);
+      REQUIRE_NOTHROW(nebula::bind::joystickAxisEvent(0, 1, 1.0, modifier));
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -413,7 +405,7 @@ SCENARIO("class bind")
     WHEN("the right axis on a different controller is moved")
     {
       handled = false;
-      nebula::bind::joystickAxisEvent(1, 0, 1.0, modifier);
+      REQUIRE_NOTHROW(nebula::bind::joystickAxisEvent(1, 0, 1.0, modifier));
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -436,7 +428,7 @@ SCENARIO("class bind")
 
       THEN("it should not react to the axis it was bound to")
       {
-        nebula::bind::joystickAxisEvent(0, 0, 1.0, modifier);
+        REQUIRE_NOTHROW(nebula::bind::joystickAxisEvent(0, 0, 1.0, modifier));
         REQUIRE(handled == false);
         REQUIRE(delta == 0.0);
       }
@@ -463,7 +455,7 @@ SCENARIO("class bind")
     bind5->bindJAxis(0, 0, modifier);
     WHEN("all binds are cleared")
     {
-      nebula::bind::clearBinds();
+      REQUIRE_NOTHROW(nebula::bind::clearBinds());
       THEN("none of the binds should be found")
       {
         REQUIRE(nebula::bind::findKey(0, modifier) == nullptr);
@@ -514,11 +506,11 @@ SCENARIO("class bind")
           nullptr, nullptr, nullptr, "Category", "Mouse Axis Test 2");
       auto bind10 = nebula::bind::create(
           nullptr, nullptr, nullptr, "Category", "Joystick Axis Test 2");
-      bind6->bindKey(0, modifier);
-      bind7->bindMButton(0, modifier);
-      bind8->bindJButton(0, 0, modifier);
-      bind9->bindMAxis(0, modifier);
-      bind10->bindJAxis(0, 0, modifier);
+      REQUIRE_NOTHROW(bind6->bindKey(0, modifier));
+      REQUIRE_NOTHROW(bind7->bindMButton(0, modifier));
+      REQUIRE_NOTHROW(bind8->bindJButton(0, 0, modifier));
+      REQUIRE_NOTHROW(bind9->bindMAxis(0, modifier));
+      REQUIRE_NOTHROW(bind10->bindJAxis(0, 0, modifier));
       THEN("the new binds should be found instead")
       {
         REQUIRE(nebula::bind::findKey(0, modifier) == bind6);
@@ -635,39 +627,24 @@ void bind::unbind()
   }
 }
 
-bool bind::press()
+void bind::press()
 {
   if (_pressHandler) {
     _pressHandler();
-    LOG_S(INFO) << "_pressHandler() executed";
-    return true;
-  } else {
-    LOG_S(INFO) << "_pressHandler() not executed";
-    return false;
   }
 }
 
-bool bind::release()
+void bind::release()
 {
   if (_releaseHandler) {
     _releaseHandler();
-    LOG_S(INFO) << "_releaseHandler() executed";
-    return true;
-  } else {
-    LOG_S(INFO) << "_releaseHandler() not executed";
-    return false;
   }
 }
 
-bool bind::delta(double delta)
+void bind::delta(double delta)
 {
   if (_deltaHandler) {
     _deltaHandler(delta);
-    LOG_S(INFO) << "_deltaHandler() executed";
-    return true;
-  } else {
-    LOG_S(INFO) << "_deltaHandler() not executed";
-    return false;
   }
 }
 
@@ -675,7 +652,6 @@ void bind::keyboardEvent(int key, action event, modifier mods)
 {
   const auto keyBind = findKey(key, mods);
   if (keyBind) {
-    LOG_S(INFO) << "Found: " << keyBind->_category << ": " << keyBind->_name;
     if (event == action::press)
       keyBind->press();
     else
@@ -687,7 +663,6 @@ void bind::mouseButtonEvent(int mBtn, action event, modifier mods)
 {
   const auto mBtnBind = findMButton(mBtn, mods);
   if (mBtnBind) {
-    LOG_S(INFO) << "Found: " << mBtnBind->_category << ": " << mBtnBind->_name;
     if (event == action::press)
       mBtnBind->press();
     else
@@ -699,8 +674,6 @@ void bind::mouseAxisEvent(int mAxis, double delta, modifier mods)
 {
   const auto mAxisBind = findMAxis(mAxis, mods);
   if (mAxisBind) {
-    LOG_S(INFO) << "Found: " << mAxisBind->_category << ": "
-                << mAxisBind->_name;
     mAxisBind->delta(delta);
   }
 }
@@ -709,7 +682,6 @@ void bind::joystickButtonEvent(int jid, int jBtn, action event, modifier mods)
 {
   const auto jBtnBind = findJButton(jid, jBtn, mods);
   if (jBtnBind) {
-    LOG_S(INFO) << "Found: " << jBtnBind->_category << ": " << jBtnBind->_name;
     if (event == action::press)
       jBtnBind->press();
     else
@@ -721,8 +693,6 @@ void bind::joystickAxisEvent(int jid, int jAxis, double delta, modifier mods)
 {
   const auto jAxisBind = findJAxis(jid, jAxis, mods);
   if (jAxisBind) {
-    LOG_S(INFO) << "Found: " << jAxisBind->_category << ": "
-                << jAxisBind->_name;
     jAxisBind->delta(delta);
   }
 }
