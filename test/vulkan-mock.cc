@@ -700,6 +700,16 @@ void vulkan_mock::nextImage(uint32_t *n)
   testDrawImage %= testSwapChainImageCount;
 }
 
+void vulkan_mock::fillFamilyProperties(VkQueueFamilyProperties c[])
+{
+  if (_separateQueues) {
+    c[0].queueFlags = VK_QUEUE_GRAPHICS_BIT;
+  } else {
+    c[0].queueFlags = VK_QUEUE_GRAPHICS_BIT;
+    c[1].queueFlags = 0;
+  }
+}
+
 void vulkan_mock::simKeyPress(int key, int mod, bool release)
 {
   LOG_SCOPE_FUNCTION(9);
@@ -726,15 +736,25 @@ void vulkan_mock::pollEvents()
     throw std::runtime_error("maximum loop count reached");
 }
 
+void vulkan_mock::enableSeparateQueues()
+{
+  _separateQueues = true;
+}
+
 void vulkan_mock::mockGraphics()
 {
-  testWindow         = reinterpret_cast<GLFWwindow *>(0x400);
-  testVkInstance     = reinterpret_cast<VkInstance>(0x500);
-  testDUMEXT         = reinterpret_cast<VkDebugUtilsMessengerEXT>(0x600);
-  testSurface        = reinterpret_cast<VkSurfaceKHR>(0x700);
-  testPhysDev        = reinterpret_cast<VkPhysicalDevice>(0x800);
-  testLogDev         = reinterpret_cast<VkDevice>(0x900);
-  testCombinedQueue  = reinterpret_cast<VkQueue>(0xA00);
+  testWindow     = reinterpret_cast<GLFWwindow *>(0x400);
+  testVkInstance = reinterpret_cast<VkInstance>(0x500);
+  testDUMEXT     = reinterpret_cast<VkDebugUtilsMessengerEXT>(0x600);
+  testSurface    = reinterpret_cast<VkSurfaceKHR>(0x700);
+  testPhysDev    = reinterpret_cast<VkPhysicalDevice>(0x800);
+  testLogDev     = reinterpret_cast<VkDevice>(0x900);
+  if (_separateQueues) {
+    testGraphicsQueue = reinterpret_cast<VkQueue>(0xA01);
+    testPresentQueue  = reinterpret_cast<VkQueue>(0xA02);
+  } else {
+    testCombinedQueue = reinterpret_cast<VkQueue>(0xA00);
+  }
   testSwapChain      = reinterpret_cast<VkSwapchainKHR>(0xB00);
   testRenderPass     = reinterpret_cast<VkRenderPass>(0xC00);
   testPipeLayout     = reinterpret_cast<VkPipelineLayout>(0xD00);
@@ -781,7 +801,7 @@ void vulkan_mock::mockGraphics()
       NAMED_ALLOW_CALL(*this, vkGetInstanceProcAddr(testVkInstance, _))
           .WITH(std::strcmp(_2, "vkCreateDebugUtilsMessengerEXT") == 0)
           .RETURN((PFN_vkVoidFunction)(&::vkCreateDebugUtilsMessengerEXT)));
-  expectations.push(NAMED_REQUIRE_CALL(
+  expectations.push(NAMED_ALLOW_CALL(
       *this, vkCreateDebugUtilsMessengerEXT(testVkInstance, _, nullptr, _))
                         .SIDE_EFFECT(*_4 = testDUMEXT)
                         .RETURN(VK_SUCCESS));
@@ -797,17 +817,58 @@ void vulkan_mock::mockGraphics()
       vkEnumeratePhysicalDevices(testVkInstance, _, trompeloeil::ne(nullptr)))
                         .SIDE_EFFECT(*_3 = testPhysDev)
                         .RETURN(VK_SUCCESS));
-  expectations.push(NAMED_ALLOW_CALL(
-      *this, vkGetPhysicalDeviceQueueFamilyProperties(testPhysDev, _, nullptr))
-                        .SIDE_EFFECT(*_2 = 1));
-  expectations.push(NAMED_ALLOW_CALL(*this,
-      vkGetPhysicalDeviceQueueFamilyProperties(
-          testPhysDev, _, trompeloeil::ne(nullptr)))
-                        .SIDE_EFFECT(_3->queueFlags = VK_QUEUE_GRAPHICS_BIT));
-  expectations.push(NAMED_ALLOW_CALL(*this,
-      vkGetPhysicalDeviceSurfaceSupportKHR(testPhysDev, _, testSurface, _))
-                        .SIDE_EFFECT(*_4 = true)
-                        .RETURN(VK_SUCCESS));
+  if (_separateQueues) {
+    expectations.push(NAMED_ALLOW_CALL(*this,
+        vkGetPhysicalDeviceQueueFamilyProperties(testPhysDev, _, nullptr))
+                          .SIDE_EFFECT(*_2 = 2));
+    expectations.push(NAMED_ALLOW_CALL(*this,
+        vkGetPhysicalDeviceQueueFamilyProperties(
+            testPhysDev, _, trompeloeil::ne(nullptr)))
+                          .SIDE_EFFECT(fillFamilyProperties(_3)));
+    expectations.push(NAMED_ALLOW_CALL(*this,
+        vkGetPhysicalDeviceSurfaceSupportKHR(testPhysDev, _, testSurface, _))
+                          .SIDE_EFFECT(*_4 = (_2 == 1))
+                          .RETURN(VK_SUCCESS));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkGetDeviceQueue(testLogDev, 0u, 0u, _))
+            .SIDE_EFFECT(*_4 = testGraphicsQueue));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkGetDeviceQueue(testLogDev, 1u, 0u, _))
+            .SIDE_EFFECT(*_4 = testPresentQueue));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkQueueSubmit(testGraphicsQueue, _, _, _))
+            .RETURN(VK_SUCCESS));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkQueueSubmit(testPresentQueue, _, _, _))
+            .RETURN(VK_SUCCESS));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkQueuePresentKHR(testGraphicsQueue, _))
+            .RETURN(VK_SUCCESS));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkQueuePresentKHR(testPresentQueue, _))
+            .RETURN(VK_SUCCESS));
+  } else {
+    expectations.push(NAMED_ALLOW_CALL(*this,
+        vkGetPhysicalDeviceQueueFamilyProperties(testPhysDev, _, nullptr))
+                          .SIDE_EFFECT(*_2 = 1));
+    expectations.push(NAMED_ALLOW_CALL(*this,
+        vkGetPhysicalDeviceQueueFamilyProperties(
+            testPhysDev, _, trompeloeil::ne(nullptr)))
+                          .SIDE_EFFECT(_3->queueFlags = VK_QUEUE_GRAPHICS_BIT));
+    expectations.push(NAMED_ALLOW_CALL(*this,
+        vkGetPhysicalDeviceSurfaceSupportKHR(testPhysDev, _, testSurface, _))
+                          .SIDE_EFFECT(*_4 = true)
+                          .RETURN(VK_SUCCESS));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkGetDeviceQueue(testLogDev, 0u, 0u, _))
+            .SIDE_EFFECT(*_4 = testCombinedQueue));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkQueueSubmit(testCombinedQueue, _, _, _))
+            .RETURN(VK_SUCCESS));
+    expectations.push(
+        NAMED_ALLOW_CALL(*this, vkQueuePresentKHR(testCombinedQueue, _))
+            .RETURN(VK_SUCCESS));
+  }
   expectations.push(NAMED_ALLOW_CALL(*this,
       vkGetPhysicalDeviceSurfaceCapabilitiesKHR(testPhysDev, testSurface, _))
                         .SIDE_EFFECT(fillSurfCaps(*_3))
@@ -851,9 +912,6 @@ void vulkan_mock::mockGraphics()
       NAMED_ALLOW_CALL(*this, vkCreateDevice(testPhysDev, _, nullptr, _))
           .SIDE_EFFECT(*_4 = testLogDev)
           .RETURN(VK_SUCCESS));
-  expectations.push(
-      NAMED_ALLOW_CALL(*this, vkGetDeviceQueue(testLogDev, 0u, 0u, _))
-          .SIDE_EFFECT(*_4 = testCombinedQueue));
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkCreateSwapchainKHR(testLogDev, _, nullptr, _))
           .SIDE_EFFECT(testSwapChainImageCount = _2->minImageCount)
@@ -978,12 +1036,6 @@ void vulkan_mock::mockGraphics()
           .RETURN(VK_SUCCESS));
   expectations.push(NAMED_ALLOW_CALL(*this, vkResetFences(testLogDev, _, _))
                         .RETURN(VK_SUCCESS));
-  expectations.push(
-      NAMED_ALLOW_CALL(*this, vkQueueSubmit(testCombinedQueue, _, _, _))
-          .RETURN(VK_SUCCESS));
-  expectations.push(
-      NAMED_ALLOW_CALL(*this, vkQueuePresentKHR(testCombinedQueue, _))
-          .RETURN(VK_SUCCESS));
   expectations.push(NAMED_ALLOW_CALL(*this, glfwWindowShouldClose(testWindow))
                         .RETURN(_glfwShouldClose));
   expectations.push(

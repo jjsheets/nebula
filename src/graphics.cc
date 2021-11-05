@@ -20,7 +20,7 @@
   #include <doctest/trompeloeil.hpp>
   #include "../test/vulkan-mock.h"
 
-SCENARIO("class graphics" * doctest::may_fail())
+SCENARIO("class graphics")
 {
   GIVEN("a graphics object")
   {
@@ -30,6 +30,21 @@ SCENARIO("class graphics" * doctest::may_fail())
 
     nebula::graphics gfx(
         1600, 900, [](GLFWwindow *, int, int, int, int) {}, true);
+    THEN("it should not throw when a frame is drawn")
+    {
+      REQUIRE_NOTHROW(gfx.drawFrame());
+    }
+  }
+  GIVEN("a graphics object without validation layers, testing alternate code "
+        "paths")
+  {
+    // Set up the expectations for this test in a mock object
+    vulkan_mock vkMock;
+    vkMock.enableSeparateQueues();
+    vkMock.mockGraphics();
+
+    nebula::graphics gfx(
+        1600, 900, [](GLFWwindow *, int, int, int, int) {}, false);
     THEN("it should not throw when a frame is drawn")
     {
       REQUIRE_NOTHROW(gfx.drawFrame());
@@ -392,6 +407,14 @@ graphics::queueFamilyIndices::queueFamilyIndices(
     }
     i++;
   }
+  if (_graphicsFamily)
+    LOG_S(1) << "graphicsFamily: " << _graphicsFamily.value();
+  else
+    LOG_S(1) << "graphicsFamily: none";
+  if (_presentFamily)
+    LOG_S(1) << "presentFamily: " << _presentFamily.value();
+  else
+    LOG_S(1) << "presentFamily: none";
 }
 
 bool graphics::queueFamilyIndices::isComplete()

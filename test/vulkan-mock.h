@@ -20,6 +20,8 @@ private:
   VkPhysicalDevice testPhysDev;
   VkDevice testLogDev;
   VkQueue testCombinedQueue;
+  VkQueue testGraphicsQueue;
+  VkQueue testPresentQueue;
   VkSwapchainKHR testSwapChain;
   VkRenderPass testRenderPass;
   VkPipelineLayout testPipeLayout;
@@ -37,8 +39,9 @@ private:
   int _glfwShouldClose = GLFW_FALSE;
   std::function<void(GLFWwindow *, int, int, int, int)> _keyCB;
   std::queue<std::function<void()>> _evBuffer;
-  uint64_t _loopCount = 0;
-  uint64_t _loopMax   = 60 * 5;
+  uint64_t _loopCount  = 0;
+  uint64_t _loopMax    = 60 * 5;
+  bool _separateQueues = false;
 
   void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
   void fillSurfFmt(VkSurfaceFormatKHR &fmt);
@@ -51,6 +54,7 @@ private:
   void fillCmdBuffer(uint32_t n, VkCommandBuffer *bufs);
   bool validCmdBuffer(VkCommandBuffer &b);
   void nextImage(uint32_t *n);
+  void fillFamilyProperties(VkQueueFamilyProperties c[]);
 
 public:
   static vulkan_mock *&instance()
@@ -74,6 +78,7 @@ public:
   void simKeyPress(int key, int mod, bool release);
   void maxLoop(uint64_t m);
   void pollEvents();
+  void enableSeparateQueues();
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());
