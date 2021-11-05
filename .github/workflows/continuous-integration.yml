@@ -42,6 +42,7 @@ jobs:
             mingw-w64-x86_64-libc++
             mingw-w64-x86_64-libc++abi
             mingw-w64-clang-x86_64-winpthreads-git
+            mingw-w64-x86_64-compiler-rt
             msys2-runtime-devel
             base-devel
             libreadline-devel
