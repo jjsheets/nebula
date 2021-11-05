@@ -42,6 +42,8 @@ SCENARIO("class bind")
     WHEN("the key is pressed and released")
     {
       // just that the same integer is used when sending the key pressed event
+      pressed  = false;
+      released = false;
       REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
           0, nebula::bind::action::press, modifier));
       REQUIRE_NOTHROW(nebula::bind::keyboardEvent(
