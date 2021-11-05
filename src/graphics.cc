@@ -370,9 +370,6 @@ bool graphics::checkDeviceExtensionSupport(VkPhysicalDevice device)
   LOG_SCOPE_FUNCTION(2);
   VkPhysicalDeviceProperties deviceProperties;
   vkGetPhysicalDeviceProperties(device, &deviceProperties);
-  if (deviceProperties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-    return false;
-  }
   uint32_t extensionCount;
   vkEnumerateDeviceExtensionProperties(
       device, nullptr, &extensionCount, nullptr);
