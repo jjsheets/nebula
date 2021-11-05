@@ -3,6 +3,9 @@
 #include <doctest/trompeloeil.hpp>
 #include "../test/vulkan-mock.h"
 
+// Exception includes
+#include "exceptions.h"
+
 // Logging system includes
 #include "loguru.hpp"
 #include <cstring>
@@ -13,6 +16,7 @@ extern "C" {
 
 void glfwSetWindowShouldClose(GLFWwindow *a, int b)
 {
+  LOG_SCOPE_FUNCTION(9);
   auto vkMock = vulkan_mock::instance();
   assert(vkMock);
   vkMock->glfwSetWindowShouldClose(a, b);
@@ -123,6 +127,7 @@ GLFWframebuffersizefun glfwSetFramebufferSizeCallback(
 
 GLFWkeyfun glfwSetKeyCallback(GLFWwindow *a, GLFWkeyfun b)
 {
+  LOG_SCOPE_FUNCTION(9);
   auto vkMock = vulkan_mock::instance();
   assert(vkMock);
   return vkMock->glfwSetKeyCallback(a, b);
@@ -697,12 +702,28 @@ void vulkan_mock::nextImage(uint32_t *n)
 
 void vulkan_mock::simKeyPress(int key, int mod, bool release)
 {
+  LOG_SCOPE_FUNCTION(9);
   _evBuffer.emplace(
       [key, mod, this]() { _keyCB(testWindow, key, key, GLFW_PRESS, mod); });
   if (release)
     _evBuffer.emplace([key, mod, this]() {
       _keyCB(testWindow, key, key, GLFW_RELEASE, mod);
     });
+}
+
+void vulkan_mock::maxLoop(uint64_t m)
+{
+  _loopMax = m;
+}
+
+void vulkan_mock::pollEvents()
+{
+  while (!_evBuffer.empty()) {
+    _evBuffer.front()();
+    _evBuffer.pop();
+  }
+  if (++_loopCount == _loopMax)
+    throw std::runtime_error("maximum loop count reached");
 }
 
 void vulkan_mock::mockGraphics()
@@ -968,4 +989,6 @@ void vulkan_mock::mockGraphics()
   expectations.push(
       NAMED_ALLOW_CALL(*this, glfwSetWindowShouldClose(testWindow, _))
           .SIDE_EFFECT(_glfwShouldClose = _2));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, glfwPollEvents()).SIDE_EFFECT(pollEvents()));
 }

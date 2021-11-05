@@ -37,6 +37,8 @@ private:
   int _glfwShouldClose = GLFW_FALSE;
   std::function<void(GLFWwindow *, int, int, int, int)> _keyCB;
   std::queue<std::function<void()>> _evBuffer;
+  uint64_t _loopCount = 0;
+  uint64_t _loopMax   = 60 * 5;
 
   void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
   void fillSurfFmt(VkSurfaceFormatKHR &fmt);
@@ -70,6 +72,8 @@ public:
   vulkan_mock &operator=(const vulkan_mock &) = delete;
   void mockGraphics();
   void simKeyPress(int key, int mod, bool release);
+  void maxLoop(uint64_t m);
+  void pollEvents();
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());
