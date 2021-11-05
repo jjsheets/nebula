@@ -180,7 +180,6 @@ jobs:
           mkdir /home/runner/.local
           mkdir /home/runner/.local/share
           test/test
-          cat test/test.log
           cd gcov
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info
@@ -191,7 +190,6 @@ jobs:
         shell: msys2 {0}
         run: |
           test/test
-          cat test/test.log
           cd gcov
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info

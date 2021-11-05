@@ -5,11 +5,11 @@ CFLAGS += -Og
 
 ifeq (@(TUP_PLATFORM),win32)
 : foreach *.cc |> !cc |> %B.o
-: foreach ../src/*.cc ^../src/main.cc |> !cc |> %B.o
+: foreach ../src/*.cc ^../src/main.cc |> !cc -fprofile-arcs -ftest-coverage |> %B.o
 : ../external/loguru/loguru.cpp |> !cc -I/mingw64/x86_64-w64-mingw32/include |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc -D _WIN32 |> %B.o
 : ../external/sqlite-build/sqlite3.c |> !c |> %B.o
-: *.o ../external/lua/liblua.a |> !ld |> test.exe
+: *.o ../external/lua/liblua.a |> !ld -lgcov --coverage |> test.exe
 else
 : foreach *.cc |> !cc |> %B.o
 : foreach ../src/*.cc ^../src/main.cc |> !cc -fprofile-arcs -ftest-coverage |> %B.o | %B.gcno
