@@ -191,10 +191,10 @@ jobs:
         shell: msys2 {0}
         run: |
           test/test
-          cd gcov
-          gcov -o ../test ../src/*.cc -t >test.gcov
-          lcov -c -d ../test -o test.info
-          lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
+#          cd gcov
+#          gcov -o ../test ../src/*.cc -t >test.gcov
+#          lcov -c -d ../test -o test.info
+#          lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
 
       - uses: codecov/codecov-action@v2
         if: matrix.os == 'ubuntu-latest'
