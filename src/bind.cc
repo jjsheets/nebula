@@ -51,9 +51,9 @@ SCENARIO("class bind")
       {
         REQUIRE(pressed == true);
         REQUIRE(released == true);
+        pressed  = false;
+        released = false;
       }
-      pressed  = false;
-      released = false;
     }
 
     WHEN("a different key is pressed and released")
@@ -133,9 +133,9 @@ SCENARIO("class bind")
       {
         REQUIRE(pressed == true);
         REQUIRE(released == true);
+        pressed  = false;
+        released = false;
       }
-      pressed  = false;
-      released = false;
     }
 
     WHEN("a different button is pressed and released")
@@ -215,9 +215,9 @@ SCENARIO("class bind")
       {
         REQUIRE(pressed == true);
         REQUIRE(released == true);
+        pressed  = false;
+        released = false;
       }
-      pressed  = false;
-      released = false;
     }
 
     WHEN("a different button is pressed and released")
@@ -311,8 +311,9 @@ SCENARIO("class bind")
       {
         REQUIRE(handled == true);
         REQUIRE(delta == 1.0);
+        handled = false;
+        delta   = 0.0;
       }
-      handled = false;
     }
 
     WHEN("a different axis is moved")
@@ -379,7 +380,6 @@ SCENARIO("class bind")
 
     WHEN("the axis is moved")
     {
-      handled = false;
       // just that the same integer is used when sending the key pressed event
       REQUIRE_NOTHROW(nebula::bind::joystickAxisEvent(0, 0, 1.0, modifier));
 
@@ -387,6 +387,8 @@ SCENARIO("class bind")
       {
         REQUIRE(handled == true);
         REQUIRE(delta == 1.0);
+        handled = false;
+        delta   = 0.0;
       }
     }
 
