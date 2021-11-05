@@ -14,7 +14,7 @@ SCENARIO("class bind")
 {
   GIVEN("a bind object bound to a key")
   {
-    LOG_S(INFO) << "class bind test fixture";
+    LOG_S(INFO) << "FOO 1";
     bool pressed  = false;
     bool released = false;
     nebula::bind::modifier modifier;
@@ -23,33 +23,48 @@ SCENARIO("class bind")
         [&](double d) {},
         "Category",
         "Keyboard Test");
+    LOG_S(INFO) << "FOO 2";
     // the integer used as the key is intended to be a GLFW constant, but its
     // value doesn't matter for testing purposes
     bind->bindKey(0, modifier);
+    LOG_S(INFO) << "FOO 3";
 
     THEN("it should report as bound")
     {
+      LOG_S(INFO) << "FOO 4";
       REQUIRE(bind->bound() == true);
+      LOG_S(INFO) << "FOO 5";
       REQUIRE(!!nebula::bind::findBind("Category", "Keyboard Test"));
+      LOG_S(INFO) << "FOO 6";
       REQUIRE(!!nebula::bind::findKey(0, modifier));
+      LOG_S(INFO) << "FOO 7";
       REQUIRE(nebula::bind::findKey(0, modifier).get() == bind.get());
+      LOG_S(INFO) << "FOO 8";
     }
 
     THEN("it should report its name in <Category>:<Name> format")
     {
+      LOG_S(INFO) << "FOO 9";
       REQUIRE(bind->combinedName() == "Category:Keyboard Test");
+      LOG_S(INFO) << "FOO 10";
     }
 
     WHEN("the key is pressed and released")
     {
+      LOG_S(INFO) << "FOO 11";
       // just that the same integer is used when sending the key pressed event
       nebula::bind::keyboardEvent(0, nebula::bind::action::press, modifier);
+      LOG_S(INFO) << "FOO 12";
       nebula::bind::keyboardEvent(0, nebula::bind::action::release, modifier);
+      LOG_S(INFO) << "FOO 13";
 
       THEN("the pressHandler and releaseHandler code should have run")
       {
+        LOG_S(INFO) << "FOO 14";
         REQUIRE(pressed == true);
+        LOG_S(INFO) << "FOO 15";
         REQUIRE(released == true);
+        LOG_S(INFO) << "FOO 16";
       }
       pressed  = false;
       released = false;
