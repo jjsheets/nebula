@@ -8,10 +8,13 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "engine.h"
+#include "loguru.hpp"
 
 int main(int argc, char *argv[])
 {
-  nebula::engine nebulaEngine(argc, argv);
+  loguru::init(argc, argv);
+  loguru::add_file("log/verbose.log", loguru::Truncate, loguru::Verbosity_MAX);
+  nebula::engine nebulaEngine;
   nebulaEngine.loop();
   return 0;
 }

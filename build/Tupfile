@@ -4,7 +4,7 @@ CFLAGS += -D DOCTEST_CONFIG_DISABLE -O2
 
 : foreach ../src/*.cc ^../src/test.cc |> !cc |> %B.o
 ifeq (@(TUP_PLATFORM),win32)
-: ../external/loguru/loguru.cpp |> !cc -D _WIN32 -I/mingw64/x86_64-w64-mingw32/include |> %B.o
+: ../external/loguru/loguru.cpp |> !cc -I/mingw64/x86_64-w64-mingw32/include |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc -D _WIN32 |> %B.o
 : ../external/sqlite-build/sqlite3.c |> !c |> %B.o
 : *.o ../external/lua/liblua.a |> !ld $(BUILD_LDFLAGS) |> nebula.exe

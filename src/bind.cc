@@ -3,6 +3,7 @@
 
 #include "bind.h"
 
+#include "loguru.hpp"
 // Unit Testing includes
 #include "doctest.h"
 
@@ -15,48 +16,58 @@ SCENARIO("class bind")
   {
     bool pressed  = false;
     bool released = false;
-    nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() { pressed = true; },
-        [&]() { released = true; },
+    nebula::bindManager bindMgr;
+    nebula::bindManager::modifier modifier;
+    auto bind = bindMgr.create(
+        [&]() {
+          LOG_S(INFO) << "press event";
+          pressed = true;
+        },
+        [&]() {
+          LOG_S(INFO) << "release event";
+          released = true;
+        },
         [&](double d) {},
         "Category",
         "Keyboard Test");
     // the integer used as the key is intended to be a GLFW constant, but its
     // value doesn't matter for testing purposes
-    bind->bindKey(0, modifier);
+    bindMgr.bindKey(bind, 0, modifier);
 
     THEN("it should report as bound")
     {
-      REQUIRE(bind->bound() == true);
-      REQUIRE(!!nebula::bind::findBind("Category", "Keyboard Test"));
-      REQUIRE(!!nebula::bind::findKey(0, modifier));
-      REQUIRE(nebula::bind::findKey(0, modifier).get() == bind.get());
+      REQUIRE(bindMgr.bound(bind) == true);
+      REQUIRE(bindMgr.bindExists("Category", "Keyboard Test"));
+      REQUIRE(bindMgr.keyBindExists(0, modifier));
+      REQUIRE(bindMgr.keyBindIs(0, modifier, bind));
     }
 
     THEN("it should report its name in <Category>:<Name> format")
     {
-      REQUIRE(bind->combinedName() == "Category:Keyboard Test");
+      REQUIRE(bind.combinedName() == "Category:Keyboard Test");
     }
 
     WHEN("the key is pressed and released")
     {
+      pressed  = false;
+      released = false;
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::keyboardEvent(0, nebula::bind::action::press, modifier);
-      nebula::bind::keyboardEvent(0, nebula::bind::action::release, modifier);
+      bindMgr.keyboardPress(0, modifier);
+      bindMgr.keyboardRelease(0, modifier);
 
       THEN("the pressHandler and releaseHandler code should have run")
       {
         REQUIRE(pressed == true);
         REQUIRE(released == true);
       }
-      pressed  = false;
-      released = false;
     }
 
     WHEN("a different key is pressed and released")
     {
-      nebula::bind::keyboardEvent(1, nebula::bind::action::press, modifier);
-      nebula::bind::keyboardEvent(1, nebula::bind::action::release, modifier);
+      pressed  = false;
+      released = false;
+      bindMgr.keyboardPress(1, modifier);
+      bindMgr.keyboardRelease(1, modifier);
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -67,20 +78,21 @@ SCENARIO("class bind")
 
     WHEN("it is unbound")
     {
-      bind->unbind();
+      bindMgr.unbind(bind);
 
       THEN("it should report as unbound")
       {
-        REQUIRE(bind->bound() == false);
-        REQUIRE(!!nebula::bind::findBind("Category", "Keyboard Test"));
-        REQUIRE(!nebula::bind::findKey(0, modifier));
-        REQUIRE(nebula::bind::findKey(0, modifier).get() != bind.get());
+        REQUIRE(bindMgr.bound(bind) == false);
+        REQUIRE(!bindMgr.keyBindExists(0, modifier));
+        REQUIRE(!bindMgr.keyBindIs(0, modifier, bind));
       }
 
       THEN("it should not react to the key it was bound to")
       {
-        nebula::bind::keyboardEvent(0, nebula::bind::action::press, modifier);
-        nebula::bind::keyboardEvent(0, nebula::bind::action::release, modifier);
+        pressed  = false;
+        released = false;
+        bindMgr.keyboardPress(0, modifier);
+        bindMgr.keyboardRelease(0, modifier);
         REQUIRE(pressed == false);
         REQUIRE(released == false);
       }
@@ -91,50 +103,58 @@ SCENARIO("class bind")
   {
     bool pressed  = false;
     bool released = false;
-    nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() { pressed = true; },
-        [&]() { released = true; },
+    nebula::bindManager bindMgr;
+    nebula::bindManager::modifier modifier;
+    auto bind = bindMgr.create(
+        [&]() {
+          LOG_S(INFO) << "press event";
+          pressed = true;
+        },
+        [&]() {
+          LOG_S(INFO) << "release event";
+          released = true;
+        },
         [&](double d) {},
         "Category",
-        "Mouse Button Test");
-    // the integer used as the mouse button is intended to be a GLFW constant,
-    // but its value doesn't matter for testing purposes
-    bind->bindMButton(0, modifier);
+        "MButton Test");
+    // the integer used as the key is intended to be a GLFW constant, but its
+    // value doesn't matter for testing purposes
+    bindMgr.bindMBtn(bind, 0, modifier);
 
     THEN("it should report as bound")
     {
-      REQUIRE(bind->bound() == true);
-      REQUIRE(!!nebula::bind::findBind("Category", "Mouse Button Test"));
-      REQUIRE(!!nebula::bind::findMButton(0, modifier));
-      REQUIRE(nebula::bind::findMButton(0, modifier).get() == bind.get());
+      REQUIRE(bindMgr.bound(bind) == true);
+      REQUIRE(bindMgr.bindExists("Category", "MButton Test"));
+      REQUIRE(bindMgr.mBtnBindExists(0, modifier));
+      REQUIRE(bindMgr.mBtnBindIs(0, modifier, bind));
     }
 
     THEN("it should report its name in <Category>:<Name> format")
     {
-      REQUIRE(bind->combinedName() == "Category:Mouse Button Test");
+      REQUIRE(bind.combinedName() == "Category:MButton Test");
     }
 
-    WHEN("the button is pressed and released")
+    WHEN("the mouse button is pressed and released")
     {
+      pressed  = false;
+      released = false;
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::mouseButtonEvent(0, nebula::bind::action::press, modifier);
-      nebula::bind::mouseButtonEvent(
-          0, nebula::bind::action::release, modifier);
+      bindMgr.mButtonPress(0, modifier);
+      bindMgr.mButtonRelease(0, modifier);
 
       THEN("the pressHandler and releaseHandler code should have run")
       {
         REQUIRE(pressed == true);
         REQUIRE(released == true);
       }
-      pressed  = false;
-      released = false;
     }
 
-    WHEN("a different button is pressed and released")
+    WHEN("a different mouse button is pressed and released")
     {
-      nebula::bind::mouseButtonEvent(1, nebula::bind::action::press, modifier);
-      nebula::bind::mouseButtonEvent(
-          1, nebula::bind::action::release, modifier);
+      pressed  = false;
+      released = false;
+      bindMgr.mButtonPress(1, modifier);
+      bindMgr.mButtonRelease(1, modifier);
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -145,92 +165,83 @@ SCENARIO("class bind")
 
     WHEN("it is unbound")
     {
-      bind->unbind();
+      bindMgr.unbind(bind);
 
       THEN("it should report as unbound")
       {
-        REQUIRE(bind->bound() == false);
-        REQUIRE(!!nebula::bind::findBind("Category", "Mouse Button Test"));
-        REQUIRE(!nebula::bind::findMButton(0, modifier));
-        REQUIRE(nebula::bind::findMButton(0, modifier).get() != bind.get());
+        REQUIRE(bindMgr.bound(bind) == false);
+        REQUIRE(!bindMgr.mBtnBindExists(0, modifier));
+        REQUIRE(!bindMgr.mBtnBindIs(0, modifier, bind));
       }
 
-      THEN("it should not react to the button it was bound to")
+      THEN("it should not react to the mouse button it was bound to")
       {
-        nebula::bind::mouseButtonEvent(
-            0, nebula::bind::action::press, modifier);
-        nebula::bind::mouseButtonEvent(
-            0, nebula::bind::action::release, modifier);
+        pressed  = false;
+        released = false;
+        bindMgr.mButtonPress(0, modifier);
+        bindMgr.mButtonRelease(0, modifier);
         REQUIRE(pressed == false);
         REQUIRE(released == false);
       }
     }
   }
 
-  GIVEN("a bind object bound to a joystick/gamepad button")
+  GIVEN("a bind object bound to a controller button")
   {
     bool pressed  = false;
     bool released = false;
-    nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() { pressed = true; },
-        [&]() { released = true; },
+    nebula::bindManager bindMgr;
+    nebula::bindManager::modifier modifier;
+    auto bind = bindMgr.create(
+        [&]() {
+          LOG_S(INFO) << "press event";
+          pressed = true;
+        },
+        [&]() {
+          LOG_S(INFO) << "release event";
+          released = true;
+        },
         [&](double d) {},
         "Category",
-        "Joystick Button Test");
-    // the integer used as the mouse button is intended to be a GLFW constant,
-    // but its value doesn't matter for testing purposes
-    bind->bindJButton(0, 0, modifier);
+        "CButton Test");
+    // the integer used as the key is intended to be a GLFW constant, but its
+    // value doesn't matter for testing purposes
+    bindMgr.bindCBtn(bind, 0, 0, modifier);
 
     THEN("it should report as bound")
     {
-      REQUIRE(bind->bound() == true);
-      REQUIRE(!!nebula::bind::findBind("Category", "Joystick Button Test"));
-      REQUIRE(!!nebula::bind::findJButton(0, 0, modifier));
-      REQUIRE(nebula::bind::findJButton(0, 0, modifier).get() == bind.get());
+      REQUIRE(bindMgr.bound(bind) == true);
+      REQUIRE(bindMgr.bindExists("Category", "CButton Test"));
+      REQUIRE(bindMgr.cBtnBindExists(0, 0, modifier));
+      REQUIRE(bindMgr.cBtnBindIs(0, 0, modifier, bind));
     }
 
     THEN("it should report its name in <Category>:<Name> format")
     {
-      REQUIRE(bind->combinedName() == "Category:Joystick Button Test");
+      REQUIRE(bind.combinedName() == "Category:CButton Test");
     }
 
-    WHEN("the button is pressed and released")
+    WHEN("the controller button is pressed and released")
     {
+      pressed  = false;
+      released = false;
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::joystickButtonEvent(
-          0, 0, nebula::bind::action::press, modifier);
-      nebula::bind::joystickButtonEvent(
-          0, 0, nebula::bind::action::release, modifier);
+      bindMgr.cButtonPress(0, 0, modifier);
+      bindMgr.cButtonRelease(0, 0, modifier);
 
       THEN("the pressHandler and releaseHandler code should have run")
       {
         REQUIRE(pressed == true);
         REQUIRE(released == true);
       }
+    }
+
+    WHEN("a different controller button is pressed and released")
+    {
       pressed  = false;
       released = false;
-    }
-
-    WHEN("a different button is pressed and released")
-    {
-      nebula::bind::joystickButtonEvent(
-          0, 1, nebula::bind::action::press, modifier);
-      nebula::bind::joystickButtonEvent(
-          0, 1, nebula::bind::action::release, modifier);
-
-      THEN("the pressHandler and releaseHandler code should not have run")
-      {
-        REQUIRE(pressed == false);
-        REQUIRE(released == false);
-      }
-    }
-
-    WHEN("the right button on the wrong controller is pressed and released")
-    {
-      nebula::bind::joystickButtonEvent(
-          1, 0, nebula::bind::action::press, modifier);
-      nebula::bind::joystickButtonEvent(
-          1, 0, nebula::bind::action::release, modifier);
+      bindMgr.cButtonPress(1, 0, modifier);
+      bindMgr.cButtonRelease(1, 0, modifier);
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -241,22 +252,21 @@ SCENARIO("class bind")
 
     WHEN("it is unbound")
     {
-      bind->unbind();
+      bindMgr.unbind(bind);
 
       THEN("it should report as unbound")
       {
-        REQUIRE(bind->bound() == false);
-        REQUIRE(!!nebula::bind::findBind("Category", "Joystick Button Test"));
-        REQUIRE(!nebula::bind::findJButton(0, 0, modifier));
-        REQUIRE(nebula::bind::findJButton(0, 0, modifier).get() != bind.get());
+        REQUIRE(bindMgr.bound(bind) == false);
+        REQUIRE(!bindMgr.cBtnBindExists(0, 0, modifier));
+        REQUIRE(!bindMgr.cBtnBindIs(0, 0, modifier, bind));
       }
 
-      THEN("it should not react to the button it was bound to")
+      THEN("it should not react to the controller button it was bound to")
       {
-        nebula::bind::joystickButtonEvent(
-            0, 0, nebula::bind::action::press, modifier);
-        nebula::bind::joystickButtonEvent(
-            0, 0, nebula::bind::action::release, modifier);
+        pressed  = false;
+        released = false;
+        bindMgr.cButtonPress(0, 0, modifier);
+        bindMgr.cButtonRelease(0, 0, modifier);
         REQUIRE(pressed == false);
         REQUIRE(released == false);
       }
@@ -267,48 +277,53 @@ SCENARIO("class bind")
   {
     bool handled = false;
     double delta = 0.0;
-    nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() {},
+    nebula::bindManager bindMgr;
+    nebula::bindManager::modifier modifier;
+    auto bind = bindMgr.create([&]() {},
         [&]() {},
         [&](double d) {
+          LOG_S(INFO) << "delta event";
           handled = true;
           delta += d;
         },
         "Category",
-        "Mouse Axis Test");
-    // the integer used as the mouse button is intended to be a GLFW constant,
-    // but its value doesn't matter for testing purposes
-    bind->bindMAxis(0, modifier);
+        "MAxis Test");
+    // the integer used as the key is intended to be a GLFW constant, but its
+    // value doesn't matter for testing purposes
+    bindMgr.bindMAxis(bind, 0, modifier);
 
     THEN("it should report as bound")
     {
-      REQUIRE(bind->bound() == true);
-      REQUIRE(!!nebula::bind::findBind("Category", "Mouse Axis Test"));
-      REQUIRE(!!nebula::bind::findMAxis(0, modifier));
-      REQUIRE(nebula::bind::findMAxis(0, modifier).get() == bind.get());
+      REQUIRE(bindMgr.bound(bind) == true);
+      REQUIRE(bindMgr.bindExists("Category", "MAxis Test"));
+      REQUIRE(bindMgr.mAxisBindExists(0, modifier));
+      REQUIRE(bindMgr.mAxisBindIs(0, modifier, bind));
     }
 
     THEN("it should report its name in <Category>:<Name> format")
     {
-      REQUIRE(bind->combinedName() == "Category:Mouse Axis Test");
+      REQUIRE(bind.combinedName() == "Category:MAxis Test");
     }
 
-    WHEN("the axis is moved")
+    WHEN("the mouse axis is moved")
     {
+      handled = false;
+      delta   = 0.0;
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::mouseAxisEvent(0, 1.0, modifier);
+      bindMgr.mAxisDelta(0, modifier, 1.0);
 
-      THEN("the deltaHandler code should have run")
+      THEN("the pressHandler and releaseHandler code should have run")
       {
         REQUIRE(handled == true);
         REQUIRE(delta == 1.0);
       }
-      handled = false;
     }
 
-    WHEN("a different axis is moved")
+    WHEN("a different mouse axis is moved")
     {
-      nebula::bind::mouseAxisEvent(1, 1.0, modifier);
+      handled = false;
+      delta   = 0.0;
+      bindMgr.mAxisDelta(1, modifier, 1.0);
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -319,84 +334,77 @@ SCENARIO("class bind")
 
     WHEN("it is unbound")
     {
-      bind->unbind();
+      bindMgr.unbind(bind);
 
       THEN("it should report as unbound")
       {
-        REQUIRE(bind->bound() == false);
-        REQUIRE(!!nebula::bind::findBind("Category", "Mouse Axis Test"));
-        REQUIRE(!nebula::bind::findMAxis(0, modifier));
-        REQUIRE(nebula::bind::findMAxis(0, modifier).get() != bind.get());
+        REQUIRE(bindMgr.bound(bind) == false);
+        REQUIRE(!bindMgr.mAxisBindExists(0, modifier));
+        REQUIRE(!bindMgr.mAxisBindIs(0, modifier, bind));
       }
 
-      THEN("it should not react to the axis it was bound to")
+      THEN("it should not react to the mouse axis it was bound to")
       {
-        nebula::bind::mouseAxisEvent(0, 1.0, modifier);
+        handled = false;
+        delta   = 0.0;
+        bindMgr.mAxisDelta(0, modifier, 1.0);
         REQUIRE(handled == false);
         REQUIRE(delta == 0.0);
       }
     }
   }
 
-  GIVEN("a bind object bound to a joystick/controller axis")
+  GIVEN("a bind object bound to a controller axis")
   {
     bool handled = false;
     double delta = 0.0;
-    nebula::bind::modifier modifier;
-    auto bind = nebula::bind::create([&]() {},
+    nebula::bindManager bindMgr;
+    nebula::bindManager::modifier modifier;
+    auto bind = bindMgr.create([&]() {},
         [&]() {},
         [&](double d) {
+          LOG_S(INFO) << "delta event";
           handled = true;
           delta += d;
         },
         "Category",
-        "Joystick Axis Test");
-    // the integer used as the mouse button is intended to be a GLFW constant,
-    // but its value doesn't matter for testing purposes
-    bind->bindJAxis(0, 0, modifier);
+        "CAxis Test");
+    // the integer used as the key is intended to be a GLFW constant, but its
+    // value doesn't matter for testing purposes
+    bindMgr.bindCAxis(bind, 0, 0, modifier);
 
     THEN("it should report as bound")
     {
-      REQUIRE(bind->bound() == true);
-      REQUIRE(!!nebula::bind::findBind("Category", "Joystick Axis Test"));
-      REQUIRE(!!nebula::bind::findJAxis(0, 0, modifier));
-      REQUIRE(nebula::bind::findJAxis(0, 0, modifier).get() == bind.get());
+      REQUIRE(bindMgr.bound(bind) == true);
+      REQUIRE(bindMgr.bindExists("Category", "CAxis Test"));
+      REQUIRE(bindMgr.cAxisBindExists(0, 0, modifier));
+      REQUIRE(bindMgr.cAxisBindIs(0, 0, modifier, bind));
     }
 
     THEN("it should report its name in <Category>:<Name> format")
     {
-      REQUIRE(bind->combinedName() == "Category:Joystick Axis Test");
+      REQUIRE(bind.combinedName() == "Category:CAxis Test");
     }
 
-    WHEN("the axis is moved")
+    WHEN("the controller axis is moved")
     {
       handled = false;
+      delta   = 0.0;
       // just that the same integer is used when sending the key pressed event
-      nebula::bind::joystickAxisEvent(0, 0, 1.0, modifier);
+      bindMgr.cAxisDelta(0, 0, modifier, 1.0);
 
-      THEN("the deltaHandler code should have run")
+      THEN("the pressHandler and releaseHandler code should have run")
       {
         REQUIRE(handled == true);
         REQUIRE(delta == 1.0);
       }
     }
 
-    WHEN("a different axis is moved")
+    WHEN("a different controller axis is moved")
     {
       handled = false;
-      nebula::bind::joystickAxisEvent(0, 1, 1.0, modifier);
-
-      THEN("the pressHandler and releaseHandler code should not have run")
-      {
-        REQUIRE(handled == false);
-        REQUIRE(delta == 0.0);
-      }
-    }
-
-    WHEN("the right axis on a different controller is moved")
-    {
-      handled = false;
-      nebula::bind::joystickAxisEvent(1, 0, 1.0, modifier);
+      delta   = 0.0;
+      bindMgr.cAxisDelta(1, 0, modifier, 1.0);
 
       THEN("the pressHandler and releaseHandler code should not have run")
       {
@@ -407,19 +415,20 @@ SCENARIO("class bind")
 
     WHEN("it is unbound")
     {
-      bind->unbind();
+      bindMgr.unbind(bind);
 
       THEN("it should report as unbound")
       {
-        REQUIRE(bind->bound() == false);
-        REQUIRE(!!nebula::bind::findBind("Category", "Joystick Axis Test"));
-        REQUIRE(!nebula::bind::findJAxis(0, 0, modifier));
-        REQUIRE(nebula::bind::findJAxis(0, 0, modifier).get() != bind.get());
+        REQUIRE(bindMgr.bound(bind) == false);
+        REQUIRE(!bindMgr.cAxisBindExists(0, 0, modifier));
+        REQUIRE(!bindMgr.cAxisBindIs(0, 0, modifier, bind));
       }
 
-      THEN("it should not react to the axis it was bound to")
+      THEN("it should not react to the controller axis it was bound to")
       {
-        nebula::bind::joystickAxisEvent(0, 0, 1.0, modifier);
+        handled = false;
+        delta   = 0.0;
+        bindMgr.cAxisDelta(0, 0, modifier, 1.0);
         REQUIRE(handled == false);
         REQUIRE(delta == 0.0);
       }
@@ -428,87 +437,85 @@ SCENARIO("class bind")
 
   GIVEN("multiple bind objects mapped to input events")
   {
-    nebula::bind::modifier modifier;
-    auto bind1 = nebula::bind::create(
+    nebula::bindManager bindMgr;
+    nebula::bindManager::modifier modifier;
+    auto bind1 = bindMgr.create(
         nullptr, nullptr, nullptr, "Category", "Keyboard Test");
-    auto bind2 = nebula::bind::create(
-        nullptr, nullptr, nullptr, "Category", "Mouse Button Test");
-    auto bind3 = nebula::bind::create(
-        nullptr, nullptr, nullptr, "Category", "Joystick Button Test");
-    auto bind4 = nebula::bind::create(
-        nullptr, nullptr, nullptr, "Category", "Mouse Axis Test");
-    auto bind5 = nebula::bind::create(
-        nullptr, nullptr, nullptr, "Category", "Joystick Axis Test");
-    bind1->bindKey(0, modifier);
-    bind2->bindMButton(0, modifier);
-    bind3->bindJButton(0, 0, modifier);
-    bind4->bindMAxis(0, modifier);
-    bind5->bindJAxis(0, 0, modifier);
+    auto bind2
+        = bindMgr.create(nullptr, nullptr, nullptr, "Category", "MButton Test");
+    auto bind3
+        = bindMgr.create(nullptr, nullptr, nullptr, "Category", "CButton Test");
+    auto bind4
+        = bindMgr.create(nullptr, nullptr, nullptr, "Category", "MAxis Test");
+    auto bind5
+        = bindMgr.create(nullptr, nullptr, nullptr, "Category", "CAxis Test");
+    bindMgr.bindKey(bind1, 0, modifier);
+    bindMgr.bindMBtn(bind2, 0, modifier);
+    bindMgr.bindCBtn(bind3, 0, 0, modifier);
+    bindMgr.bindMAxis(bind4, 0, modifier);
+    bindMgr.bindCAxis(bind5, 0, 0, modifier);
     WHEN("all binds are cleared")
     {
-      nebula::bind::clearBinds();
+      REQUIRE_NOTHROW(bindMgr.clearBinds());
       THEN("none of the binds should be found")
       {
-        REQUIRE(nebula::bind::findKey(0, modifier) == nullptr);
-        REQUIRE(nebula::bind::findBind("Category", "Keyboard Test") == nullptr);
-        REQUIRE(nebula::bind::findMButton(0, modifier) == nullptr);
-        REQUIRE(
-            nebula::bind::findBind("Category", "Mouse Button Test") == nullptr);
-        REQUIRE(nebula::bind::findJButton(0, 0, modifier) == nullptr);
-        REQUIRE(nebula::bind::findBind("Category", "Joystick Button Test")
-                == nullptr);
-        REQUIRE(nebula::bind::findMAxis(0, modifier) == nullptr);
-        REQUIRE(
-            nebula::bind::findBind("Category", "Mouse Axis Test") == nullptr);
-        REQUIRE(nebula::bind::findJAxis(0, 0, modifier) == nullptr);
-        REQUIRE(nebula::bind::findBind("Category", "Joystick Axis Test")
-                == nullptr);
+        REQUIRE(!bindMgr.bindExists("Category", "Keyboard Test"));
+        REQUIRE(!bindMgr.bindExists("Category", "MButton Test"));
+        REQUIRE(!bindMgr.bindExists("Category", "CButton Test"));
+        REQUIRE(!bindMgr.bindExists("Category", "MAxis Test"));
+        REQUIRE(!bindMgr.bindExists("Category", "CAxis Test"));
+        REQUIRE(!bindMgr.keyBindExists(0, modifier));
+        REQUIRE(!bindMgr.mBtnBindExists(0, modifier));
+        REQUIRE(!bindMgr.cBtnBindExists(0, 0, modifier));
+        REQUIRE(!bindMgr.mAxisBindExists(0, modifier));
+        REQUIRE(!bindMgr.cAxisBindExists(0, 0, modifier));
       }
     }
   }
 
   GIVEN("multiple bind objects mapped to input events")
   {
-    nebula::bind::modifier modifier;
-    auto bind1 = nebula::bind::create(
+    nebula::bindManager bindMgr;
+    nebula::bindManager::modifier modifier;
+    auto bind1 = bindMgr.create(
         nullptr, nullptr, nullptr, "Category", "Keyboard Test");
-    auto bind2 = nebula::bind::create(
-        nullptr, nullptr, nullptr, "Category", "Mouse Button Test");
-    auto bind3 = nebula::bind::create(
-        nullptr, nullptr, nullptr, "Category", "Joystick Button Test");
-    auto bind4 = nebula::bind::create(
-        nullptr, nullptr, nullptr, "Category", "Mouse Axis Test");
-    auto bind5 = nebula::bind::create(
-        nullptr, nullptr, nullptr, "Category", "Joystick Axis Test");
-    bind1->bindKey(0, modifier);
-    bind2->bindMButton(0, modifier);
-    bind3->bindJButton(0, 0, modifier);
-    bind4->bindMAxis(0, modifier);
-    bind5->bindJAxis(0, 0, modifier);
+    auto bind2
+        = bindMgr.create(nullptr, nullptr, nullptr, "Category", "MButton Test");
+    auto bind3
+        = bindMgr.create(nullptr, nullptr, nullptr, "Category", "CButton Test");
+    auto bind4
+        = bindMgr.create(nullptr, nullptr, nullptr, "Category", "MAxis Test");
+    auto bind5
+        = bindMgr.create(nullptr, nullptr, nullptr, "Category", "CAxis Test");
+    bindMgr.bindKey(bind1, 0, modifier);
+    bindMgr.bindMBtn(bind2, 0, modifier);
+    bindMgr.bindCBtn(bind3, 0, 0, modifier);
+    bindMgr.bindMAxis(bind4, 0, modifier);
+    bindMgr.bindCAxis(bind5, 0, 0, modifier);
     WHEN("each event is mapped to new bind objects")
     {
-      auto bind6 = nebula::bind::create(
+      auto bind6 = bindMgr.create(
           nullptr, nullptr, nullptr, "Category", "Keyboard Test 2");
-      auto bind7 = nebula::bind::create(
-          nullptr, nullptr, nullptr, "Category", "Mouse Button Test 2");
-      auto bind8 = nebula::bind::create(
-          nullptr, nullptr, nullptr, "Category", "Joystick Button Test 2");
-      auto bind9 = nebula::bind::create(
-          nullptr, nullptr, nullptr, "Category", "Mouse Axis Test 2");
-      auto bind10 = nebula::bind::create(
-          nullptr, nullptr, nullptr, "Category", "Joystick Axis Test 2");
-      bind6->bindKey(0, modifier);
-      bind7->bindMButton(0, modifier);
-      bind8->bindJButton(0, 0, modifier);
-      bind9->bindMAxis(0, modifier);
-      bind10->bindJAxis(0, 0, modifier);
+      auto bind7 = bindMgr.create(
+          nullptr, nullptr, nullptr, "Category", "MButton Test 2");
+      auto bind8 = bindMgr.create(
+          nullptr, nullptr, nullptr, "Category", "CButton Test 2");
+      auto bind9 = bindMgr.create(
+          nullptr, nullptr, nullptr, "Category", "MAxis Test 2");
+      auto bind10 = bindMgr.create(
+          nullptr, nullptr, nullptr, "Category", "CAxis Test 2");
+      bindMgr.bindKey(bind6, 0, modifier);
+      bindMgr.bindMBtn(bind7, 0, modifier);
+      bindMgr.bindCBtn(bind8, 0, 0, modifier);
+      bindMgr.bindMAxis(bind9, 0, modifier);
+      bindMgr.bindCAxis(bind10, 0, 0, modifier);
       THEN("the new binds should be found instead")
       {
-        REQUIRE(nebula::bind::findKey(0, modifier) == bind6);
-        REQUIRE(nebula::bind::findMButton(0, modifier) == bind7);
-        REQUIRE(nebula::bind::findJButton(0, 0, modifier) == bind8);
-        REQUIRE(nebula::bind::findMAxis(0, modifier) == bind9);
-        REQUIRE(nebula::bind::findJAxis(0, 0, modifier) == bind10);
+        REQUIRE(bindMgr.keyBindIs(0, modifier, bind6));
+        REQUIRE(bindMgr.mBtnBindIs(0, modifier, bind7));
+        REQUIRE(bindMgr.cBtnBindIs(0, 0, modifier, bind8));
+        REQUIRE(bindMgr.mAxisBindIs(0, modifier, bind9));
+        REQUIRE(bindMgr.cAxisBindIs(0, 0, modifier, bind10));
       }
     }
   }
@@ -517,262 +524,274 @@ SCENARIO("class bind")
 
 namespace nebula {
 
-void bind::bindKey(int key, modifier mods)
+void bindManager::bind::press()
 {
-  unbind();
-  auto k              = std::make_tuple(key, mods.bits);
-  const auto &keyBind = _keyBinds.find(k);
-  if (keyBind != _keyBinds.end())
-    keyBind->second.lock()->unbind();
-  _keyBinds[k] = _bindList[combinedName()];
-  _key         = key;
-  _modifiers   = mods;
-  _bound       = true;
-}
-
-void bind::bindMButton(int mBtn, modifier mods)
-{
-  unbind();
-  auto k               = std::make_tuple(mBtn, mods.bits);
-  const auto &mBtnBind = _mBtnBinds.find(k);
-  if (mBtnBind != _mBtnBinds.end())
-    mBtnBind->second.lock()->unbind();
-  _mBtnBinds[k] = _bindList[combinedName()];
-  _mBtn         = mBtn;
-  _modifiers    = mods;
-  _bound        = true;
-}
-
-void bind::bindMAxis(int mAxis, modifier mods)
-{
-  unbind();
-  auto k                = std::make_tuple(mAxis, mods.bits);
-  const auto &mAxisBind = _mAxisBinds.find(k);
-  if (mAxisBind != _mAxisBinds.end())
-    mAxisBind->second.lock()->unbind();
-  _mAxisBinds[k] = _bindList[combinedName()];
-  _mAxis         = mAxis;
-  _modifiers     = mods;
-  _bound         = true;
-}
-
-void bind::bindJButton(int jid, int jBtn, modifier mods)
-{
-  unbind();
-  auto k               = std::make_tuple(jid, jBtn, mods.bits);
-  const auto &jBtnBind = _jBtnBinds.find(k);
-  if (jBtnBind != _jBtnBinds.end())
-    jBtnBind->second.lock()->unbind();
-  _jBtnBinds[k] = _bindList[combinedName()];
-  _jid          = jid;
-  _jBtn         = jBtn;
-  _modifiers    = mods;
-  _bound        = true;
-}
-
-void bind::bindJAxis(int jid, int jAxis, modifier mods)
-{
-  unbind();
-  auto k                = std::make_tuple(jid, jAxis, mods.bits);
-  const auto &jAxisBind = _jAxisBinds.find(k);
-  if (jAxisBind != _jAxisBinds.end())
-    jAxisBind->second.lock()->unbind();
-  _jAxisBinds[k] = _bindList[combinedName()];
-  _jid           = jid;
-  _jAxis         = jAxis;
-  _modifiers     = mods;
-  _bound         = true;
-}
-
-void bind::unbind()
-{
-  _bound = false;
-  if (_key) {
-    _keyBinds.erase(std::make_tuple(_key.value(), _modifiers.bits));
-    _key.reset();
-    return;
-  }
-  if (_mBtn) {
-    _mBtnBinds.erase(std::make_tuple(_mBtn.value(), _modifiers.bits));
-    _mBtn.reset();
-    return;
-  }
-  if (_mAxis) {
-    _mAxisBinds.erase(std::make_tuple(_mAxis.value(), _modifiers.bits));
-    _mAxis.reset();
-    return;
-  }
-  if (_jBtn) {
-    _jBtnBinds.erase(
-        std::make_tuple(_jid.value(), _jBtn.value(), _modifiers.bits));
-    _jid.reset();
-    _jBtn.reset();
-    return;
-  }
-  if (_jAxis) {
-    _jAxisBinds.erase(
-        std::make_tuple(_jid.value(), _jAxis.value(), _modifiers.bits));
-    _jid.reset();
-    _jAxis.reset();
-    return;
-  }
-}
-
-bool bind::press()
-{
-  if (_pressHandler) {
+  if (_pressHandler)
     _pressHandler();
-    return true;
-  } else {
-    return false;
-  }
 }
 
-bool bind::release()
+void bindManager::bind::release()
 {
-  if (_releaseHandler) {
+  if (_releaseHandler)
     _releaseHandler();
-    return true;
-  } else {
-    return false;
-  }
 }
 
-bool bind::delta(double delta)
+void bindManager::bind::delta(double d)
 {
-  if (_deltaHandler) {
-    _deltaHandler(delta);
-    return true;
-  } else {
-    return false;
-  }
+  if (_deltaHandler)
+    _deltaHandler(d);
 }
 
-void bind::keyboardEvent(int key, action event, modifier mods)
+std::string bindManager::bind::combinedName()
 {
-  const auto keyBind = findKey(key, mods);
-  if (keyBind) {
-    if (event == action::press)
-      keyBind->press();
-    else
-      keyBind->release();
-  }
+  return _category + ":" + _name;
 }
 
-void bind::mouseButtonEvent(int mBtn, action event, modifier mods)
-{
-  const auto mBtnBind = findMButton(mBtn, mods);
-  if (mBtnBind) {
-    if (event == action::press)
-      mBtnBind->press();
-    else
-      mBtnBind->release();
-  }
-}
-
-void bind::mouseAxisEvent(int mAxis, double delta, modifier mods)
-{
-  const auto mAxisBind = findMAxis(mAxis, mods);
-  if (mAxisBind) {
-    mAxisBind->delta(delta);
-  }
-}
-
-void bind::joystickButtonEvent(int jid, int jBtn, action event, modifier mods)
-{
-  const auto jBtnBind = findJButton(jid, jBtn, mods);
-  if (jBtnBind) {
-    if (event == action::press)
-      jBtnBind->press();
-    else
-      jBtnBind->release();
-  }
-}
-
-void bind::joystickAxisEvent(int jid, int jAxis, double delta, modifier mods)
-{
-  const auto jAxisBind = findJAxis(jid, jAxis, mods);
-  if (jAxisBind) {
-    jAxisBind->delta(delta);
-  }
-}
-
-std::shared_ptr<bind> bind::create(std::function<void()> pressHandler,
+bindManager::bind &bindManager::create(std::function<void()> pressHandler,
     std::function<void()> releaseHandler,
     std::function<void(double)> deltaHandler,
     const std::string &category,
     const std::string &name)
 {
   std::string key = category + ":" + name;
-  _bindList.emplace(key,
-      new bind(pressHandler, releaseHandler, deltaHandler, category, name));
-  return _bindList[key];
+  _bindList.try_emplace(
+      key, pressHandler, releaseHandler, deltaHandler, category, name);
+  return _bindList.at(key);
 }
 
-std::shared_ptr<bind> bind::findKey(int key, modifier mods)
+void bindManager::bindKey(bindManager::bind &b, int key, modifier mod)
 {
-  auto b = _keyBinds.find(std::make_tuple(key, mods.bits));
-  if (b == _keyBinds.end())
-    return nullptr;
-  return b->second.lock();
+  auto k = std::make_pair(key, (int)mod);
+  if (_keyList.count(k) > 0)
+    unbind(_keyList.at(k));
+  unbind(b);
+  _keyList.emplace(k, b);
+  b._keyBind = k;
 }
 
-std::shared_ptr<bind> bind::findMButton(int mBtn, modifier mods)
+void bindManager::bindMBtn(bindManager::bind &b, int mBtn, modifier mod)
 {
-  auto b = _mBtnBinds.find(std::make_tuple(mBtn, mods.bits));
-  if (b == _mBtnBinds.end())
-    return nullptr;
-  return b->second.lock();
+  auto k = std::make_pair(mBtn, (int)mod);
+  if (_mBtnList.count(k) > 0)
+    unbind(_mBtnList.at(k));
+  unbind(b);
+  _mBtnList.emplace(k, b);
+  b._mBtnBind = k;
 }
 
-std::shared_ptr<bind> bind::findMAxis(int mAxis, modifier mods)
+void bindManager::bindCBtn(
+    bindManager::bind &b, int cID, int cBtn, modifier mod)
 {
-  auto b = _mAxisBinds.find(std::make_tuple(mAxis, mods.bits));
-  if (b == _mAxisBinds.end())
-    return nullptr;
-  return b->second.lock();
+  auto k = std::make_tuple(cID, cBtn, (int)mod);
+  if (_cBtnList.count(k) > 0)
+    unbind(_cBtnList.at(k));
+  unbind(b);
+  _cBtnList.emplace(k, b);
+  b._cBtnBind = k;
 }
 
-std::shared_ptr<bind> bind::findJButton(int jid, int jBtn, modifier mods)
+void bindManager::bindMAxis(bindManager::bind &b, int mAxis, modifier mod)
 {
-  auto b = _jBtnBinds.find(std::make_tuple(jid, jBtn, mods.bits));
-  if (b == _jBtnBinds.end())
-    return nullptr;
-  return b->second.lock();
+  auto k = std::make_pair(mAxis, (int)mod);
+  if (_mAxisList.count(k) > 0)
+    unbind(_mAxisList.at(k));
+  unbind(b);
+  _mAxisList.emplace(k, b);
+  b._mAxisBind = k;
 }
 
-std::shared_ptr<bind> bind::findJAxis(int jid, int jAxis, modifier mods)
+void bindManager::bindCAxis(
+    bindManager::bind &b, int cID, int cAxis, modifier mod)
 {
-  auto b = _jAxisBinds.find(std::make_tuple(jid, jAxis, mods.bits));
-  if (b == _jAxisBinds.end())
-    return nullptr;
-  return b->second.lock();
+  auto k = std::make_tuple(cID, cAxis, (int)mod);
+  if (_cAxisList.count(k) > 0)
+    unbind(_cAxisList.at(k));
+  unbind(b);
+  _cAxisList.emplace(k, b);
+  b._cAxisBind = k;
 }
 
-std::shared_ptr<bind> bind::findBind(
+bool bindManager::keyBindIs(int key, modifier mod, bindManager::bind &b)
+{
+  auto k = std::make_pair(key, (int)mod);
+  if (_keyList.count(k) > 0)
+    return &(_keyList.at(k)) == &b;
+  return false;
+}
+
+bool bindManager::mBtnBindIs(int mBtn, modifier mod, bindManager::bind &b)
+{
+  auto k = std::make_pair(mBtn, (int)mod);
+  if (_mBtnList.count(k) > 0)
+    return &(_mBtnList.at(k)) == &b;
+  return false;
+}
+
+bool bindManager::cBtnBindIs(
+    int cID, int cBtn, modifier mod, bindManager::bind &b)
+{
+  auto k = std::make_tuple(cID, cBtn, (int)mod);
+  if (_cBtnList.count(k) > 0)
+    return &(_cBtnList.at(k)) == &b;
+  return false;
+}
+
+bool bindManager::mAxisBindIs(int mAxis, modifier mod, bindManager::bind &b)
+{
+  auto k = std::make_pair(mAxis, (int)mod);
+  if (_mAxisList.count(k) > 0)
+    return &(_mAxisList.at(k)) == &b;
+  return false;
+}
+
+bool bindManager::cAxisBindIs(
+    int cID, int cAxis, modifier mod, bindManager::bind &b)
+{
+  auto k = std::make_tuple(cID, cAxis, (int)mod);
+  if (_cAxisList.count(k) > 0)
+    return &(_cAxisList.at(k)) == &b;
+  return false;
+}
+
+bool bindManager::bindExists(
     const std::string &category, const std::string &name)
 {
-  auto b = _bindList.find(category + ":" + name);
-  if (b == _bindList.end())
-    return nullptr;
-  return b->second;
+  return _bindList.count(category + ":" + name) > 0;
 }
 
-void bind::clearBinds()
+bool bindManager::keyBindExists(int key, modifier mod)
 {
-  _keyBinds.clear();
-  _mBtnBinds.clear();
-  _mAxisBinds.clear();
-  _jBtnBinds.clear();
-  _jAxisBinds.clear();
-  _bindList.clear();
+  return _keyList.count(std::make_pair(key, (int)mod)) > 0;
 }
 
-std::map<std::tuple<int, int>, std::weak_ptr<bind>> bind::_keyBinds;
-std::map<std::tuple<int, int>, std::weak_ptr<bind>> bind::_mBtnBinds;
-std::map<std::tuple<int, int>, std::weak_ptr<bind>> bind::_mAxisBinds;
-std::map<std::tuple<int, int, int>, std::weak_ptr<bind>> bind::_jBtnBinds;
-std::map<std::tuple<int, int, int>, std::weak_ptr<bind>> bind::_jAxisBinds;
-std::map<std::string, std::shared_ptr<bind>> bind::_bindList;
+bool bindManager::mBtnBindExists(int mBtn, modifier mod)
+{
+  return _mBtnList.count(std::make_pair(mBtn, (int)mod)) > 0;
+}
+
+bool bindManager::cBtnBindExists(int cID, int cBtn, modifier mod)
+{
+  return _cBtnList.count(std::make_tuple(cID, cBtn, (int)mod)) > 0;
+}
+
+bool bindManager::mAxisBindExists(int mAxis, modifier mod)
+{
+  return _mAxisList.count(std::make_pair(mAxis, (int)mod)) > 0;
+}
+
+bool bindManager::cAxisBindExists(int cID, int cAxis, modifier mod)
+{
+  return _cAxisList.count(std::make_tuple(cID, cAxis, (int)mod)) > 0;
+}
+
+void bindManager::keyboardPress(int key, modifier mod)
+{
+  auto k = std::make_pair(key, (int)mod);
+  if (_keyList.count(k) > 0)
+    _keyList.at(k).press();
+}
+
+void bindManager::keyboardRelease(int key, modifier mod)
+{
+  auto k = std::make_pair(key, (int)mod);
+  if (_keyList.count(k) > 0)
+    _keyList.at(k).release();
+}
+
+void bindManager::mButtonPress(int mBtn, modifier mod)
+{
+  auto k = std::make_pair(mBtn, (int)mod);
+  if (_mBtnList.count(k) > 0)
+    _mBtnList.at(k).press();
+}
+
+void bindManager::mButtonRelease(int mBtn, modifier mod)
+{
+  auto k = std::make_pair(mBtn, (int)mod);
+  if (_mBtnList.count(k) > 0)
+    _mBtnList.at(k).release();
+}
+
+void bindManager::cButtonPress(int cID, int cBtn, modifier mod)
+{
+  auto k = std::make_tuple(cID, cBtn, (int)mod);
+  if (_cBtnList.count(k) > 0)
+    _cBtnList.at(k).press();
+}
+
+void bindManager::cButtonRelease(int cID, int cBtn, modifier mod)
+{
+  auto k = std::make_tuple(cID, cBtn, (int)mod);
+  if (_cBtnList.count(k) > 0)
+    _cBtnList.at(k).release();
+}
+
+void bindManager::mAxisDelta(int mAxis, modifier mod, double delta)
+{
+  auto k = std::make_pair(mAxis, (int)mod);
+  if (_mAxisList.count(k) > 0)
+    _mAxisList.at(k).delta(delta);
+}
+
+void bindManager::cAxisDelta(int cID, int cAxis, modifier mod, double delta)
+{
+  auto k = std::make_tuple(cID, cAxis, (int)mod);
+  if (_cAxisList.count(k) > 0)
+    _cAxisList.at(k).delta(delta);
+}
+
+void bindManager::clearBinds()
+{
+  _bindList.clear();
+  _keyList.clear();
+  _mBtnList.clear();
+  _cBtnList.clear();
+  _mAxisList.clear();
+  _cAxisList.clear();
+}
+
+bool bindManager::bound(bindManager::bind &b)
+{
+  if (b._keyBind) {
+    return true;
+  }
+  if (b._mBtnBind) {
+    return true;
+  }
+  if (b._cBtnBind) {
+    return true;
+  }
+  if (b._mAxisBind) {
+    return true;
+  }
+  if (b._cAxisBind) {
+    return true;
+  }
+  return false;
+}
+
+void bindManager::unbind(bindManager::bind &b)
+{
+  if (b._keyBind) {
+    _keyList.erase(b._keyBind.value());
+    b._keyBind.reset();
+  }
+  if (b._mBtnBind) {
+    _mBtnList.erase(b._mBtnBind.value());
+    b._mBtnBind.reset();
+  }
+  if (b._cBtnBind) {
+    _cBtnList.erase(b._cBtnBind.value());
+    b._cBtnBind.reset();
+  }
+  if (b._mAxisBind) {
+    _mAxisList.erase(b._mAxisBind.value());
+    b._mAxisBind.reset();
+  }
+  if (b._cAxisBind) {
+    _cAxisList.erase(b._cAxisBind.value());
+    b._cAxisBind.reset();
+  }
+}
 
 } // namespace nebula

@@ -29,13 +29,7 @@ SCENARIO("class engine" * doctest::may_fail())
     vulkan_mock vkMock;
     vkMock.mockGraphics();
 
-    // simulate command line arguments
-    char argv0[] = "nebula";
-    char argv1[] = "-v"; // This and the next option disable logging to stdout
-    char argv2[] = "OFF";
-    char *argv[] = {argv0, argv1, argv2, NULL};
-
-    nebula::engine testEngine(3, argv);
+    nebula::engine testEngine;
     THEN("it should have a 1600 x 900 GLFW window with a border")
     {
       int width, height;
@@ -95,10 +89,8 @@ static int _luaPanic(lua_State *L)
   throw std::runtime_error(msg);
 }
 
-engine::engine(int argc, char *argv[])
+engine::engine()
 {
-  loguru::init(argc, argv);
-  loguru::add_file("log/verbose.log", loguru::Truncate, loguru::Verbosity_MAX);
   LOG_SCOPE_FUNCTION(INFO);
 
   LOG_S(INFO) << LUA_RELEASE;

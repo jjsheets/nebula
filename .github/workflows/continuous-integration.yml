@@ -41,6 +41,8 @@ jobs:
             mingw-w64-x86_64-lld
             mingw-w64-x86_64-libc++
             mingw-w64-x86_64-libc++abi
+            mingw-w64-clang-x86_64-winpthreads-git
+            mingw-w64-x86_64-compiler-rt
             msys2-runtime-devel
             base-devel
             libreadline-devel
@@ -60,6 +62,10 @@ jobs:
         run: |
           curl http://gittup.org/tup/win32/tup-latest.zip -o tup.zip
           7z x -bso0 -bsp0 tup.zip
+          mkdir external/glslc
+          cd external/glslc
+          curl "https://storage.googleapis.com/shaderc/artifacts/prod/graphics_shader_compiler/shaderc/windows/continuous_release_2017/374/20210924-175819/install.zip" -o install.zip
+          7z x -bso0 -bsp0 install.zip
 
       - name: Install Vulkan SDK (Windows)
         if: matrix.os == 'windows-latest'
@@ -169,7 +175,7 @@ jobs:
         run: |
           ./tup
 
-      - name: Run tests
+      - name: Run tests (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
           mkdir /home/runner/.local
@@ -179,7 +185,16 @@ jobs:
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info
           lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
-          cat test.info
+
+      - name: Run tests (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          test/test
+#          cd gcov
+#          gcov -o ../test ../src/*.cc -t >test.gcov
+#          lcov -c -d ../test -o test.info
+#          lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
 
       - uses: codecov/codecov-action@v2
         if: matrix.os == 'ubuntu-latest'
