@@ -10,8 +10,17 @@
 #include <vector>
 #include <optional>
 #include <string>
+#include <array>
+#include <glm/glm.hpp>
 
 namespace nebula {
+
+struct vertex {
+  glm::vec2 pos;
+  glm::vec3 color;
+  static VkVertexInputBindingDescription getBindingDesc();
+  static std::array<VkVertexInputAttributeDescription, 2> getAttributeDesc();
+};
 
 class graphics {
 public:
