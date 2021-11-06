@@ -63,6 +63,10 @@ SCENARIO("class graphics")
 
 namespace nebula {
 
+const std::vector<vertex> vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+
 graphics::graphics(uint32_t width,
     uint32_t height,
     GLFWkeyfun keyCallback,
@@ -856,8 +860,14 @@ void graphics::pipeline::setupVertexInputState()
   vertexInputInfo = {};
   vertexInputInfo.sType
       = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputInfo.vertexBindingDescriptionCount   = 0;
-  vertexInputInfo.vertexAttributeDescriptionCount = 0;
+  auto bindingDescription    = vertex::getBindingDesc();
+  auto attributeDescriptions = vertex::getAttributeDesc();
+
+  vertexInputInfo.vertexBindingDescriptionCount = 1;
+  vertexInputInfo.vertexAttributeDescriptionCount
+      = static_cast<uint32_t>(attributeDescriptions.size());
+  vertexInputInfo.pVertexBindingDescriptions   = &bindingDescription;
+  vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 }
 
 void graphics::pipeline::setupInputAssemblyState()
@@ -1251,6 +1261,29 @@ void graphics::drawFrame()
   submitQueue(imageIndex, signalSemaphores);
   presentQueue(imageIndex, signalSemaphores);
   _currentFrame = (_currentFrame + 1) % _maxFramesInFlight;
+}
+
+VkVertexInputBindingDescription vertex::getBindingDesc()
+{
+  VkVertexInputBindingDescription bindingDescription {};
+  bindingDescription.binding   = 0;
+  bindingDescription.stride    = sizeof(vertex);
+  bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+  return bindingDescription;
+}
+
+std::array<VkVertexInputAttributeDescription, 2> vertex::getAttributeDesc()
+{
+  std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions {};
+  attributeDescriptions[0].binding  = 0;
+  attributeDescriptions[0].location = 0;
+  attributeDescriptions[0].format   = VK_FORMAT_R32G32_SFLOAT;
+  attributeDescriptions[0].offset   = offsetof(vertex, pos);
+  attributeDescriptions[1].binding  = 0;
+  attributeDescriptions[1].location = 1;
+  attributeDescriptions[1].format   = VK_FORMAT_R32G32B32_SFLOAT;
+  attributeDescriptions[1].offset   = offsetof(vertex, color);
+  return attributeDescriptions;
 }
 
 } // namespace nebula
