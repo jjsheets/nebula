@@ -701,6 +701,9 @@ bool vulkan_mock::validCmdBuffer(VkCommandBuffer &b)
 
 void vulkan_mock::nextImage(uint32_t *n)
 {
+  if (_swapChainOutOfDate) {
+    return;
+  }
   *n = testDrawImage++;
   testDrawImage %= testSwapChainImageCount;
 }
@@ -715,13 +718,18 @@ void vulkan_mock::fillFamilyProperties(VkQueueFamilyProperties c[])
   }
 }
 
+void vulkan_mock::queueEvent(std::function<void()> ev)
+{
+  _evBuffer.emplace(ev);
+}
+
 void vulkan_mock::simKeyPress(int key, int mod, bool release)
 {
   LOG_SCOPE_FUNCTION(9);
-  _evBuffer.emplace(
+  queueEvent(
       [key, mod, this]() { _keyCB(testWindow, key, key, GLFW_PRESS, mod); });
   if (release)
-    _evBuffer.emplace([key, mod, this]() {
+    queueEvent([key, mod, this]() {
       _keyCB(testWindow, key, key, GLFW_RELEASE, mod);
     });
 }
@@ -733,7 +741,7 @@ void vulkan_mock::maxLoop(uint64_t m)
 
 void vulkan_mock::pollEvents()
 {
-  while (!_evBuffer.empty()) {
+  if (!_evBuffer.empty()) {
     _evBuffer.front()();
     _evBuffer.pop();
   }
@@ -773,6 +781,12 @@ void vulkan_mock::framebufferResize(int newW, int newH)
   width  = newW;
   height = newH;
   _fbResizeCB(testWindow, newW, newH);
+}
+
+void vulkan_mock::setSwapChainOutOfDate()
+{
+  queueEvent(
+      [this]() { queueEvent([this]() { _swapChainOutOfDate = true; }); });
 }
 
 void vulkan_mock::mockGraphics()
@@ -951,6 +965,7 @@ void vulkan_mock::mockGraphics()
       NAMED_ALLOW_CALL(*this, vkCreateSwapchainKHR(testLogDev, _, nullptr, _))
           .SIDE_EFFECT(testSwapChainImageCount = _2->minImageCount)
           .SIDE_EFFECT(*_4 = testSwapChain)
+          .SIDE_EFFECT(_swapChainOutOfDate = false)
           .RETURN(VK_SUCCESS));
   expectations.push(NAMED_ALLOW_CALL(
       *this, vkGetSwapchainImagesKHR(testLogDev, testSwapChain, _, nullptr))
@@ -1068,7 +1083,7 @@ void vulkan_mock::mockGraphics()
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkAcquireNextImageKHR(testLogDev, _, _, _, _, _))
           .SIDE_EFFECT(nextImage(_6))
-          .RETURN(VK_SUCCESS));
+          .RETURN(_swapChainOutOfDate ? VK_ERROR_OUT_OF_DATE_KHR : VK_SUCCESS));
   expectations.push(NAMED_ALLOW_CALL(*this, vkResetFences(testLogDev, _, _))
                         .RETURN(VK_SUCCESS));
   expectations.push(NAMED_ALLOW_CALL(*this, glfwWindowShouldClose(testWindow))

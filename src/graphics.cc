@@ -53,6 +53,8 @@ SCENARIO("class graphics")
     THEN("it should not throw when a frame is drawn")
     {
       REQUIRE_NOTHROW(gfx.drawFrame());
+      vkMock.setSwapChainOutOfDate();
+      REQUIRE_NOTHROW(gfx.drawFrame());
     }
   }
 }

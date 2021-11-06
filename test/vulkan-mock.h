@@ -49,6 +49,7 @@ private:
   uint32_t _maxImageCount         = 1;
   VkPhysicalDeviceType _gpuType   = VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
   std::function<void(GLFWwindow *, int, int)> _fbResizeCB;
+  bool _swapChainOutOfDate = false;
 
   void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
   void fillSurfFmt(VkSurfaceFormatKHR &fmt);
@@ -62,6 +63,7 @@ private:
   bool validCmdBuffer(VkCommandBuffer &b);
   void nextImage(uint32_t *n);
   void fillFamilyProperties(VkQueueFamilyProperties c[]);
+  void queueEvent(std::function<void()> ev);
 
 public:
   static vulkan_mock *&instance()
@@ -91,6 +93,7 @@ public:
   void enableAltSurfaceCaps();
   void setPhysDeviceType(VkPhysicalDeviceType t);
   void framebufferResize(int newW, int newH);
+  void setSwapChainOutOfDate();
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());
