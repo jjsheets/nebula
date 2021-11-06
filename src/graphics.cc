@@ -20,7 +20,7 @@
   #include <doctest/trompeloeil.hpp>
   #include "../test/vulkan-mock.h"
 
-SCENARIO("class graphics" * doctest::may_fail())
+SCENARIO("class graphics")
 {
   GIVEN("a graphics object")
   {
@@ -32,6 +32,28 @@ SCENARIO("class graphics" * doctest::may_fail())
         1600, 900, [](GLFWwindow *, int, int, int, int) {}, true);
     THEN("it should not throw when a frame is drawn")
     {
+      REQUIRE_NOTHROW(gfx.drawFrame());
+    }
+  }
+  GIVEN("a graphics object without validation layers, testing alternate code "
+        "paths")
+  {
+    // Set up the expectations for this test in a mock object
+    vulkan_mock vkMock;
+    vkMock.enableSeparateQueues();
+    vkMock.enableAltSurfaceFormat();
+    vkMock.enableMailobxPresentMode();
+    vkMock.enableAltSurfaceCaps();
+    vkMock.setPhysDeviceType(VK_PHYSICAL_DEVICE_TYPE_CPU);
+    vkMock.mockGraphics();
+
+    nebula::graphics gfx(
+        1600, 900, [](GLFWwindow *, int, int, int, int) {}, false);
+    vkMock.framebufferResize(1280, 720);
+    THEN("it should not throw when a frame is drawn")
+    {
+      REQUIRE_NOTHROW(gfx.drawFrame());
+      vkMock.setSwapChainOutOfDate();
       REQUIRE_NOTHROW(gfx.drawFrame());
     }
   }
@@ -351,9 +373,6 @@ bool graphics::checkDeviceExtensionSupport(VkPhysicalDevice device)
   LOG_SCOPE_FUNCTION(2);
   VkPhysicalDeviceProperties deviceProperties;
   vkGetPhysicalDeviceProperties(device, &deviceProperties);
-  if (deviceProperties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-    return false;
-  }
   uint32_t extensionCount;
   vkEnumerateDeviceExtensionProperties(
       device, nullptr, &extensionCount, nullptr);
@@ -392,6 +411,10 @@ graphics::queueFamilyIndices::queueFamilyIndices(
     }
     i++;
   }
+  if (_graphicsFamily)
+    LOG_S(1) << "graphicsFamily: " << _graphicsFamily.value();
+  if (_presentFamily)
+    LOG_S(1) << "presentFamily: " << _presentFamily.value();
 }
 
 bool graphics::queueFamilyIndices::isComplete()
@@ -692,8 +715,6 @@ void graphics::createImageViews()
 
 void graphics::logMemoryType(VkMemoryType &mType)
 {
-  if (mType.propertyFlags == 0)
-    return;
   std::string flags = "";
   if (mType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
     flags += ", device local";

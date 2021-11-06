@@ -19,9 +19,11 @@ int main(int argc, char **argv)
   context.applyCommandLine(argc, argv);
   int res = context.run();
   loguru::shutdown();
-  std::ifstream log("test/test.log");
-  for (std::string line; std::getline(log, line);) {
-    std::cout << line << std::endl;
+  if (res != 0) {
+    std::ifstream log("test/test.log");
+    for (std::string line; std::getline(log, line);) {
+      std::cout << line << std::endl;
+    }
   }
   if (context.shouldExit())
     return res;

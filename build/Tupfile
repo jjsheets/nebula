@@ -2,7 +2,7 @@ include_rules
 
 CFLAGS += -D DOCTEST_CONFIG_DISABLE -O2
 
-: foreach ../src/*.cc ^../src/test.cc |> !cc |> %B.o
+: foreach ../src/*.cc |> !cc |> %B.o
 ifeq (@(TUP_PLATFORM),win32)
 : ../external/loguru/loguru.cpp |> !cc -I/mingw64/x86_64-w64-mingw32/include |> %B.o
 : ../external/PlatformFolders/sago/platform_folders.cpp |> !cc -D _WIN32 |> %B.o

@@ -9,6 +9,7 @@
 
 #include <string>
 #include <cassert>
+#include <queue>
 
 class vulkan_mock {
 private:
@@ -19,6 +20,8 @@ private:
   VkPhysicalDevice testPhysDev;
   VkDevice testLogDev;
   VkQueue testCombinedQueue;
+  VkQueue testGraphicsQueue;
+  VkQueue testPresentQueue;
   VkSwapchainKHR testSwapChain;
   VkRenderPass testRenderPass;
   VkPipelineLayout testPipeLayout;
@@ -33,6 +36,20 @@ private:
   int width;
   int height;
   std::string title;
+  int _glfwShouldClose = GLFW_FALSE;
+  std::function<void(GLFWwindow *, int, int, int, int)> _keyCB;
+  std::queue<std::function<void()>> _evBuffer;
+  uint64_t _loopCount             = 0;
+  uint64_t _loopMax               = 60 * 5;
+  bool _separateQueues            = false;
+  bool _useAlternateSurfaceFormat = false;
+  VkPresentModeKHR _presentMode   = VK_PRESENT_MODE_FIFO_KHR;
+  uint32_t _surfWidth             = 2560;
+  uint32_t _surfHeight            = 1440;
+  uint32_t _maxImageCount         = 1;
+  VkPhysicalDeviceType _gpuType   = VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+  std::function<void(GLFWwindow *, int, int)> _fbResizeCB;
+  bool _swapChainOutOfDate = false;
 
   void fillSurfCaps(VkSurfaceCapabilitiesKHR &caps);
   void fillSurfFmt(VkSurfaceFormatKHR &fmt);
@@ -45,6 +62,8 @@ private:
   void fillCmdBuffer(uint32_t n, VkCommandBuffer *bufs);
   bool validCmdBuffer(VkCommandBuffer &b);
   void nextImage(uint32_t *n);
+  void fillFamilyProperties(VkQueueFamilyProperties c[]);
+  void queueEvent(std::function<void()> ev);
 
 public:
   static vulkan_mock *&instance()
@@ -65,6 +84,16 @@ public:
   vulkan_mock(const vulkan_mock &) = delete;
   vulkan_mock &operator=(const vulkan_mock &) = delete;
   void mockGraphics();
+  void simKeyPress(int key, int mod, bool release);
+  void maxLoop(uint64_t m);
+  void pollEvents();
+  void enableSeparateQueues();
+  void enableAltSurfaceFormat();
+  void enableMailobxPresentMode();
+  void enableAltSurfaceCaps();
+  void setPhysDeviceType(VkPhysicalDeviceType t);
+  void framebufferResize(int newW, int newH);
+  void setSwapChainOutOfDate();
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());
