@@ -28,3 +28,6 @@
 [submodule "external/trompeloeil"]
 	path = external/trompeloeil
 	url = https://github.com/rollbear/trompeloeil
+[submodule "external/glm"]
+	path = external/glm
+	url = https://github.com/g-truc/glm

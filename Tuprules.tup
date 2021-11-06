@@ -9,6 +9,7 @@ CFLAGS += -I../external/PlatformFolders/sago
 CFLAGS += -I../external/semver/include
 CFLAGS += -I../external/yaml-cpp/include
 CFLAGS += -I../external/sqlite-build
+CFLAGS += -I../external/glm
 ifeq (@(TUP_PLATFORM),win32)
 CFLAGS += -I../VULKAN_SDK/include
 CFLAGS += `pkg-config --cflags glfw3`

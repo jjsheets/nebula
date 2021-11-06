@@ -11,6 +11,7 @@
 #include <ios>
 #include <iomanip>
 #include <fstream>
+#include <glm/glm.hpp>
 
 // Logging system includes
 #include "loguru.hpp"
