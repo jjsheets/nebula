@@ -17,28 +17,28 @@ extern "C" {
 void glfwSetWindowShouldClose(GLFWwindow *a, int b)
 {
   LOG_SCOPE_FUNCTION(9);
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwSetWindowShouldClose(a, b);
 }
 
 void glfwPollEvents()
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwPollEvents();
 }
 
 int glfwWindowShouldClose(GLFWwindow *a)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwWindowShouldClose(a);
 }
 
 void glfwGetWindowSize(GLFWwindow *a, int *b, int *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwGetWindowSize(a, b, c);
 }
@@ -46,7 +46,7 @@ void glfwGetWindowSize(GLFWwindow *a, int *b, int *c)
 GLFWwindow *glfwCreateWindow(
     int a, int b, const char *c, GLFWmonitor *d, GLFWwindow *e)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwCreateWindow(a, b, c, d, e);
 }
@@ -56,63 +56,63 @@ VkResult glfwCreateWindowSurface(VkInstance a,
     const VkAllocationCallbacks *c,
     VkSurfaceKHR *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwCreateWindowSurface(a, b, c, d);
 }
 
 void glfwDestroyWindow(GLFWwindow *a)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwDestroyWindow(a);
 }
 
 int glfwGetError(const char **a)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwGetError(a);
 }
 
 void glfwGetFramebufferSize(GLFWwindow *a, int *b, int *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwGetFramebufferSize(a, b, c);
 }
 
 const char **glfwGetRequiredInstanceExtensions(uint32_t *a)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwGetRequiredInstanceExtensions(a);
 }
 
 const char *glfwGetVersionString()
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwGetVersionString();
 }
 
 int glfwGetWindowAttrib(GLFWwindow *a, int b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwGetWindowAttrib(a, b);
 }
 
 void *glfwGetWindowUserPointer(GLFWwindow *a)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwGetWindowUserPointer(a);
 }
 
 int glfwInit()
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwInit();
 }
@@ -120,7 +120,7 @@ int glfwInit()
 GLFWframebuffersizefun glfwSetFramebufferSizeCallback(
     GLFWwindow *a, GLFWframebuffersizefun b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwSetFramebufferSizeCallback(a, b);
 }
@@ -128,35 +128,35 @@ GLFWframebuffersizefun glfwSetFramebufferSizeCallback(
 GLFWkeyfun glfwSetKeyCallback(GLFWwindow *a, GLFWkeyfun b)
 {
   LOG_SCOPE_FUNCTION(9);
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwSetKeyCallback(a, b);
 }
 
 void glfwSetWindowUserPointer(GLFWwindow *a, void *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwSetWindowUserPointer(a, b);
 }
 
 void glfwTerminate()
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwTerminate();
 }
 
 void glfwWaitEvents()
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwWaitEvents();
 }
 
 void glfwWindowHint(int a, int b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwWindowHint(a, b);
 }
@@ -168,7 +168,7 @@ VkResult vkAcquireNextImageKHR(VkDevice a,
     VkFence e,
     uint32_t *f)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkAcquireNextImageKHR(a, b, c, d, e, f);
 }
@@ -176,7 +176,7 @@ VkResult vkAcquireNextImageKHR(VkDevice a,
 VkResult vkAllocateCommandBuffers(
     VkDevice a, const VkCommandBufferAllocateInfo *b, VkCommandBuffer *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkAllocateCommandBuffers(a, b, c);
 }
@@ -184,7 +184,7 @@ VkResult vkAllocateCommandBuffers(
 VkResult vkBeginCommandBuffer(
     VkCommandBuffer a, const VkCommandBufferBeginInfo *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkBeginCommandBuffer(a, b);
 }
@@ -192,14 +192,14 @@ VkResult vkBeginCommandBuffer(
 void vkCmdBeginRenderPass(
     VkCommandBuffer a, const VkRenderPassBeginInfo *b, VkSubpassContents c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkCmdBeginRenderPass(a, b, c);
 }
 
 void vkCmdBindPipeline(VkCommandBuffer a, VkPipelineBindPoint b, VkPipeline c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCmdBindPipeline(a, b, c);
 }
@@ -207,14 +207,14 @@ void vkCmdBindPipeline(VkCommandBuffer a, VkPipelineBindPoint b, VkPipeline c)
 void vkCmdDraw(
     VkCommandBuffer a, uint32_t b, uint32_t c, uint32_t d, uint32_t e)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkCmdDraw(a, b, c, d, e);
 }
 
 void vkCmdEndRenderPass(VkCommandBuffer a)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkCmdEndRenderPass(a);
 }
@@ -224,7 +224,7 @@ VkResult vkCreateCommandPool(VkDevice a,
     const VkAllocationCallbacks *c,
     VkCommandPool *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateCommandPool(a, b, c, d);
 }
@@ -234,7 +234,7 @@ VkResult vkCreateDevice(VkPhysicalDevice a,
     const VkAllocationCallbacks *c,
     VkDevice *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateDevice(a, b, c, d);
 }
@@ -244,7 +244,7 @@ VkResult vkCreateFence(VkDevice a,
     const VkAllocationCallbacks *c,
     VkFence *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateFence(a, b, c, d);
 }
@@ -254,7 +254,7 @@ VkResult vkCreateFramebuffer(VkDevice a,
     const VkAllocationCallbacks *c,
     VkFramebuffer *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateFramebuffer(a, b, c, d);
 }
@@ -266,7 +266,7 @@ VkResult vkCreateGraphicsPipelines(VkDevice a,
     const VkAllocationCallbacks *e,
     VkPipeline *f)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateGraphicsPipelines(a, b, c, d, e, f);
 }
@@ -276,7 +276,7 @@ VkResult vkCreateImageView(VkDevice a,
     const VkAllocationCallbacks *c,
     VkImageView *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateImageView(a, b, c, d);
 }
@@ -285,7 +285,7 @@ VkResult vkCreateInstance(const VkInstanceCreateInfo *a,
     const VkAllocationCallbacks *b,
     VkInstance *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateInstance(a, b, c);
 }
@@ -295,7 +295,7 @@ VkResult vkCreatePipelineLayout(VkDevice a,
     const VkAllocationCallbacks *c,
     VkPipelineLayout *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreatePipelineLayout(a, b, c, d);
 }
@@ -305,7 +305,7 @@ VkResult vkCreateRenderPass(VkDevice a,
     const VkAllocationCallbacks *c,
     VkRenderPass *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateRenderPass(a, b, c, d);
 }
@@ -315,7 +315,7 @@ VkResult vkCreateSemaphore(VkDevice a,
     const VkAllocationCallbacks *c,
     VkSemaphore *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateSemaphore(a, b, c, d);
 }
@@ -325,7 +325,7 @@ VkResult vkCreateShaderModule(VkDevice a,
     const VkAllocationCallbacks *c,
     VkShaderModule *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateShaderModule(a, b, c, d);
 }
@@ -335,7 +335,7 @@ VkResult vkCreateSwapchainKHR(VkDevice a,
     const VkAllocationCallbacks *c,
     VkSwapchainKHR *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateSwapchainKHR(a, b, c, d);
 }
@@ -343,21 +343,21 @@ VkResult vkCreateSwapchainKHR(VkDevice a,
 void vkDestroyCommandPool(
     VkDevice a, VkCommandPool b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyCommandPool(a, b, c);
 }
 
 void vkDestroyDevice(VkDevice a, const VkAllocationCallbacks *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyDevice(a, b);
 }
 
 void vkDestroyFence(VkDevice a, VkFence b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyFence(a, b, c);
 }
@@ -365,7 +365,7 @@ void vkDestroyFence(VkDevice a, VkFence b, const VkAllocationCallbacks *c)
 void vkDestroyFramebuffer(
     VkDevice a, VkFramebuffer b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyFramebuffer(a, b, c);
 }
@@ -373,21 +373,21 @@ void vkDestroyFramebuffer(
 void vkDestroyImageView(
     VkDevice a, VkImageView b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyImageView(a, b, c);
 }
 
 void vkDestroyInstance(VkInstance a, const VkAllocationCallbacks *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyInstance(a, b);
 }
 
 void vkDestroyPipeline(VkDevice a, VkPipeline b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyPipeline(a, b, c);
 }
@@ -395,7 +395,7 @@ void vkDestroyPipeline(VkDevice a, VkPipeline b, const VkAllocationCallbacks *c)
 void vkDestroyPipelineLayout(
     VkDevice a, VkPipelineLayout b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyPipelineLayout(a, b, c);
 }
@@ -403,7 +403,7 @@ void vkDestroyPipelineLayout(
 void vkDestroyRenderPass(
     VkDevice a, VkRenderPass b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyRenderPass(a, b, c);
 }
@@ -411,7 +411,7 @@ void vkDestroyRenderPass(
 void vkDestroySemaphore(
     VkDevice a, VkSemaphore b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroySemaphore(a, b, c);
 }
@@ -419,7 +419,7 @@ void vkDestroySemaphore(
 void vkDestroyShaderModule(
     VkDevice a, VkShaderModule b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroyShaderModule(a, b, c);
 }
@@ -427,7 +427,7 @@ void vkDestroyShaderModule(
 void vkDestroySurfaceKHR(
     VkInstance a, VkSurfaceKHR b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroySurfaceKHR(a, b, c);
 }
@@ -435,21 +435,21 @@ void vkDestroySurfaceKHR(
 void vkDestroySwapchainKHR(
     VkDevice a, VkSwapchainKHR b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkDestroySwapchainKHR(a, b, c);
 }
 
 VkResult vkDeviceWaitIdle(VkDevice a)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkDeviceWaitIdle(a);
 }
 
 VkResult vkEndCommandBuffer(VkCommandBuffer a)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkEndCommandBuffer(a);
 }
@@ -457,14 +457,14 @@ VkResult vkEndCommandBuffer(VkCommandBuffer a)
 VkResult vkEnumerateDeviceExtensionProperties(
     VkPhysicalDevice a, const char *b, uint32_t *c, VkExtensionProperties *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkEnumerateDeviceExtensionProperties(a, b, c, d);
 }
 
 VkResult vkEnumerateInstanceLayerProperties(uint32_t *a, VkLayerProperties *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkEnumerateInstanceLayerProperties(a, b);
 }
@@ -472,7 +472,7 @@ VkResult vkEnumerateInstanceLayerProperties(uint32_t *a, VkLayerProperties *b)
 VkResult vkEnumeratePhysicalDevices(
     VkInstance a, uint32_t *b, VkPhysicalDevice *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkEnumeratePhysicalDevices(a, b, c);
 }
@@ -480,21 +480,21 @@ VkResult vkEnumeratePhysicalDevices(
 void vkFreeCommandBuffers(
     VkDevice a, VkCommandPool b, uint32_t c, const VkCommandBuffer *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkFreeCommandBuffers(a, b, c, d);
 }
 
 void vkGetDeviceQueue(VkDevice a, uint32_t b, uint32_t c, VkQueue *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkGetDeviceQueue(a, b, c, d);
 }
 
 PFN_vkVoidFunction vkGetInstanceProcAddr(VkInstance a, const char *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkGetInstanceProcAddr(a, b);
 }
@@ -502,7 +502,7 @@ PFN_vkVoidFunction vkGetInstanceProcAddr(VkInstance a, const char *b)
 void vkGetPhysicalDeviceMemoryProperties(
     VkPhysicalDevice a, VkPhysicalDeviceMemoryProperties *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkGetPhysicalDeviceMemoryProperties(a, b);
 }
@@ -510,7 +510,7 @@ void vkGetPhysicalDeviceMemoryProperties(
 void vkGetPhysicalDeviceProperties(
     VkPhysicalDevice a, VkPhysicalDeviceProperties *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkGetPhysicalDeviceProperties(a, b);
 }
@@ -518,7 +518,7 @@ void vkGetPhysicalDeviceProperties(
 void vkGetPhysicalDeviceQueueFamilyProperties(
     VkPhysicalDevice a, uint32_t *b, VkQueueFamilyProperties *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->vkGetPhysicalDeviceQueueFamilyProperties(a, b, c);
 }
@@ -526,7 +526,7 @@ void vkGetPhysicalDeviceQueueFamilyProperties(
 VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
     VkPhysicalDevice a, VkSurfaceKHR b, VkSurfaceCapabilitiesKHR *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(a, b, c);
 }
@@ -534,7 +534,7 @@ VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
 VkResult vkGetPhysicalDeviceSurfaceFormatsKHR(
     VkPhysicalDevice a, VkSurfaceKHR b, uint32_t *c, VkSurfaceFormatKHR *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkGetPhysicalDeviceSurfaceFormatsKHR(a, b, c, d);
 }
@@ -542,7 +542,7 @@ VkResult vkGetPhysicalDeviceSurfaceFormatsKHR(
 VkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
     VkPhysicalDevice a, VkSurfaceKHR b, uint32_t *c, VkPresentModeKHR *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkGetPhysicalDeviceSurfacePresentModesKHR(a, b, c, d);
 }
@@ -550,7 +550,7 @@ VkResult vkGetPhysicalDeviceSurfacePresentModesKHR(
 VkResult vkGetPhysicalDeviceSurfaceSupportKHR(
     VkPhysicalDevice a, uint32_t b, VkSurfaceKHR c, VkBool32 *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkGetPhysicalDeviceSurfaceSupportKHR(a, b, c, d);
 }
@@ -558,28 +558,28 @@ VkResult vkGetPhysicalDeviceSurfaceSupportKHR(
 VkResult vkGetSwapchainImagesKHR(
     VkDevice a, VkSwapchainKHR b, uint32_t *c, VkImage *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkGetSwapchainImagesKHR(a, b, c, d);
 }
 
 VkResult vkQueuePresentKHR(VkQueue a, const VkPresentInfoKHR *b)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkQueuePresentKHR(a, b);
 }
 
 VkResult vkQueueSubmit(VkQueue a, uint32_t b, const VkSubmitInfo *c, VkFence d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkQueueSubmit(a, b, c, d);
 }
 
 VkResult vkResetFences(VkDevice a, uint32_t b, const VkFence *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkResetFences(a, b, c);
 }
@@ -587,7 +587,7 @@ VkResult vkResetFences(VkDevice a, uint32_t b, const VkFence *c)
 VkResult vkWaitForFences(
     VkDevice a, uint32_t b, const VkFence *c, VkBool32 d, uint64_t e)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkWaitForFences(a, b, c, d, e);
 }
@@ -597,20 +597,101 @@ VkResult vkCreateDebugUtilsMessengerEXT(VkInstance a,
     const VkAllocationCallbacks *c,
     VkDebugUtilsMessengerEXT *d)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->vkCreateDebugUtilsMessengerEXT(a, b, c, d);
 }
+
 void vkDestroyDebugUtilsMessengerEXT(
     VkInstance a, VkDebugUtilsMessengerEXT b, const VkAllocationCallbacks *c)
 {
-  auto vkMock = vulkan_mock::instance();
+  auto vkMock = vulkanMock::instance();
   assert(vkMock);
-  return vkMock->vkDestroyDebugUtilsMessengerEXT(a, b, c);
+  vkMock->vkDestroyDebugUtilsMessengerEXT(a, b, c);
+}
+
+void vkDestroyBuffer(VkDevice a, VkBuffer b, const VkAllocationCallbacks *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkDestroyBuffer(a, b, c);
+}
+
+void vkFreeMemory(VkDevice a, VkDeviceMemory b, const VkAllocationCallbacks *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkFreeMemory(a, b, c);
+}
+
+VkResult vkCreateBuffer(VkDevice a,
+    const VkBufferCreateInfo *b,
+    const VkAllocationCallbacks *c,
+    VkBuffer *d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkCreateBuffer(a, b, c, d);
+}
+
+void vkGetBufferMemoryRequirements(
+    VkDevice a, VkBuffer b, VkMemoryRequirements *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkGetBufferMemoryRequirements(a, b, c);
+}
+
+VkResult vkAllocateMemory(VkDevice a,
+    const VkMemoryAllocateInfo *b,
+    const VkAllocationCallbacks *c,
+    VkDeviceMemory *d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkAllocateMemory(a, b, c, d);
+}
+
+VkResult vkBindBufferMemory(
+    VkDevice a, VkBuffer b, VkDeviceMemory c, VkDeviceSize d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkBindBufferMemory(a, b, c, d);
+}
+
+VkResult vkMapMemory(VkDevice a,
+    VkDeviceMemory b,
+    VkDeviceSize c,
+    VkDeviceSize d,
+    VkMemoryMapFlags e,
+    void **f)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkMapMemory(a, b, c, d, e, f);
+}
+
+void vkUnmapMemory(VkDevice a, VkDeviceMemory b)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkUnmapMemory(a, b);
+}
+
+void vkCmdBindVertexBuffers(VkCommandBuffer a,
+    uint32_t b,
+    uint32_t c,
+    const VkBuffer *d,
+    const VkDeviceSize *e)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkCmdBindVertexBuffers(a, b, c, d, e);
 }
 }
 
-void vulkan_mock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
+void vulkanMock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
 {
   caps.minImageCount           = 1;
   caps.maxImageCount           = _maxImageCount;
@@ -627,7 +708,7 @@ void vulkan_mock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
   caps.supportedUsageFlags     = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 }
 
-void vulkan_mock::fillSurfFmt(VkSurfaceFormatKHR &fmt)
+void vulkanMock::fillSurfFmt(VkSurfaceFormatKHR &fmt)
 {
   if (!_useAlternateSurfaceFormat) {
     fmt.format     = VK_FORMAT_R8G8B8A8_SRGB;
@@ -638,7 +719,7 @@ void vulkan_mock::fillSurfFmt(VkSurfaceFormatKHR &fmt)
   }
 }
 
-void vulkan_mock::fillPhysDevProps(VkPhysicalDeviceProperties &props)
+void vulkanMock::fillPhysDevProps(VkPhysicalDeviceProperties &props)
 {
   props.apiVersion    = VK_MAKE_VERSION(1, 2, 155);
   props.driverVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -653,12 +734,12 @@ void vulkan_mock::fillPhysDevProps(VkPhysicalDeviceProperties &props)
   // ignoring limits and sparseProperties for now.
 }
 
-void vulkan_mock::fillDevExtProps(VkExtensionProperties &props)
+void vulkanMock::fillDevExtProps(VkExtensionProperties &props)
 {
   std::strcpy(props.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 }
 
-void vulkan_mock::fillPhysDevMemProps(VkPhysicalDeviceMemoryProperties &props)
+void vulkanMock::fillPhysDevMemProps(VkPhysicalDeviceMemoryProperties &props)
 {
   props.memoryTypeCount              = 1;
   props.memoryHeapCount              = 1;
@@ -670,14 +751,14 @@ void vulkan_mock::fillPhysDevMemProps(VkPhysicalDeviceMemoryProperties &props)
   props.memoryHeaps[0].flags     = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
 }
 
-void vulkan_mock::genImgHandles(uint32_t n, VkImage *images)
+void vulkanMock::genImgHandles(uint32_t n, VkImage *images)
 {
   for (uint32_t i = 0; i < n; i++) {
     images[i] = reinterpret_cast<VkImage>(testImageCur++);
   }
 }
 
-void vulkan_mock::makePipelines(
+void vulkanMock::makePipelines(
     uint32_t n, const VkGraphicsPipelineCreateInfo *info, VkPipeline *p)
 {
   for (uint32_t i = 0; i < n; i++) {
@@ -686,20 +767,20 @@ void vulkan_mock::makePipelines(
   }
 }
 
-void vulkan_mock::fillCmdBuffer(uint32_t n, VkCommandBuffer *bufs)
+void vulkanMock::fillCmdBuffer(uint32_t n, VkCommandBuffer *bufs)
 {
   for (uint32_t i = 0; i < n; i++) {
     bufs[i] = reinterpret_cast<VkCommandBuffer>(0xE01 + i);
   }
 }
 
-bool vulkan_mock::validCmdBuffer(VkCommandBuffer &b)
+bool vulkanMock::validCmdBuffer(VkCommandBuffer &b)
 {
   return (0xE00 < reinterpret_cast<uint64_t>(b))
       && (reinterpret_cast<uint64_t>(b) < 0xF00);
 }
 
-void vulkan_mock::nextImage(uint32_t *n)
+void vulkanMock::nextImage(uint32_t *n)
 {
   if (_swapChainOutOfDate) {
     return;
@@ -708,7 +789,7 @@ void vulkan_mock::nextImage(uint32_t *n)
   testDrawImage %= testSwapChainImageCount;
 }
 
-void vulkan_mock::fillFamilyProperties(VkQueueFamilyProperties c[])
+void vulkanMock::fillFamilyProperties(VkQueueFamilyProperties c[])
 {
   if (_separateQueues) {
     c[0].queueFlags = VK_QUEUE_GRAPHICS_BIT;
@@ -718,12 +799,12 @@ void vulkan_mock::fillFamilyProperties(VkQueueFamilyProperties c[])
   }
 }
 
-void vulkan_mock::queueEvent(std::function<void()> ev)
+void vulkanMock::queueEvent(std::function<void()> ev)
 {
   _evBuffer.emplace(ev);
 }
 
-void vulkan_mock::simKeyPress(int key, int mod, bool release)
+void vulkanMock::simKeyPress(int key, int mod, bool release)
 {
   LOG_SCOPE_FUNCTION(9);
   queueEvent(
@@ -734,12 +815,12 @@ void vulkan_mock::simKeyPress(int key, int mod, bool release)
     });
 }
 
-void vulkan_mock::maxLoop(uint64_t m)
+void vulkanMock::maxLoop(uint64_t m)
 {
   _loopMax = m;
 }
 
-void vulkan_mock::pollEvents()
+void vulkanMock::pollEvents()
 {
   if (!_evBuffer.empty()) {
     _evBuffer.front()();
@@ -749,47 +830,67 @@ void vulkan_mock::pollEvents()
     throw std::runtime_error("maximum loop count reached");
 }
 
-void vulkan_mock::enableSeparateQueues()
+void vulkanMock::enableSeparateQueues()
 {
   _separateQueues = true;
 }
 
-void vulkan_mock::enableAltSurfaceFormat()
+void vulkanMock::enableAltSurfaceFormat()
 {
   _useAlternateSurfaceFormat = true;
 }
 
-void vulkan_mock::enableMailobxPresentMode()
+void vulkanMock::enableMailobxPresentMode()
 {
   _presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 }
 
-void vulkan_mock::enableAltSurfaceCaps()
+void vulkanMock::enableAltSurfaceCaps()
 {
   _maxImageCount = 0;
   _surfWidth     = std::numeric_limits<uint32_t>::max();
   _surfHeight    = std::numeric_limits<uint32_t>::max();
 }
 
-void vulkan_mock::setPhysDeviceType(VkPhysicalDeviceType t)
+void vulkanMock::setPhysDeviceType(VkPhysicalDeviceType t)
 {
   _gpuType = t;
 }
 
-void vulkan_mock::framebufferResize(int newW, int newH)
+void vulkanMock::framebufferResize(int newW, int newH)
 {
   width  = newW;
   height = newH;
   _fbResizeCB(testWindow, newW, newH);
 }
 
-void vulkan_mock::setSwapChainOutOfDate()
+void vulkanMock::setSwapChainOutOfDate()
 {
   queueEvent(
       [this]() { queueEvent([this]() { _swapChainOutOfDate = true; }); });
 }
 
-void vulkan_mock::mockGraphics()
+VkDeviceMemory vulkanMock::newMem(const VkMemoryAllocateInfo *info)
+{
+  return reinterpret_cast<VkDeviceMemory>(new mockMem);
+}
+
+void vulkanMock::freeMem(VkDeviceMemory a)
+{
+  delete reinterpret_cast<mockMem *>(a);
+}
+
+void *vulkanMock::mapMem(VkDeviceMemory a, uint64_t size)
+{
+  return (reinterpret_cast<mockMem *>(a))->map(size);
+}
+
+void vulkanMock::unmapMem(VkDeviceMemory a)
+{
+  (reinterpret_cast<mockMem *>(a))->unmap();
+}
+
+void vulkanMock::mockGraphics()
 {
   testWindow     = reinterpret_cast<GLFWwindow *>(0x400);
   testVkInstance = reinterpret_cast<VkInstance>(0x500);
@@ -1020,6 +1121,9 @@ void vulkan_mock::mockGraphics()
                         .WITH(validCmdBuffer(_1)));
   expectations.push(NAMED_ALLOW_CALL(*this, vkCmdBindPipeline(_, _, _))
                         .WITH(validCmdBuffer(_1)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCmdBindVertexBuffers(_, _, _, _, _))
+          .WITH(validCmdBuffer(_1)));
   expectations.push(NAMED_ALLOW_CALL(*this, vkCmdDraw(_, _, _, _, _))
                         .WITH(validCmdBuffer(_1)));
   expectations.push(
@@ -1100,4 +1204,30 @@ void vulkan_mock::mockGraphics()
   expectations.push(
       NAMED_ALLOW_CALL(*this, glfwGetWindowUserPointer(testWindow))
           .RETURN(windowUP));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateBuffer(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<VkBuffer>(
+                           const_cast<VkBufferCreateInfo *>(_2)))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkGetBufferMemoryRequirements(testLogDev, _, _))
+          .SIDE_EFFECT(_3->memoryTypeBits = 1));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkAllocateMemory(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = newMem(_2))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkBindBufferMemory(testLogDev, _, _, _))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyBuffer(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkFreeMemory(testLogDev, _, nullptr))
+          .SIDE_EFFECT(freeMem(_2)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkMapMemory(testLogDev, _, _, _, _, _))
+          .SIDE_EFFECT(*_6 = mapMem(_2, _4))
+          .RETURN(VK_SUCCESS));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkUnmapMemory(testLogDev, _))
+                        .SIDE_EFFECT(unmapMem(_2)));
 }

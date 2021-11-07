@@ -26,7 +26,7 @@ SCENARIO("class engine")
   GIVEN("an engine object")
   {
     // Set up the expectations for this test in a mock object
-    vulkan_mock vkMock;
+    vulkanMock vkMock;
     vkMock.mockGraphics();
     vkMock.simKeyPress(GLFW_KEY_ESCAPE, 0, true);
 
@@ -43,7 +43,7 @@ SCENARIO("class engine")
   }
   GIVEN("an engine object")
   {
-    vulkan_mock vkMock;
+    vulkanMock vkMock;
     vkMock.mockGraphics();
     vkMock.maxLoop(10);
 
@@ -59,7 +59,7 @@ SCENARIO("class engine")
   }
   GIVEN("an engine object")
   {
-    vulkan_mock vkMock;
+    vulkanMock vkMock;
     vkMock.mockGraphics();
     vkMock.maxLoop(10);
 

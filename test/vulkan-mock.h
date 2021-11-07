@@ -1,8 +1,8 @@
 // This document is licensed according to the LGPL v2.1 license
 // Consult the LICENSE file in the root project directory for details
 
-#ifndef NEBULA_TEST_VULKAN_MOCK_H
-#define NEBULA_TEST_VULKAN_MOCK_H
+#ifndef NEBULA_TEST_vulkanMock_H
+#define NEBULA_TEST_vulkanMock_H
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -11,7 +11,7 @@
 #include <cassert>
 #include <queue>
 
-class vulkan_mock {
+class vulkanMock {
 private:
   GLFWwindow *testWindow;
   VkInstance testVkInstance;
@@ -64,25 +64,42 @@ private:
   void nextImage(uint32_t *n);
   void fillFamilyProperties(VkQueueFamilyProperties c[]);
   void queueEvent(std::function<void()> ev);
+  VkDeviceMemory newMem(const VkMemoryAllocateInfo *info);
+  void freeMem(VkDeviceMemory a);
+  void *mapMem(VkDeviceMemory a, uint64_t size);
+  void unmapMem(VkDeviceMemory a);
+
+  struct mockMem {
+    unsigned char *m;
+    void *map(uint64_t size)
+    {
+      m = (new unsigned char[size]);
+      return (void *)m;
+    }
+    void unmap()
+    {
+      delete m;
+    }
+  };
 
 public:
-  static vulkan_mock *&instance()
+  static vulkanMock *&instance()
   {
-    static vulkan_mock *obj = nullptr;
+    static vulkanMock *obj = nullptr;
     return obj;
   }
-  vulkan_mock()
+  vulkanMock()
   {
     assert(instance() == nullptr);
     instance() = this;
   }
-  ~vulkan_mock()
+  ~vulkanMock()
   {
     assert(instance() == this);
     instance() = nullptr;
   }
-  vulkan_mock(const vulkan_mock &) = delete;
-  vulkan_mock &operator=(const vulkan_mock &) = delete;
+  vulkanMock(const vulkanMock &) = delete;
+  vulkanMock &operator=(const vulkanMock &) = delete;
   void mockGraphics();
   void simKeyPress(int key, int mod, bool release);
   void maxLoop(uint64_t m);
@@ -272,8 +289,40 @@ public:
   MAKE_MOCK3(vkDestroyDebugUtilsMessengerEXT,
       void(
           VkInstance, VkDebugUtilsMessengerEXT, const VkAllocationCallbacks *));
+  MAKE_MOCK3(
+      vkDestroyBuffer, void(VkDevice, VkBuffer, const VkAllocationCallbacks *));
+  MAKE_MOCK3(vkFreeMemory,
+      void(VkDevice, VkDeviceMemory, const VkAllocationCallbacks *));
+  MAKE_MOCK4(vkCreateBuffer,
+      VkResult(VkDevice,
+          const VkBufferCreateInfo *,
+          const VkAllocationCallbacks *,
+          VkBuffer *));
+  MAKE_MOCK3(vkGetBufferMemoryRequirements,
+      void(VkDevice, VkBuffer, VkMemoryRequirements *));
+  MAKE_MOCK4(vkAllocateMemory,
+      VkResult(VkDevice,
+          const VkMemoryAllocateInfo *,
+          const VkAllocationCallbacks *,
+          VkDeviceMemory *));
+  MAKE_MOCK4(vkBindBufferMemory,
+      VkResult(VkDevice, VkBuffer, VkDeviceMemory, VkDeviceSize));
+  MAKE_MOCK6(vkMapMemory,
+      VkResult(VkDevice,
+          VkDeviceMemory,
+          VkDeviceSize,
+          VkDeviceSize,
+          VkMemoryMapFlags,
+          void **));
+  MAKE_MOCK2(vkUnmapMemory, void(VkDevice, VkDeviceMemory));
+  MAKE_MOCK5(vkCmdBindVertexBuffers,
+      void(VkCommandBuffer,
+          uint32_t,
+          uint32_t,
+          const VkBuffer *,
+          const VkDeviceSize *));
 };
 
-extern vulkan_mock vkMock;
+extern vulkanMock vkMock;
 
-#endif // NEBULA_TEST_VULKAN_MOCK_H
+#endif // NEBULA_TEST_vulkanMock_H
