@@ -18,8 +18,10 @@ namespace nebula {
 struct vertex {
   glm::vec2 pos;
   glm::vec3 color;
-  static VkVertexInputBindingDescription getBindingDesc();
-  static std::array<VkVertexInputAttributeDescription, 2> getAttributeDesc();
+  static void getBindingDesc();
+  static void getAttributeDesc();
+  static VkVertexInputBindingDescription _bindDesc;
+  static std::array<VkVertexInputAttributeDescription, 2> _attribDesc;
 };
 
 class graphics {
@@ -99,6 +101,8 @@ private:
   std::vector<VkFence> _inFlightImage;
   size_t _currentFrame;
   bool _framebufferResized;
+  VkBuffer _vertexBuffer;
+  VkDeviceMemory _vertexBufferMemory;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -143,6 +147,10 @@ private:
   void waitForImage(size_t f);
   void submitQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[]);
   void presentQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[]);
+  void createVertexBuffer();
+  uint32_t findMemoryType(
+      uint32_t typeFilter, VkMemoryPropertyFlags properties);
+  void destroyBuffers();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

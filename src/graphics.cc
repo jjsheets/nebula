@@ -11,6 +11,7 @@
 #include <ios>
 #include <iomanip>
 #include <fstream>
+#include <cstring>
 
 // Logging system includes
 #include "loguru.hpp"
@@ -25,7 +26,7 @@ SCENARIO("class graphics")
   GIVEN("a graphics object")
   {
     // Set up the expectations for this test in a mock object
-    vulkan_mock vkMock;
+    vulkanMock vkMock;
     vkMock.mockGraphics();
 
     nebula::graphics gfx(
@@ -39,7 +40,7 @@ SCENARIO("class graphics")
         "paths")
   {
     // Set up the expectations for this test in a mock object
-    vulkan_mock vkMock;
+    vulkanMock vkMock;
     vkMock.enableSeparateQueues();
     vkMock.enableAltSurfaceFormat();
     vkMock.enableMailobxPresentMode();
@@ -76,7 +77,8 @@ graphics::graphics(uint32_t width,
       _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE),
       _surface(VK_NULL_HANDLE), _swapChain(VK_NULL_HANDLE),
       _renderPass(VK_NULL_HANDLE), _commandPool(VK_NULL_HANDLE),
-      _currentFrame(0), _framebufferResized(false)
+      _currentFrame(0), _framebufferResized(false),
+      _vertexBuffer(VK_NULL_HANDLE), _vertexBufferMemory(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
   initGLFW(keyCallback);
@@ -97,6 +99,7 @@ graphics::graphics(uint32_t width,
       _renderPass);
   createFramebuffers();
   createCommandPool();
+  createVertexBuffer();
   createCommandBuffers();
   createSyncObjects();
 }
@@ -106,6 +109,7 @@ graphics::~graphics()
   LOG_SCOPE_FUNCTION(INFO);
   destroySynchronization();
   cleanupSwapChain();
+  destroyBuffers();
   destroyLogicalDevice();
   destroyVulkanInstance();
   destroyGLFW();
@@ -132,6 +136,17 @@ void graphics::destroyLogicalDevice()
   }
   if (_logicalDevice) {
     vkDestroyDevice(_logicalDevice, nullptr);
+  }
+}
+
+void graphics::destroyBuffers()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  if (_vertexBuffer) {
+    vkDestroyBuffer(_logicalDevice, _vertexBuffer, nullptr);
+  }
+  if (_vertexBufferMemory) {
+    vkFreeMemory(_logicalDevice, _vertexBufferMemory, nullptr);
   }
 }
 
@@ -860,14 +875,13 @@ void graphics::pipeline::setupVertexInputState()
   vertexInputInfo = {};
   vertexInputInfo.sType
       = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  auto bindingDescription    = vertex::getBindingDesc();
-  auto attributeDescriptions = vertex::getAttributeDesc();
-
+  vertex::getBindingDesc();
+  vertex::getAttributeDesc();
   vertexInputInfo.vertexBindingDescriptionCount = 1;
   vertexInputInfo.vertexAttributeDescriptionCount
-      = static_cast<uint32_t>(attributeDescriptions.size());
-  vertexInputInfo.pVertexBindingDescriptions   = &bindingDescription;
-  vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+      = static_cast<uint32_t>(vertex::_attribDesc.size());
+  vertexInputInfo.pVertexBindingDescriptions   = &vertex::_bindDesc;
+  vertexInputInfo.pVertexAttributeDescriptions = vertex::_attribDesc.data();
 }
 
 void graphics::pipeline::setupInputAssemblyState()
@@ -1129,6 +1143,9 @@ void graphics::createCommandBuffers()
         _commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(
         _commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, *_pipeline);
+    VkBuffer vertexBuffers[] = {_vertexBuffer};
+    VkDeviceSize offsets[]   = {0};
+    vkCmdBindVertexBuffers(_commandBuffers[i], 0, 1, vertexBuffers, offsets);
     vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
     vkCmdEndRenderPass(_commandBuffers[i]);
     if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
@@ -1263,27 +1280,87 @@ void graphics::drawFrame()
   _currentFrame = (_currentFrame + 1) % _maxFramesInFlight;
 }
 
-VkVertexInputBindingDescription vertex::getBindingDesc()
+VkVertexInputBindingDescription vertex::_bindDesc;
+std::array<VkVertexInputAttributeDescription, 2> vertex::_attribDesc;
+
+void vertex::getBindingDesc()
 {
-  VkVertexInputBindingDescription bindingDescription {};
-  bindingDescription.binding   = 0;
-  bindingDescription.stride    = sizeof(vertex);
-  bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-  return bindingDescription;
+  _bindDesc           = {};
+  _bindDesc.binding   = 0;
+  _bindDesc.stride    = sizeof(vertex);
+  _bindDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 }
 
-std::array<VkVertexInputAttributeDescription, 2> vertex::getAttributeDesc()
+void vertex::getAttributeDesc()
 {
-  std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions {};
-  attributeDescriptions[0].binding  = 0;
-  attributeDescriptions[0].location = 0;
-  attributeDescriptions[0].format   = VK_FORMAT_R32G32_SFLOAT;
-  attributeDescriptions[0].offset   = offsetof(vertex, pos);
-  attributeDescriptions[1].binding  = 0;
-  attributeDescriptions[1].location = 1;
-  attributeDescriptions[1].format   = VK_FORMAT_R32G32B32_SFLOAT;
-  attributeDescriptions[1].offset   = offsetof(vertex, color);
-  return attributeDescriptions;
+  _attribDesc             = {};
+  _attribDesc[0].binding  = 0;
+  _attribDesc[0].location = 0;
+  _attribDesc[0].format   = VK_FORMAT_R32G32_SFLOAT;
+  _attribDesc[0].offset   = offsetof(vertex, pos);
+  _attribDesc[1].binding  = 0;
+  _attribDesc[1].location = 1;
+  _attribDesc[1].format   = VK_FORMAT_R32G32B32_SFLOAT;
+  _attribDesc[1].offset   = offsetof(vertex, color);
+}
+
+void graphics::createVertexBuffer()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  VkBufferCreateInfo bufferInfo {};
+  bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  bufferInfo.size        = sizeof(vertices[0]) * vertices.size();
+  bufferInfo.usage       = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  if (vkCreateBuffer(_logicalDevice, &bufferInfo, nullptr, &_vertexBuffer)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to create vertex buffer";
+    throw std::runtime_error("Vulkan: failed to create vertex buffer");
+  }
+  LOG_S(INFO) << "Vulkan: vertex buffer created";
+  VkMemoryRequirements memRequirements;
+  vkGetBufferMemoryRequirements(
+      _logicalDevice, _vertexBuffer, &memRequirements);
+  VkMemoryAllocateInfo allocInfo {};
+  allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  allocInfo.allocationSize  = memRequirements.size;
+  allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+          | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  if (vkAllocateMemory(
+          _logicalDevice, &allocInfo, nullptr, &_vertexBufferMemory)
+      != VK_SUCCESS)
+  {
+    LOG_S(ERROR) << "Vulkan: failed to allocate vertex buffer memory";
+    throw std::runtime_error("Vulkan: failed to allocate vertex buffer memory");
+  }
+  LOG_S(INFO) << "Vulkan: memory allocated";
+  vkBindBufferMemory(_logicalDevice, _vertexBuffer, _vertexBufferMemory, 0);
+  void *data;
+  vkMapMemory(
+      _logicalDevice, _vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+  std::memcpy(data, vertices.data(), (size_t)bufferInfo.size);
+  vkUnmapMemory(_logicalDevice, _vertexBufferMemory);
+  LOG_S(INFO) << "Vulkan: vertex data transferred";
+}
+
+uint32_t graphics::findMemoryType(
+    uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  VkPhysicalDeviceMemoryProperties memProperties;
+  vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
+  for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+    if ((typeFilter & (1 << i))
+        && (memProperties.memoryTypes[i].propertyFlags & properties)
+               == properties)
+    {
+      return i;
+    }
+  }
+  LOG_S(ERROR) << "Vulkan: failed to find suitable memory type";
+  throw std::runtime_error("Vulkan: failed to find suitable memory type");
 }
 
 } // namespace nebula
