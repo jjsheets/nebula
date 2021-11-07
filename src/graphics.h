@@ -147,7 +147,13 @@ private:
   void waitForImage(size_t f);
   void submitQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[]);
   void presentQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[]);
+  void createBuffer(VkDeviceSize size,
+      VkBufferUsageFlags usage,
+      VkMemoryPropertyFlags properties,
+      VkBuffer &buffer,
+      VkDeviceMemory &bufferMemory);
   void createVertexBuffer();
+  void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
   uint32_t findMemoryType(
       uint32_t typeFilter, VkMemoryPropertyFlags properties);
   void destroyBuffers();
