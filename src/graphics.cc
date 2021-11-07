@@ -1304,45 +1304,95 @@ void vertex::getAttributeDesc()
   _attribDesc[1].offset   = offsetof(vertex, color);
 }
 
-void graphics::createVertexBuffer()
+void graphics::createBuffer(VkDeviceSize size,
+    VkBufferUsageFlags usage,
+    VkMemoryPropertyFlags properties,
+    VkBuffer &buffer,
+    VkDeviceMemory &bufferMemory)
 {
   LOG_SCOPE_FUNCTION(INFO);
   VkBufferCreateInfo bufferInfo {};
   bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  bufferInfo.size        = sizeof(vertices[0]) * vertices.size();
-  bufferInfo.usage       = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  bufferInfo.size        = size;
+  bufferInfo.usage       = usage;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  if (vkCreateBuffer(_logicalDevice, &bufferInfo, nullptr, &_vertexBuffer)
-      != VK_SUCCESS)
-  {
-    LOG_S(ERROR) << "Vulkan: failed to create vertex buffer";
-    throw std::runtime_error("Vulkan: failed to create vertex buffer");
+  if (vkCreateBuffer(_logicalDevice, &bufferInfo, nullptr, &buffer)
+      != VK_SUCCESS) {
+    LOG_S(ERROR) << "Vulkan: failed to create buffer";
+    throw std::runtime_error("Vulkan: failed to create buffer");
   }
-  LOG_S(INFO) << "Vulkan: vertex buffer created";
+  LOG_S(INFO) << "Vulkan: buffer created";
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements(
-      _logicalDevice, _vertexBuffer, &memRequirements);
+  vkGetBufferMemoryRequirements(_logicalDevice, buffer, &memRequirements);
   VkMemoryAllocateInfo allocInfo {};
-  allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-  allocInfo.allocationSize  = memRequirements.size;
-  allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits,
-      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-          | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-  if (vkAllocateMemory(
-          _logicalDevice, &allocInfo, nullptr, &_vertexBufferMemory)
+  allocInfo.sType          = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  allocInfo.allocationSize = memRequirements.size;
+  allocInfo.memoryTypeIndex
+      = findMemoryType(memRequirements.memoryTypeBits, properties);
+  if (vkAllocateMemory(_logicalDevice, &allocInfo, nullptr, &bufferMemory)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to allocate vertex buffer memory";
-    throw std::runtime_error("Vulkan: failed to allocate vertex buffer memory");
+    LOG_S(ERROR) << "Vulkan: failed to allocate buffer memory";
+    throw std::runtime_error("Vulkan: failed to allocate buffer memory");
   }
   LOG_S(INFO) << "Vulkan: memory allocated";
-  vkBindBufferMemory(_logicalDevice, _vertexBuffer, _vertexBufferMemory, 0);
+  vkBindBufferMemory(_logicalDevice, buffer, bufferMemory, 0);
+}
+
+void graphics::createVertexBuffer()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+  VkBuffer stagingBuffer;
+  VkDeviceMemory stagingBufferMemory;
+  createBuffer(bufferSize,
+      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+          | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+      stagingBuffer,
+      stagingBufferMemory);
   void *data;
-  vkMapMemory(
-      _logicalDevice, _vertexBufferMemory, 0, bufferInfo.size, 0, &data);
-  std::memcpy(data, vertices.data(), (size_t)bufferInfo.size);
-  vkUnmapMemory(_logicalDevice, _vertexBufferMemory);
+  vkMapMemory(_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+  std::memcpy(data, vertices.data(), (size_t)bufferSize);
+  vkUnmapMemory(_logicalDevice, stagingBufferMemory);
   LOG_S(INFO) << "Vulkan: vertex data transferred";
+  createBuffer(bufferSize,
+      VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+      _vertexBuffer,
+      _vertexBufferMemory);
+  copyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
+  vkDestroyBuffer(_logicalDevice, stagingBuffer, nullptr);
+  vkFreeMemory(_logicalDevice, stagingBufferMemory, nullptr);
+}
+
+void graphics::copyBuffer(
+    VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+{
+  LOG_SCOPE_FUNCTION(1);
+  VkCommandBufferAllocateInfo allocInfo {};
+  allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  allocInfo.commandPool        = _commandPool;
+  allocInfo.commandBufferCount = 1;
+
+  VkCommandBuffer commandBuffer;
+  vkAllocateCommandBuffers(_logicalDevice, &allocInfo, &commandBuffer);
+  VkCommandBufferBeginInfo beginInfo {};
+  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+  vkBeginCommandBuffer(commandBuffer, &beginInfo);
+  VkBufferCopy copyRegion {};
+  copyRegion.size = size;
+  vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+  vkEndCommandBuffer(commandBuffer);
+  VkSubmitInfo submitInfo {};
+  submitInfo.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  submitInfo.commandBufferCount = 1;
+  submitInfo.pCommandBuffers    = &commandBuffer;
+  vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+  vkQueueWaitIdle(_graphicsQueue);
+  vkFreeCommandBuffers(_logicalDevice, _commandPool, 1, &commandBuffer);
 }
 
 uint32_t graphics::findMemoryType(

@@ -689,6 +689,24 @@ void vkCmdBindVertexBuffers(VkCommandBuffer a,
   assert(vkMock);
   vkMock->vkCmdBindVertexBuffers(a, b, c, d, e);
 }
+
+void vkCmdCopyBuffer(VkCommandBuffer a,
+    VkBuffer b,
+    VkBuffer c,
+    uint32_t d,
+    const VkBufferCopy *e)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkCmdCopyBuffer(a, b, c, d, e);
+}
+
+VkResult vkQueueWaitIdle(VkQueue a)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkQueueWaitIdle(a);
+}
 }
 
 void vulkanMock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
@@ -1230,4 +1248,7 @@ void vulkanMock::mockGraphics()
           .RETURN(VK_SUCCESS));
   expectations.push(NAMED_ALLOW_CALL(*this, vkUnmapMemory(testLogDev, _))
                         .SIDE_EFFECT(unmapMem(_2)));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkCmdCopyBuffer(_, _, _, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkQueueWaitIdle(_)).RETURN(VK_SUCCESS));
 }
