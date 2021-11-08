@@ -31,9 +31,9 @@ struct uniformBufferObject {
 };
 
 class graphics {
-public:
-  class pipeline {
-  private:
+  // public:
+private:
+  struct pipeline {
     VkDevice _device;
     VkPipelineLayout _pipelineLayout;
     VkPipeline _graphicsPipeline;
@@ -68,7 +68,6 @@ public:
     void setupPipelineLayout(VkRenderPass renderPass);
     void createDescriptorSetLayout();
 
-  public:
     pipeline(VkDevice device,
         const std::string &vertShader,
         const std::string &fragShader,
@@ -81,7 +80,7 @@ public:
     }
   };
 
-private:
+  // private:
   uint32_t _width;
   uint32_t _height;
   GLFWwindow *_window;
@@ -115,6 +114,8 @@ private:
   VkDeviceMemory _indexBufferMemory;
   std::vector<VkBuffer> _uniformBuffers;
   std::vector<VkDeviceMemory> _uniformBuffersMemory;
+  VkDescriptorPool _descriptorPool;
+  std::vector<VkDescriptorSet> _descriptorSets;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -172,6 +173,8 @@ private:
       uint32_t typeFilter, VkMemoryPropertyFlags properties);
   void destroyBuffers();
   void updateUniformBuffer(uint32_t currentImage);
+  void createDescriptorPool();
+  void createDescriptorSets();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

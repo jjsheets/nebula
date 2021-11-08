@@ -745,6 +745,57 @@ void vkDestroyDescriptorSetLayout(
   assert(vkMock);
   vkMock->vkDestroyDescriptorSetLayout(a, b, c);
 }
+
+VkResult vkCreateDescriptorPool(VkDevice a,
+    const VkDescriptorPoolCreateInfo *b,
+    const VkAllocationCallbacks *c,
+    VkDescriptorPool *d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkCreateDescriptorPool(a, b, c, d);
+}
+
+void vkDestroyDescriptorPool(
+    VkDevice a, VkDescriptorPool b, const VkAllocationCallbacks *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkDestroyDescriptorPool(a, b, c);
+}
+
+VkResult vkAllocateDescriptorSets(
+    VkDevice a, const VkDescriptorSetAllocateInfo *b, VkDescriptorSet *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkAllocateDescriptorSets(a, b, c);
+}
+
+void vkUpdateDescriptorSets(VkDevice a,
+    uint32_t b,
+    const VkWriteDescriptorSet *c,
+    uint32_t d,
+    const VkCopyDescriptorSet *e)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkUpdateDescriptorSets(a, b, c, d, e);
+}
+
+void vkCmdBindDescriptorSets(VkCommandBuffer a,
+    VkPipelineBindPoint b,
+    VkPipelineLayout c,
+    uint32_t d,
+    uint32_t e,
+    const VkDescriptorSet *f,
+    uint32_t g,
+    const uint32_t *h)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkCmdBindDescriptorSets(a, b, c, d, e, f, g, h);
+}
 }
 
 void vulkanMock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
@@ -944,6 +995,15 @@ void *vulkanMock::mapMem(VkDeviceMemory a, uint64_t size)
 void vulkanMock::unmapMem(VkDeviceMemory a)
 {
   (reinterpret_cast<mockMem *>(a))->unmap();
+}
+
+void vulkanMock::allocDescriptorSets(
+    const VkDescriptorSetAllocateInfo *pAllocateInfo,
+    VkDescriptorSet pDescriptorSets[])
+{
+  for (uint32_t i = 0; i < pAllocateInfo->descriptorSetCount; i++) {
+    pDescriptorSets[i] = reinterpret_cast<VkDescriptorSet>(0xF00 + i);
+  }
 }
 
 void vulkanMock::mockGraphics()
@@ -1300,4 +1360,19 @@ void vulkanMock::mockGraphics()
           .RETURN(VK_SUCCESS));
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkDestroyDescriptorSetLayout(testLogDev, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateDescriptorPool(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<VkDescriptorPool>(
+                           const_cast<VkDescriptorPoolCreateInfo *>(_2)))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyDescriptorPool(testLogDev, _, nullptr)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkAllocateDescriptorSets(testLogDev, _, _))
+          .SIDE_EFFECT(allocDescriptorSets(_2, _3))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkUpdateDescriptorSets(testLogDev, _, _, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCmdBindDescriptorSets(_, _, _, _, _, _, _, _)));
 }
