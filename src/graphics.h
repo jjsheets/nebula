@@ -24,6 +24,12 @@ struct vertex {
   static std::array<VkVertexInputAttributeDescription, 2> _attribDesc;
 };
 
+struct uniformBufferObject {
+  glm::mat4 model;
+  glm::mat4 view;
+  glm::mat4 proj;
+};
+
 class graphics {
 public:
   class pipeline {
@@ -31,19 +37,20 @@ public:
     VkDevice _device;
     VkPipelineLayout _pipelineLayout;
     VkPipeline _graphicsPipeline;
-    VkPipelineShaderStageCreateInfo vertShaderStageInfo;
-    VkPipelineShaderStageCreateInfo fragShaderStageInfo;
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo;
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly;
-    VkViewport viewport;
-    VkRect2D scissor;
-    VkPipelineViewportStateCreateInfo viewportState;
-    VkPipelineRasterizationStateCreateInfo rasterizer;
-    VkPipelineMultisampleStateCreateInfo multisampling;
-    VkPipelineColorBlendAttachmentState colorBlendAttachment;
-    VkPipelineColorBlendStateCreateInfo colorBlending;
-    VkPipelineLayoutCreateInfo pipelineLayoutInfo;
-    VkGraphicsPipelineCreateInfo pipelineInfo;
+    VkPipelineShaderStageCreateInfo _vertShaderStageInfo;
+    VkPipelineShaderStageCreateInfo _fragShaderStageInfo;
+    VkPipelineVertexInputStateCreateInfo _vertexInputInfo;
+    VkPipelineInputAssemblyStateCreateInfo _inputAssembly;
+    VkViewport _viewport;
+    VkRect2D _scissor;
+    VkPipelineViewportStateCreateInfo _viewportState;
+    VkPipelineRasterizationStateCreateInfo _rasterizer;
+    VkPipelineMultisampleStateCreateInfo _multisampling;
+    VkPipelineColorBlendAttachmentState _colorBlendAttachment;
+    VkPipelineColorBlendStateCreateInfo _colorBlending;
+    VkPipelineLayoutCreateInfo _pipelineLayoutInfo;
+    VkGraphicsPipelineCreateInfo _pipelineInfo;
+    VkDescriptorSetLayout _descriptorSetLayout;
 
     static std::vector<char> readFile(const std::string &filename);
     VkShaderModule createShaderModule(const std::vector<char> &code);
@@ -59,6 +66,7 @@ public:
     void setupMultisampling();
     void setupColorBlend();
     void setupPipelineLayout(VkRenderPass renderPass);
+    void createDescriptorSetLayout();
 
   public:
     pipeline(VkDevice device,
@@ -105,6 +113,8 @@ private:
   VkDeviceMemory _vertexBufferMemory;
   VkBuffer _indexBuffer;
   VkDeviceMemory _indexBufferMemory;
+  std::vector<VkBuffer> _uniformBuffers;
+  std::vector<VkDeviceMemory> _uniformBuffersMemory;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -156,10 +166,12 @@ private:
       VkDeviceMemory &bufferMemory);
   void createVertexBuffer();
   void createIndexBuffer();
+  void createUniformBuffers();
   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
   uint32_t findMemoryType(
       uint32_t typeFilter, VkMemoryPropertyFlags properties);
   void destroyBuffers();
+  void updateUniformBuffer(uint32_t currentImage);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

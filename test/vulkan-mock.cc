@@ -727,6 +727,24 @@ void vkCmdDrawIndexed(VkCommandBuffer a,
   assert(vkMock);
   vkMock->vkCmdDrawIndexed(a, b, c, d, e, f);
 }
+
+VkResult vkCreateDescriptorSetLayout(VkDevice a,
+    const VkDescriptorSetLayoutCreateInfo *b,
+    const VkAllocationCallbacks *c,
+    VkDescriptorSetLayout *d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkCreateDescriptorSetLayout(a, b, c, d);
+}
+
+void vkDestroyDescriptorSetLayout(
+    VkDevice a, VkDescriptorSetLayout b, const VkAllocationCallbacks *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkDestroyDescriptorSetLayout(a, b, c);
+}
 }
 
 void vulkanMock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
@@ -1274,4 +1292,12 @@ void vulkanMock::mockGraphics()
   expectations.push(NAMED_ALLOW_CALL(*this, vkCmdBindIndexBuffer(_, _, _, _)));
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkCmdDrawIndexed(_, _, _, _, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(
+          *this, vkCreateDescriptorSetLayout(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<VkDescriptorSetLayout>(
+                           const_cast<VkDescriptorSetLayoutCreateInfo *>(_2)))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyDescriptorSetLayout(testLogDev, _, _)));
 }

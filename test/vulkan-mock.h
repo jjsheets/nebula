@@ -329,6 +329,13 @@ public:
       void(VkCommandBuffer, VkBuffer, VkDeviceSize, VkIndexType));
   MAKE_MOCK6(vkCmdDrawIndexed,
       void(VkCommandBuffer, uint32_t, uint32_t, uint32_t, int32_t, uint32_t));
+  MAKE_MOCK4(vkCreateDescriptorSetLayout,
+      VkResult(VkDevice,
+          const VkDescriptorSetLayoutCreateInfo *,
+          const VkAllocationCallbacks *,
+          VkDescriptorSetLayout *));
+  MAKE_MOCK3(vkDestroyDescriptorSetLayout,
+      void(VkDevice, VkDescriptorSetLayout, const VkAllocationCallbacks *));
 };
 
 extern vulkanMock vkMock;
