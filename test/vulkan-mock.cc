@@ -707,6 +707,26 @@ VkResult vkQueueWaitIdle(VkQueue a)
   assert(vkMock);
   return vkMock->vkQueueWaitIdle(a);
 }
+
+void vkCmdBindIndexBuffer(
+    VkCommandBuffer a, VkBuffer b, VkDeviceSize c, VkIndexType d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkCmdBindIndexBuffer(a, b, c, d);
+}
+
+void vkCmdDrawIndexed(VkCommandBuffer a,
+    uint32_t b,
+    uint32_t c,
+    uint32_t d,
+    int32_t e,
+    uint32_t f)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkCmdDrawIndexed(a, b, c, d, e, f);
+}
 }
 
 void vulkanMock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
@@ -1251,4 +1271,7 @@ void vulkanMock::mockGraphics()
   expectations.push(NAMED_ALLOW_CALL(*this, vkCmdCopyBuffer(_, _, _, _, _)));
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkQueueWaitIdle(_)).RETURN(VK_SUCCESS));
+  expectations.push(NAMED_ALLOW_CALL(*this, vkCmdBindIndexBuffer(_, _, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCmdDrawIndexed(_, _, _, _, _, _)));
 }
