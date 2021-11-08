@@ -111,6 +111,8 @@ public:
   void setPhysDeviceType(VkPhysicalDeviceType t);
   void framebufferResize(int newW, int newH);
   void setSwapChainOutOfDate();
+  void allocDescriptorSets(const VkDescriptorSetAllocateInfo *pAllocateInfo,
+      VkDescriptorSet *pDescriptorSets);
 
   MAKE_MOCK2(glfwSetWindowShouldClose, void(GLFWwindow *, int));
   MAKE_MOCK0(glfwPollEvents, void());
@@ -336,6 +338,31 @@ public:
           VkDescriptorSetLayout *));
   MAKE_MOCK3(vkDestroyDescriptorSetLayout,
       void(VkDevice, VkDescriptorSetLayout, const VkAllocationCallbacks *));
+  MAKE_MOCK4(vkCreateDescriptorPool,
+      VkResult(VkDevice,
+          const VkDescriptorPoolCreateInfo *,
+          const VkAllocationCallbacks *,
+          VkDescriptorPool *));
+  MAKE_MOCK3(vkDestroyDescriptorPool,
+      void(VkDevice, VkDescriptorPool, const VkAllocationCallbacks *));
+  MAKE_MOCK3(vkAllocateDescriptorSets,
+      VkResult(
+          VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *));
+  MAKE_MOCK5(vkUpdateDescriptorSets,
+      void(VkDevice,
+          uint32_t,
+          const VkWriteDescriptorSet *,
+          uint32_t,
+          const VkCopyDescriptorSet *));
+  MAKE_MOCK8(vkCmdBindDescriptorSets,
+      void(VkCommandBuffer,
+          VkPipelineBindPoint,
+          VkPipelineLayout,
+          uint32_t,
+          uint32_t,
+          const VkDescriptorSet *,
+          uint32_t,
+          const uint32_t *));
 };
 
 extern vulkanMock vkMock;
