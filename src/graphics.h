@@ -103,6 +103,8 @@ private:
   bool _framebufferResized;
   VkBuffer _vertexBuffer;
   VkDeviceMemory _vertexBufferMemory;
+  VkBuffer _indexBuffer;
+  VkDeviceMemory _indexBufferMemory;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -153,6 +155,7 @@ private:
       VkBuffer &buffer,
       VkDeviceMemory &bufferMemory);
   void createVertexBuffer();
+  void createIndexBuffer();
   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
   uint32_t findMemoryType(
       uint32_t typeFilter, VkMemoryPropertyFlags properties);

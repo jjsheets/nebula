@@ -325,6 +325,10 @@ public:
       void(
           VkCommandBuffer, VkBuffer, VkBuffer, uint32_t, const VkBufferCopy *));
   MAKE_MOCK1(vkQueueWaitIdle, VkResult(VkQueue));
+  MAKE_MOCK4(vkCmdBindIndexBuffer,
+      void(VkCommandBuffer, VkBuffer, VkDeviceSize, VkIndexType));
+  MAKE_MOCK6(vkCmdDrawIndexed,
+      void(VkCommandBuffer, uint32_t, uint32_t, uint32_t, int32_t, uint32_t));
 };
 
 extern vulkanMock vkMock;

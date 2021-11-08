@@ -64,9 +64,12 @@ SCENARIO("class graphics")
 
 namespace nebula {
 
-const std::vector<vertex> vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+const std::vector<vertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+
+const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0};
 
 graphics::graphics(uint32_t width,
     uint32_t height,
@@ -100,6 +103,7 @@ graphics::graphics(uint32_t width,
   createFramebuffers();
   createCommandPool();
   createVertexBuffer();
+  createIndexBuffer();
   createCommandBuffers();
   createSyncObjects();
 }
@@ -142,6 +146,12 @@ void graphics::destroyLogicalDevice()
 void graphics::destroyBuffers()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  if (_indexBuffer) {
+    vkDestroyBuffer(_logicalDevice, _indexBuffer, nullptr);
+  }
+  if (_indexBufferMemory) {
+    vkFreeMemory(_logicalDevice, _indexBufferMemory, nullptr);
+  }
   if (_vertexBuffer) {
     vkDestroyBuffer(_logicalDevice, _vertexBuffer, nullptr);
   }
@@ -1146,7 +1156,10 @@ void graphics::createCommandBuffers()
     VkBuffer vertexBuffers[] = {_vertexBuffer};
     VkDeviceSize offsets[]   = {0};
     vkCmdBindVertexBuffers(_commandBuffers[i], 0, 1, vertexBuffers, offsets);
-    vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
+    vkCmdBindIndexBuffer(
+        _commandBuffers[i], _indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdDrawIndexed(
+        _commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
     vkCmdEndRenderPass(_commandBuffers[i]);
     if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
       LOG_S(ERROR) << "Vulkan: failed to record command buffer";
@@ -1362,6 +1375,31 @@ void graphics::createVertexBuffer()
       _vertexBuffer,
       _vertexBufferMemory);
   copyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
+  vkDestroyBuffer(_logicalDevice, stagingBuffer, nullptr);
+  vkFreeMemory(_logicalDevice, stagingBufferMemory, nullptr);
+}
+
+void graphics::createIndexBuffer()
+{
+  VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+  VkBuffer stagingBuffer;
+  VkDeviceMemory stagingBufferMemory;
+  createBuffer(bufferSize,
+      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+          | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+      stagingBuffer,
+      stagingBufferMemory);
+  void *data;
+  vkMapMemory(_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+  memcpy(data, indices.data(), (size_t)bufferSize);
+  vkUnmapMemory(_logicalDevice, stagingBufferMemory);
+  createBuffer(bufferSize,
+      VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+      _indexBuffer,
+      _indexBufferMemory);
+  copyBuffer(stagingBuffer, _indexBuffer, bufferSize);
   vkDestroyBuffer(_logicalDevice, stagingBuffer, nullptr);
   vkFreeMemory(_logicalDevice, stagingBufferMemory, nullptr);
 }
