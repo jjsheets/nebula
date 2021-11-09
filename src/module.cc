@@ -4,7 +4,7 @@
 #include "module.h"
 #include <stdexcept>
 #include <algorithm>
-#include "yaml-cpp/yaml.h"
+#include <cstring>
 
 // Logging system includes
 #include "loguru.hpp"
@@ -47,6 +47,22 @@ SCENARIO("class module")
     THEN("the name should equal the module's identifier")
     {
       REQUIRE(mod.name() == mod.identifier());
+    }
+  }
+  GIVEN("a valid module")
+  {
+    auto path = "test/valid-module";
+    auto mod  = nebula::module(path, true);
+    WHEN("loadModule() is called")
+    {
+      mod.loadModule();
+      THEN("generated SQL should be correct")
+      {
+        REQUIRE(mod.getComponentSQL("test")
+                == "CREATE TABLE test (entity INTEGER PRIMARY KEY REFERENCES "
+                   "entity(entity) ON DELETE CASCADE, test_int INTEGER, "
+                   "test_num REAL, test_txt TEXT);");
+      }
     }
   }
 }
@@ -102,5 +118,59 @@ module::module(const module &other)
 }
 
 module::~module() { }
+
+void module::loadModule()
+{
+  for (auto fileName : _includes) {
+    YAML::Node include;
+    try {
+      include = YAML::LoadFile(_rootPath + "/" + fileName);
+    } catch (YAML::BadFile &e) {
+      LOG_S(ERROR) << "Included file is missing or corrupt:";
+      LOG_S(ERROR) << "  " << _rootPath << "/" << fileName;
+      throw;
+    }
+    if (include["components"]) {
+      if (!include["components"].IsMap()) {
+        LOG_S(ERROR) << "Invalid components section: not type Map";
+        throw std::runtime_error("Invalid components section: not type Map");
+      }
+      for (auto componentNode = include["components"].begin();
+           componentNode != include["components"].end();
+           ++componentNode)
+      {
+        loadComponent(
+            componentNode->first.as<std::string>(), componentNode->second);
+      }
+    }
+  }
+}
+
+void module::loadComponent(std::string key, YAML::Node &component)
+{
+  if (!component.IsMap()) {
+    LOG_S(ERROR) << "Invalid component " + key + ": not type Map";
+    throw std::runtime_error("Invalid component " + key + ": not type Map");
+  }
+  std::string sql = "CREATE TABLE " + key
+                  + " (entity INTEGER PRIMARY KEY "
+                    "REFERENCES entity(entity) ON DELETE CASCADE";
+  for (auto value = component.begin(); value != component.end(); ++value) {
+    const std::string &dtype = value->second.as<std::string>();
+    sql += ", " + value->first.as<std::string>() + " ";
+    for (auto &c : dtype)
+      sql += std::toupper(c);
+  }
+  sql += ");";
+  _componentSQL[key] = sql;
+}
+
+const std::string module::getComponentSQL(const std::string &component)
+{
+  if (_componentSQL.count(component) > 0)
+    return _componentSQL.at(component);
+  throw std::runtime_error(
+      "Component '" + component + "' does not exist in module '" + _name + "'");
+}
 
 } // namespace nebula

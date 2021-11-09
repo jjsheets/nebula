@@ -1,0 +1,6 @@
+module:
+  id: valid-module
+  tags: core
+  core: true
+  include:
+  - components.yml

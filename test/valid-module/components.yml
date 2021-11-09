@@ -1,0 +1,5 @@
+components:
+  test:
+    test_int: integer
+    test_num: real
+    test_txt: text
