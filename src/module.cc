@@ -62,6 +62,12 @@ SCENARIO("class module")
                 == "CREATE TABLE test (entity INTEGER PRIMARY KEY REFERENCES "
                    "entity(entity) ON DELETE CASCADE, test_int INTEGER, "
                    "test_num REAL, test_txt TEXT);");
+        REQUIRE(mod.getSystemSQL("update_location")
+                == "UPDATE location SET theta = old.theta + mobile.rotation, x "
+                   "= old.x - sin(old.theta) * mobile.vel * deltaT(), y = "
+                   "old.y + cos(old.theta) * mobile.vel * deltaT() FROM "
+                   "location AS old JOIN mobile USING (entity) WHERE vel > "
+                   "0.0;");
       }
     }
   }
@@ -123,11 +129,13 @@ void module::loadModule()
 {
   for (auto fileName : _includes) {
     YAML::Node include;
+    auto filePath = _rootPath + "/" + fileName;
+    LOG_S(INFO) << "Loading " << filePath;
     try {
-      include = YAML::LoadFile(_rootPath + "/" + fileName);
+      include = YAML::LoadFile(filePath);
     } catch (YAML::BadFile &e) {
       LOG_S(ERROR) << "Included file is missing or corrupt:";
-      LOG_S(ERROR) << "  " << _rootPath << "/" << fileName;
+      LOG_S(ERROR) << "  " << filePath;
       throw;
     }
     if (include["components"]) {
@@ -141,6 +149,18 @@ void module::loadModule()
       {
         loadComponent(
             componentNode->first.as<std::string>(), componentNode->second);
+      }
+    }
+    if (include["systems"]) {
+      if (!include["systems"].IsMap()) {
+        LOG_S(ERROR) << "Invalid systems section: not type Map";
+        throw std::runtime_error("Invalid systems section: not type Map");
+      }
+      for (auto systemNode = include["systems"].begin();
+           systemNode != include["systems"].end();
+           ++systemNode)
+      {
+        loadSystem(systemNode->first.as<std::string>(), systemNode->second);
       }
     }
   }
@@ -165,12 +185,84 @@ void module::loadComponent(std::string key, YAML::Node &component)
   _componentSQL[key] = sql;
 }
 
+void module::loadSystem(std::string key, YAML::Node &system)
+{
+  if (!system.IsMap()) {
+    LOG_S(ERROR) << "Invalid system " + key + ": not type Map";
+    throw std::runtime_error("Invalid system " + key + ": not type Map");
+  }
+  if (system["update"]) {
+    YAML::Node update = system["update"];
+    if (!update["component"]) {
+      LOG_S(ERROR) << "Invalid system " + key + ": no component field";
+      throw std::runtime_error(
+          "Invalid system " + key + ": no component field");
+    }
+    if (!update["set"]) {
+      LOG_S(ERROR) << "Invalid system " + key + ": no set field";
+      throw std::runtime_error("Invalid system " + key + ": no set field");
+    }
+    YAML::Node set = update["set"];
+    std::string sql
+        = "UPDATE " + update["component"].as<std::string>() + " SET ";
+    for (auto value = set.begin(); value != set.end(); ++value) {
+      if (value != set.begin()) {
+        sql += ", ";
+      }
+      sql += value->first.as<std::string>() + " = "
+           + value->second.as<std::string>();
+    }
+    if (update["entity_join"]) {
+      YAML::Node join = update["entity_join"];
+      sql += " FROM ";
+      for (auto value = join.begin(); value != join.end(); ++value) {
+        if (value != join.begin()) {
+          sql += " JOIN ";
+        }
+        auto component = value->second.as<std::string>();
+        auto name      = value->first.as<std::string>();
+        if (component != name) {
+          sql += component + " AS ";
+        }
+        sql += name;
+        if (value != join.begin()) {
+          sql += " USING (entity)";
+        }
+      }
+    }
+    if (update["require"]) {
+      YAML::Node require = update["require"];
+      sql += " WHERE ";
+      for (auto value = require.begin(); value != require.end(); ++value) {
+        if (value != require.begin()) {
+          sql += ", ";
+        }
+        sql += value->first.as<std::string>() + " "
+             + value->second.as<std::string>();
+      }
+    }
+    sql += ";";
+    _systemSQL[key] = sql;
+    return;
+  }
+  LOG_S(ERROR) << "No valid system configuration found for " << key;
+  throw std::runtime_error("No valid system configuration found for " + key);
+}
+
 const std::string module::getComponentSQL(const std::string &component)
 {
   if (_componentSQL.count(component) > 0)
     return _componentSQL.at(component);
   throw std::runtime_error(
       "Component '" + component + "' does not exist in module '" + _name + "'");
+}
+
+const std::string module::getSystemSQL(const std::string &system)
+{
+  if (_systemSQL.count(system) > 0)
+    return _systemSQL.at(system);
+  throw std::runtime_error(
+      "System '" + system + "' does not exist in module '" + _name + "'");
 }
 
 } // namespace nebula

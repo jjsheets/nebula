@@ -1,5 +1,5 @@
 systems:
-- new_player:
+  new_player:
     new_entity:
       id: player
       trigger:
@@ -22,7 +22,7 @@ systems:
         reload: 1.0
         shield: 100
         health: 100
-- accelerate:
+  accelerate:
     update:
       component: mobile
       keybinds:
@@ -32,7 +32,7 @@ systems:
         entity_has: player_ship
       set:
         accel: accel + 0.5
-- decelerate:
+  decelerate:
     update:
       component: mobile
       keybinds:
@@ -42,7 +42,7 @@ systems:
         entity_has: player_ship
       set:
         accel: accel - 0.5
-- turn_left:
+  turn_left:
     update:
       component: mobile
       keybinds:
@@ -52,7 +52,7 @@ systems:
         entity_has: player_ship
       set:
         rotation: rotation + 0.5
-- turn_right:
+  turn_right:
     update:
       component: mobile
       keybinds:

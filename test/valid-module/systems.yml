@@ -1,0 +1,13 @@
+systems:
+  update_location:
+    update:
+      component: location
+      entity_join:
+        old: location
+        mobile: mobile
+      require:
+        vel: '> 0.0'
+      set:
+        theta: old.theta + mobile.rotation
+        x: old.x - sin(old.theta) * mobile.vel * deltaT()
+        y: old.y + cos(old.theta) * mobile.vel * deltaT()
