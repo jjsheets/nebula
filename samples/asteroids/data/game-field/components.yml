@@ -1,14 +1,14 @@
 components:
-- location:
-    x: numeric
-    y: numeric
-    prev_x: numeric
-    prev_y: numeric
-    theta: numeric
-- mobile:
-    accel: numeric
-    vel: numeric
-    max_vel: numeric
-    rotation: numeric
-- collision:
-    radius: numeric
+  location:
+    x: real
+    y: real
+    prev_x: real
+    prev_y: real
+    theta: real
+  mobile:
+    accel: real
+    vel: real
+    max_vel: real
+    rotation: real
+  collision:
+    radius: real

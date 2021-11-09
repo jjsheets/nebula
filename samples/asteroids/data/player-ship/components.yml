@@ -1,5 +1,5 @@
 components:
-- player_ship:
-    reload: numeric
+  player_ship:
+    reload: real
     shield: integer
     health: integer

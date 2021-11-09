@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include "yaml-cpp/yaml.h"
 
 namespace nebula {
 
@@ -18,6 +19,7 @@ private:
   std::string _tags;
   std::vector<std::string> _dependencies;
   std::vector<std::string> _includes;
+  std::map<std::string, std::string> _componentSQL;
 
 public:
   module(const std::string &path, bool shouldLoad = false);
@@ -44,10 +46,15 @@ public:
   {
     return _load;
   }
+
   void load(bool shouldLoad)
   {
     _load = shouldLoad;
   }
+
+  void loadModule();
+  void loadComponent(std::string key, YAML::Node &component);
+  const std::string getComponentSQL(const std::string &component);
 };
 
 } // namespace nebula
