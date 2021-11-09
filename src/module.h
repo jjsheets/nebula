@@ -20,6 +20,7 @@ private:
   std::vector<std::string> _dependencies;
   std::vector<std::string> _includes;
   std::map<std::string, std::string> _componentSQL;
+  std::map<std::string, std::string> _systemSQL;
 
 public:
   module(const std::string &path, bool shouldLoad = false);
@@ -54,7 +55,9 @@ public:
 
   void loadModule();
   void loadComponent(std::string key, YAML::Node &component);
+  void loadSystem(std::string key, YAML::Node &system);
   const std::string getComponentSQL(const std::string &component);
+  const std::string getSystemSQL(const std::string &system);
 };
 
 } // namespace nebula

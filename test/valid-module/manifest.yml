@@ -4,3 +4,4 @@ module:
   core: true
   include:
   - components.yml
+  - systems.yml
