@@ -16,7 +16,6 @@ extern "C" {
 
 void glfwSetWindowShouldClose(GLFWwindow *a, int b)
 {
-  LOG_SCOPE_FUNCTION(9);
   auto vkMock = vulkanMock::instance();
   assert(vkMock);
   vkMock->glfwSetWindowShouldClose(a, b);
@@ -127,7 +126,6 @@ GLFWframebuffersizefun glfwSetFramebufferSizeCallback(
 
 GLFWkeyfun glfwSetKeyCallback(GLFWwindow *a, GLFWkeyfun b)
 {
-  LOG_SCOPE_FUNCTION(9);
   auto vkMock = vulkanMock::instance();
   assert(vkMock);
   return vkMock->glfwSetKeyCallback(a, b);
