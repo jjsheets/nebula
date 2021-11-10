@@ -1,8 +1,8 @@
 // This document is licensed according to the LGPL v2.1 license
 // Consult the LICENSE file in the root project directory for details
 
-#ifndef NEBULA_TEST_vulkanMock_H
-#define NEBULA_TEST_vulkanMock_H
+#ifndef NEBULA_TEST_VULKAN_MOCK_H
+#define NEBULA_TEST_VULKAN_MOCK_H
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -365,6 +365,4 @@ public:
           const uint32_t *));
 };
 
-extern vulkanMock vkMock;
-
-#endif // NEBULA_TEST_vulkanMock_H
+#endif // NEBULA_TEST_VULKAN_MOCK_H
