@@ -180,7 +180,7 @@ jobs:
         run: |
           mkdir /home/runner/.local
           mkdir /home/runner/.local/share
-          test/test
+          test/test --ci-cat-logs
           cd gcov
           gcov -o ../test ../src/*.cc -t >test.gcov
           lcov -c -d ../test -o test.info
@@ -190,7 +190,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: msys2 {0}
         run: |
-          test/test
+          test/test --ci-cat-logs
 #          cd gcov
 #          gcov -o ../test ../src/*.cc -t >test.gcov
 #          lcov -c -d ../test -o test.info
