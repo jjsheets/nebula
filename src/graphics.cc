@@ -759,6 +759,7 @@ void graphics::createImageViews()
 
 void graphics::logMemoryType(VkMemoryType &mType)
 {
+  LOG_SCOPE_FUNCTION(9);
   std::string flags = "";
   if (mType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
     flags += ", device local";
@@ -783,6 +784,7 @@ void graphics::logMemoryType(VkMemoryType &mType)
 
 void graphics::logMemoryHeap(VkMemoryHeap &mHeap, uint32_t i)
 {
+  LOG_SCOPE_FUNCTION(9);
   std::string flags = "";
   if (mHeap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
     flags += ", device local";
@@ -1326,6 +1328,7 @@ void graphics::drawFrame()
 
 void graphics::updateUniformBuffer(uint32_t currentImage)
 {
+  LOG_SCOPE_FUNCTION(INFO);
   static auto startTime = std::chrono::high_resolution_clock::now();
   auto currentTime      = std::chrono::high_resolution_clock::now();
   float time = std::chrono::duration<float, std::chrono::seconds::period>(
@@ -1441,6 +1444,7 @@ void graphics::createVertexBuffer()
 
 void graphics::createIndexBuffer()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
