@@ -11,6 +11,8 @@
 // Logging system includes
 #include "loguru.hpp"
 
+// Exception includes
+#include "exceptions.h"
 // Folder Handling includes
 #include "platform_folders.h"
 
@@ -140,8 +142,7 @@ void moduleManager::resolveModule(module &mod)
     if (_resolved.find(dep) == _resolved.end()) {
       LOG_S(INFO) << "  Dependency not already resolved";
       if (_unresolved.find(dep) != _unresolved.end()) {
-        LOG_S(ERROR) << "Circular module dependency detected";
-        throw std::runtime_error("Circular module dependency detected");
+        throw nebulaException("Circular module dependency detected");
       }
       LOG_S(INFO) << "  No Circular dependency detected, resolving " << dep;
       resolveModule(_moduleMap[dep]);

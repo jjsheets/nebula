@@ -9,6 +9,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 
+#include "clipp.h"
+
 int main(int argc, char **argv)
 {
   loguru::init(argc, argv);
@@ -19,10 +21,16 @@ int main(int argc, char **argv)
   context.applyCommandLine(argc, argv);
   int res = context.run();
   loguru::shutdown();
-  if (res != 0) {
-    std::ifstream log("test/test.log");
-    for (std::string line; std::getline(log, line);) {
-      std::cout << line << std::endl;
+  bool catLog = false;
+  clipp::group cli;
+  cli.push_back(clipp::option("--ci-cat-logs").set(catLog));
+  clipp::parse(argc, argv, cli);
+  if (catLog) {
+    if (res != 0) {
+      std::ifstream log("test/test.log");
+      for (std::string line; std::getline(log, line);) {
+        std::cout << line << std::endl;
+      }
     }
   }
   if (context.shouldExit())

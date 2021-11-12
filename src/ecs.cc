@@ -30,9 +30,7 @@ ecs::ecs() : _db(nullptr)
   int res = sqlite3_open_v2(
       ":memory:", &_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr);
   if (res != SQLITE_OK) {
-    sqliteException e(res);
-    LOG_S(ERROR) << e.what();
-    throw e;
+    throw sqliteException(res);
   }
   sqlite3_stmt *insertEntityTable;
   if (sqlite3_prepare_v2(_db,
@@ -42,20 +40,14 @@ ecs::ecs() : _db(nullptr)
           nullptr)
       != SQLITE_OK)
   {
-    sqliteException e(_db);
-    LOG_S(ERROR) << e.what();
-    throw e;
+    throw sqliteException(_db);
   }
   if (sqlite3_step(insertEntityTable) != SQLITE_DONE) {
-    sqliteException e(_db);
-    LOG_S(ERROR) << e.what();
-    throw e;
+    throw sqliteException(_db);
   }
   LOG_S(INFO) << "SQL: Entity table created";
   if (sqlite3_finalize(insertEntityTable) != SQLITE_OK) {
-    sqliteException e(_db);
-    LOG_S(ERROR) << e.what();
-    throw e;
+    throw sqliteException(_db);
   }
 }
 

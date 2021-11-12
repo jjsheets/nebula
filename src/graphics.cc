@@ -202,18 +202,17 @@ void graphics::initGLFW(GLFWkeyfun keyCallback)
   LOG_SCOPE_FUNCTION(INFO);
   LOG_S(INFO) << "GLFW " << glfwGetVersionString();
   if (!glfwInit()) {
-    LOG_S(ERROR) << "Could not initialize GLFW: Platform does not meet minimum "
-                    "requirements for GLFW initialization";
-    throw glfwException();
+    throw glfwException(
+        "Could not initialize GLFW: Platform does not meet minimum "
+        "requirements for GLFW initialization");
   }
   LOG_S(INFO) << "GLFW library loaded";
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   _window = glfwCreateWindow(_width, _height, "Nebula", nullptr, nullptr);
   if (!_window) {
-    LOG_S(ERROR) << "GLFW: Window creation failed";
     glfwTerminate();
-    throw glfwException();
+    throw glfwException("GLFW: Window creation failed");
   }
   LOG_S(INFO) << "GLFW: Game window created (" << _width << "x" << _height
               << ")";
@@ -238,8 +237,7 @@ void graphics::createVulkanInstance()
 {
   LOG_SCOPE_FUNCTION(INFO);
   if (_useValidationLayers && !checkValidationLayerSupport()) {
-    LOG_S(ERROR) << "Vulkan: validation layers requested, but not available";
-    throw std::runtime_error(
+    throw nebulaException(
         "Vulkan: validation layers requested, but not available");
   }
   VkApplicationInfo appInfo {};
@@ -266,8 +264,7 @@ void graphics::createVulkanInstance()
     createInfo.enabledLayerCount = 0;
   }
   if (vkCreateInstance(&createInfo, nullptr, &_instance) != VK_SUCCESS) {
-    LOG_S(ERROR) << "Vulkan: failed to create instance";
-    throw std::runtime_error("Vulkan: failed to create instance");
+    throw nebulaException("Vulkan: failed to create instance");
   }
   LOG_S(INFO) << "Vulkan: instance created";
 }
@@ -366,9 +363,7 @@ void graphics::setValidationCallback()
       return;
     }
   }
-  LOG_S(ERROR) << "Vulkan: failed to set up validation layer callback";
-  throw std::runtime_error(
-      "Vulkan: failed to set up validation layer callback");
+  throw nebulaException("Vulkan: failed to set up validation layer callback");
 }
 
 void graphics::pickPhysicalDevice()
@@ -377,8 +372,7 @@ void graphics::pickPhysicalDevice()
   uint32_t deviceCount = 0;
   vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
   if (deviceCount == 0) {
-    LOG_S(ERROR) << "Vulkan: failed to find GPUs with Vulkan support";
-    throw std::runtime_error("Vulkan: failed to find GPUs with Vulkan support");
+    throw nebulaException("Vulkan: failed to find GPUs with Vulkan support");
   }
   std::vector<VkPhysicalDevice> devices(deviceCount);
   vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
@@ -389,8 +383,7 @@ void graphics::pickPhysicalDevice()
     }
   }
   if (_physicalDevice == VK_NULL_HANDLE) {
-    LOG_S(ERROR) << "Vulkan: failed to find a suitable GPU";
-    throw std::runtime_error("Vulkan: failed to find a suitable GPU");
+    throw nebulaException("Vulkan: failed to find a suitable GPU");
   }
   logPhysicalDevice();
 }
@@ -502,8 +495,7 @@ void graphics::createLogicalDevice()
   if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_logicalDevice)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create logical device";
-    throw std::runtime_error("Vulkan: failed to create logical device");
+    throw nebulaException("Vulkan: failed to create logical device");
   }
   LOG_S(INFO) << "Vulkan: logical device created";
   vkGetDeviceQueue(_logicalDevice,
@@ -520,8 +512,7 @@ void graphics::createSurface()
   if (glfwCreateWindowSurface(_instance, _window, nullptr, &_surface)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create window surface";
-    throw std::runtime_error("Vulkan: failed to create window surface");
+    throw nebulaException("Vulkan: failed to create window surface");
   }
 }
 
@@ -664,8 +655,7 @@ void graphics::createSwapChain()
   if (vkCreateSwapchainKHR(_logicalDevice, &createInfo, nullptr, &_swapChain)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create swap chain";
-    throw std::runtime_error("Vulkan: failed to create swap chain");
+    throw nebulaException("Vulkan: failed to create swap chain");
   }
   vkGetSwapchainImagesKHR(_logicalDevice, _swapChain, &imageCount, nullptr);
   _swapChainImages.resize(imageCount);
@@ -751,14 +741,14 @@ void graphics::createImageViews()
             _logicalDevice, &createInfo, nullptr, &_swapChainImageViews[i])
         != VK_SUCCESS)
     {
-      LOG_S(ERROR) << "Vulkan: failed to create image views";
-      throw std::runtime_error("Vulkan: failed to create image views");
+      throw nebulaException("Vulkan: failed to create image views");
     }
   }
 }
 
 void graphics::logMemoryType(VkMemoryType &mType)
 {
+  LOG_SCOPE_FUNCTION(9);
   std::string flags = "";
   if (mType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
     flags += ", device local";
@@ -783,6 +773,7 @@ void graphics::logMemoryType(VkMemoryType &mType)
 
 void graphics::logMemoryHeap(VkMemoryHeap &mHeap, uint32_t i)
 {
+  LOG_SCOPE_FUNCTION(9);
   std::string flags = "";
   if (mHeap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
     flags += ", device local";
@@ -867,8 +858,7 @@ graphics::pipeline::pipeline(VkDevice device,
           &_graphicsPipeline)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create graphics pipeline";
-    throw std::runtime_error("Vulkan: failed to create graphics pipeline");
+    throw nebulaException("Vulkan: failed to create graphics pipeline");
   }
   vkDestroyShaderModule(_device, fragShaderModule, nullptr);
   vkDestroyShaderModule(_device, vertShaderModule, nullptr);
@@ -992,8 +982,7 @@ void graphics::pipeline::setupPipelineLayout(VkRenderPass renderPass)
           _device, &_pipelineLayoutInfo, nullptr, &_pipelineLayout)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create pipeline layout";
-    throw std::runtime_error("Vulkan: failed to create pipeline layout");
+    throw nebulaException("Vulkan: failed to create pipeline layout");
   }
   _pipelineInfo       = {};
   _pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -1027,8 +1016,7 @@ std::vector<char> graphics::pipeline::readFile(const std::string &filename)
   LOG_SCOPE_FUNCTION(INFO);
   std::ifstream file(filename, std::ios::ate | std::ios::binary);
   if (!file.is_open()) {
-    LOG_S(ERROR) << "failed to open file: " << filename;
-    throw std::runtime_error("failed to open file: " + filename);
+    throw nebulaException("failed to open file: " + filename);
   }
   LOG_S(INFO) << "opened shader file: " << filename;
   size_t fileSize = (size_t)file.tellg();
@@ -1051,8 +1039,7 @@ VkShaderModule graphics::pipeline::createShaderModule(
   if (vkCreateShaderModule(_device, &createInfo, nullptr, &shaderModule)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create shader module";
-    throw std::runtime_error("Vulkan: failed to create shader module");
+    throw nebulaException("Vulkan: failed to create shader module");
   }
   return shaderModule;
 }
@@ -1092,8 +1079,7 @@ void graphics::createRenderPass()
   if (vkCreateRenderPass(_logicalDevice, &renderPassInfo, nullptr, &_renderPass)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create render pass";
-    throw std::runtime_error("Vulkan: failed to create render pass");
+    throw nebulaException("Vulkan: failed to create render pass");
   }
 }
 
@@ -1117,8 +1103,7 @@ void graphics::createFramebuffers()
             &_swapChainFramebuffers[i])
         != VK_SUCCESS)
     {
-      LOG_S(ERROR) << "Vulkan: failed to create framebuffer";
-      throw std::runtime_error("Vulkan: failed to create framebuffer");
+      throw nebulaException("Vulkan: failed to create framebuffer");
     }
   }
 }
@@ -1133,8 +1118,7 @@ void graphics::createCommandPool()
   if (vkCreateCommandPool(_logicalDevice, &poolInfo, nullptr, &_commandPool)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create command pool";
-    throw std::runtime_error("Vulkan: failed to create command pool");
+    throw nebulaException("Vulkan: failed to create command pool");
   }
 }
 
@@ -1151,16 +1135,13 @@ void graphics::createCommandBuffers()
           _logicalDevice, &allocInfo, _commandBuffers.data())
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to allocate command buffers";
-    throw std::runtime_error("Vulkan: failed to allocate command buffers");
+    throw nebulaException("Vulkan: failed to allocate command buffers");
   }
   for (size_t i = 0; i < _commandBuffers.size(); i++) {
     VkCommandBufferBeginInfo beginInfo {};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     if (vkBeginCommandBuffer(_commandBuffers[i], &beginInfo) != VK_SUCCESS) {
-      LOG_S(ERROR) << "Vulkan: failed to begin recording command buffer";
-      throw std::runtime_error(
-          "Vulkan: failed to begin recording command buffer");
+      throw nebulaException("Vulkan: failed to begin recording command buffer");
     }
     VkRenderPassBeginInfo renderPassInfo {};
     renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1192,8 +1173,7 @@ void graphics::createCommandBuffers()
         _commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
     vkCmdEndRenderPass(_commandBuffers[i]);
     if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
-      LOG_S(ERROR) << "Vulkan: failed to record command buffer";
-      throw std::runtime_error("Vulkan: failed to record command buffer");
+      throw nebulaException("Vulkan: failed to record command buffer");
     }
   }
 }
@@ -1221,9 +1201,7 @@ void graphics::createSyncObjects()
                _logicalDevice, &fenceInfo, nullptr, &_inFlightFence[i])
                != VK_SUCCESS)
     {
-      LOG_S(ERROR) << "Vulkan: failed to create synchronization objects";
-      throw std::runtime_error(
-          "Vulkan: failed to create synchronization objects");
+      throw nebulaException("Vulkan: failed to create synchronization objects");
     }
   }
 }
@@ -1267,8 +1245,7 @@ void graphics::submitQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[])
           _graphicsQueue, 1, &submitInfo, _inFlightFence[_currentFrame])
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to submit draw command buffer";
-    throw std::runtime_error("Vulkan: failed to submit draw command buffer");
+    throw nebulaException("Vulkan: failed to submit draw command buffer");
   }
 }
 
@@ -1290,8 +1267,7 @@ void graphics::presentQueue(uint32_t imageIndex, VkSemaphore signalSemaphores[])
     _framebufferResized = false;
     recreateSwapChain();
   } else if (result != VK_SUCCESS) {
-    LOG_S(ERROR) << "Vulkan: failed to present swap chain image";
-    throw std::runtime_error("Vulkan: failed to present swap chain image");
+    throw nebulaException("Vulkan: failed to present swap chain image");
   }
 }
 
@@ -1310,8 +1286,7 @@ void graphics::drawFrame()
     recreateSwapChain();
     return;
   } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-    LOG_S(ERROR) << "Vulkan: failed to acquire swap chain image";
-    throw std::runtime_error("Vulkan: failed to acquire swap chain image");
+    throw nebulaException("Vulkan: failed to acquire swap chain image");
   }
   if (_inFlightImage[imageIndex] != VK_NULL_HANDLE) {
     waitForImage(imageIndex);
@@ -1326,6 +1301,7 @@ void graphics::drawFrame()
 
 void graphics::updateUniformBuffer(uint32_t currentImage)
 {
+  LOG_SCOPE_FUNCTION(INFO);
   static auto startTime = std::chrono::high_resolution_clock::now();
   auto currentTime      = std::chrono::high_resolution_clock::now();
   float time = std::chrono::duration<float, std::chrono::seconds::period>(
@@ -1391,8 +1367,7 @@ void graphics::createBuffer(VkDeviceSize size,
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
   if (vkCreateBuffer(_logicalDevice, &bufferInfo, nullptr, &buffer)
       != VK_SUCCESS) {
-    LOG_S(ERROR) << "Vulkan: failed to create buffer";
-    throw std::runtime_error("Vulkan: failed to create buffer");
+    throw NEBULA_EXCEPTIONS_H("Vulkan: failed to create buffer");
   }
   LOG_S(INFO) << "Vulkan: buffer created";
   VkMemoryRequirements memRequirements;
@@ -1405,8 +1380,7 @@ void graphics::createBuffer(VkDeviceSize size,
   if (vkAllocateMemory(_logicalDevice, &allocInfo, nullptr, &bufferMemory)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to allocate buffer memory";
-    throw std::runtime_error("Vulkan: failed to allocate buffer memory");
+    throw nebulaException("Vulkan: failed to allocate buffer memory");
   }
   LOG_S(INFO) << "Vulkan: memory allocated";
   vkBindBufferMemory(_logicalDevice, buffer, bufferMemory, 0);
@@ -1441,6 +1415,7 @@ void graphics::createVertexBuffer()
 
 void graphics::createIndexBuffer()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
@@ -1507,8 +1482,7 @@ uint32_t graphics::findMemoryType(
       return i;
     }
   }
-  LOG_S(ERROR) << "Vulkan: failed to find suitable memory type";
-  throw std::runtime_error("Vulkan: failed to find suitable memory type");
+  throw nebulaException("Vulkan: failed to find suitable memory type");
 }
 
 void graphics::pipeline::createDescriptorSetLayout()
@@ -1527,8 +1501,7 @@ void graphics::pipeline::createDescriptorSetLayout()
           _device, &layoutInfo, nullptr, &_descriptorSetLayout)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create descriptor set layout";
-    throw std::runtime_error("Vulkan: failed to create descriptor set layout");
+    throw nebulaException("Vulkan: failed to create descriptor set layout");
   }
 }
 
@@ -1563,8 +1536,7 @@ void graphics::createDescriptorPool()
           _logicalDevice, &poolInfo, nullptr, &_descriptorPool)
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to create descriptor pool";
-    throw std::runtime_error("Vulkan: failed to create descriptor pool");
+    throw nebulaException("Vulkan: failed to create descriptor pool");
   }
 }
 
@@ -1583,8 +1555,7 @@ void graphics::createDescriptorSets()
           _logicalDevice, &allocInfo, _descriptorSets.data())
       != VK_SUCCESS)
   {
-    LOG_S(ERROR) << "Vulkan: failed to allocate descriptor sets";
-    throw std::runtime_error("Vulkan: failed to allocate descriptor sets");
+    throw nebulaException("Vulkan: failed to allocate descriptor sets");
   }
   for (size_t i = 0; i < _swapChainImages.size(); i++) {
     VkDescriptorBufferInfo bufferInfo {};
