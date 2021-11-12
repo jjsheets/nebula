@@ -1,6 +1,8 @@
 // This document is licensed according to the LGPL v2.1 license
 // Consult the LICENSE file in the root project directory for details
 
+// Exception includes
+#include "exceptions.h"
 #include "module.h"
 #include <stdexcept>
 #include <algorithm>
@@ -86,19 +88,17 @@ module::module(const std::string &path, bool shouldLoad)
   try {
     manifest = YAML::LoadFile(path + "/manifest.yml");
   } catch (YAML::BadFile &e) {
-    LOG_S(ERROR) << "Manifest file is missing or corrupt:";
-    LOG_S(ERROR) << "  " << path << "/manifest.yml";
+    LOG_S(ERROR) << "Manifest file is missing or corrupt: " << path
+                 << "/manifest.yml";
     throw;
   }
   if (!manifest["module"]) {
-    LOG_S(ERROR) << "Manifest file lacks module section:";
-    LOG_S(ERROR) << "  " << path << "/manifest.yml";
-    throw std::runtime_error("Manifest file lacks module section");
+    throw nebulaException(
+        "Manifest file lacks module section: " + path + "/manifest.yml");
   }
   if (!manifest["module"]["id"]) {
-    LOG_S(ERROR) << "Manifest file lacks identifier:";
-    LOG_S(ERROR) << "  " << path << "/manifest.yml";
-    throw std::runtime_error("Manifest file lacks identifier");
+    throw nebulaException(
+        "Manifest file lacks identifier: " + path + "/manifest.yml");
   }
   _identifier = manifest["module"]["id"].as<std::string>();
   _name = manifest["module"]["name"].as<std::string, std::string>(_identifier);
@@ -134,14 +134,12 @@ void module::loadModule()
     try {
       include = YAML::LoadFile(filePath);
     } catch (YAML::BadFile &e) {
-      LOG_S(ERROR) << "Included file is missing or corrupt:";
-      LOG_S(ERROR) << "  " << filePath;
+      LOG_S(ERROR) << "Included file is missing or corrupt: " << filePath;
       throw;
     }
     if (include["components"]) {
       if (!include["components"].IsMap()) {
-        LOG_S(ERROR) << "Invalid components section: not type Map";
-        throw std::runtime_error("Invalid components section: not type Map");
+        throw nebulaException("Invalid components section: not type Map");
       }
       for (auto componentNode = include["components"].begin();
            componentNode != include["components"].end();
@@ -153,8 +151,7 @@ void module::loadModule()
     }
     if (include["systems"]) {
       if (!include["systems"].IsMap()) {
-        LOG_S(ERROR) << "Invalid systems section: not type Map";
-        throw std::runtime_error("Invalid systems section: not type Map");
+        throw nebulaException("Invalid systems section: not type Map");
       }
       for (auto systemNode = include["systems"].begin();
            systemNode != include["systems"].end();
@@ -169,8 +166,7 @@ void module::loadModule()
 void module::loadComponent(std::string key, YAML::Node &component)
 {
   if (!component.IsMap()) {
-    LOG_S(ERROR) << "Invalid component " + key + ": not type Map";
-    throw std::runtime_error("Invalid component " + key + ": not type Map");
+    throw nebulaException("Invalid component " + key + ": not type Map");
   }
   std::string sql = "CREATE TABLE " + key
                   + " (entity INTEGER PRIMARY KEY "
@@ -188,19 +184,15 @@ void module::loadComponent(std::string key, YAML::Node &component)
 void module::loadSystem(std::string key, YAML::Node &system)
 {
   if (!system.IsMap()) {
-    LOG_S(ERROR) << "Invalid system " + key + ": not type Map";
-    throw std::runtime_error("Invalid system " + key + ": not type Map");
+    throw nebulaException("Invalid system " + key + ": not type Map");
   }
   if (system["update"]) {
     YAML::Node update = system["update"];
     if (!update["component"]) {
-      LOG_S(ERROR) << "Invalid system " + key + ": no component field";
-      throw std::runtime_error(
-          "Invalid system " + key + ": no component field");
+      throw nebulaException("Invalid system " + key + ": no component field");
     }
     if (!update["set"]) {
-      LOG_S(ERROR) << "Invalid system " + key + ": no set field";
-      throw std::runtime_error("Invalid system " + key + ": no set field");
+      throw nebulaException("Invalid system " + key + ": no set field");
     }
     YAML::Node set = update["set"];
     std::string sql
@@ -245,15 +237,14 @@ void module::loadSystem(std::string key, YAML::Node &system)
     _systemSQL[key] = sql;
     return;
   }
-  LOG_S(ERROR) << "No valid system configuration found for " << key;
-  throw std::runtime_error("No valid system configuration found for " + key);
+  throw nebulaException("No valid system configuration found for " + key);
 }
 
 const std::string module::getComponentSQL(const std::string &component)
 {
   if (_componentSQL.count(component) > 0)
     return _componentSQL.at(component);
-  throw std::runtime_error(
+  throw nebulaException(
       "Component '" + component + "' does not exist in module '" + _name + "'");
 }
 
@@ -261,7 +252,7 @@ const std::string module::getSystemSQL(const std::string &system)
 {
   if (_systemSQL.count(system) > 0)
     return _systemSQL.at(system);
-  throw std::runtime_error(
+  throw nebulaException(
       "System '" + system + "' does not exist in module '" + _name + "'");
 }
 

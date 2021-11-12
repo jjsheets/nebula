@@ -17,6 +17,7 @@ class glfwException : public std::runtime_error {
 
 public:
   explicit glfwException();
+  explicit glfwException(const std::string &logMsg);
   explicit glfwException(const glfwException &other) noexcept
       : std::runtime_error("")
   {
@@ -64,6 +65,26 @@ public:
   bool operator==(int other) noexcept
   {
     return _code == other;
+  }
+};
+
+class nebulaException : public std::runtime_error {
+  std::string _description;
+
+public:
+  explicit nebulaException(const std::string &description);
+  nebulaException(const nebulaException &other) : std::runtime_error("")
+  {
+    _description = other._description;
+  }
+  virtual const char *what() const noexcept
+  {
+    return _description.c_str();
+  }
+  nebulaException &operator=(const nebulaException &other) noexcept
+  {
+    _description = other._description;
+    return *this;
   }
 };
 
