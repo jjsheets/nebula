@@ -118,6 +118,8 @@ private:
   std::vector<VkDescriptorSet> _descriptorSets;
   VkImage _textureImage;
   VkDeviceMemory _textureImageMemory;
+  VkImageView _textureImageView;
+  VkSampler _textureSampler;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -194,6 +196,9 @@ private:
       VkImageLayout newLayout);
   void copyBufferToImage(
       VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+  void createTextureImageView();
+  VkImageView createImageView(VkImage image, VkFormat format);
+  void createTextureSampler();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

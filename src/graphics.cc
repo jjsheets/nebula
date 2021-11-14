@@ -87,7 +87,9 @@ graphics::graphics(uint32_t width,
       _surface(VK_NULL_HANDLE), _swapChain(VK_NULL_HANDLE),
       _renderPass(VK_NULL_HANDLE), _commandPool(VK_NULL_HANDLE),
       _currentFrame(0), _framebufferResized(false),
-      _vertexBuffer(VK_NULL_HANDLE), _vertexBufferMemory(VK_NULL_HANDLE)
+      _vertexBuffer(VK_NULL_HANDLE), _vertexBufferMemory(VK_NULL_HANDLE),
+      _textureImage(VK_NULL_HANDLE), _textureImageMemory(VK_NULL_HANDLE),
+      _textureImageView(VK_NULL_HANDLE), _textureSampler(VK_NULL_HANDLE)
 {
   LOG_SCOPE_FUNCTION(INFO);
   initGLFW(keyCallback);
@@ -109,6 +111,8 @@ graphics::graphics(uint32_t width,
   createFramebuffers();
   createCommandPool();
   createTextureImage();
+  createTextureImageView();
+  createTextureSampler();
   createVertexBuffer();
   createIndexBuffer();
   createUniformBuffers();
@@ -121,6 +125,8 @@ graphics::graphics(uint32_t width,
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  vkDestroySampler(_logicalDevice, _textureSampler, nullptr);
+  vkDestroyImageView(_logicalDevice, _textureImageView, nullptr);
   vkDestroyImage(_logicalDevice, _textureImage, nullptr);
   vkFreeMemory(_logicalDevice, _textureImageMemory, nullptr);
   destroySynchronization();
@@ -398,8 +404,10 @@ bool graphics::deviceIsSuitable(VkPhysicalDevice device)
   LOG_SCOPE_FUNCTION(1);
   queueFamilyIndices queueFamilies(device, _surface);
   swapChainSupportDetails swapChainDetails(device, _surface);
+  VkPhysicalDeviceFeatures supportedFeatures;
+  vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
   return queueFamilies.isComplete() && checkDeviceExtensionSupport(device)
-      && swapChainDetails.isSuitable();
+      && swapChainDetails.isSuitable() && supportedFeatures.samplerAnisotropy;
 }
 
 bool graphics::checkDeviceExtensionSupport(VkPhysicalDevice device)
@@ -481,6 +489,7 @@ void graphics::createLogicalDevice()
   std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
   populateQueueCreateInfos(queueFamilies, queueCreateInfos);
   VkPhysicalDeviceFeatures deviceFeatures {};
+  deviceFeatures.samplerAnisotropy = VK_TRUE;
   VkDeviceCreateInfo createInfo {};
   createInfo.sType             = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   createInfo.pQueueCreateInfos = queueCreateInfos.data();
@@ -728,26 +737,8 @@ void graphics::createImageViews()
   LOG_SCOPE_FUNCTION(INFO);
   _swapChainImageViews.resize(_swapChainImages.size());
   for (size_t i = 0; i < _swapChainImages.size(); i++) {
-    VkImageViewCreateInfo createInfo {};
-    createInfo.sType        = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.image        = _swapChainImages[i];
-    createInfo.viewType     = VK_IMAGE_VIEW_TYPE_2D;
-    createInfo.format       = _swapChainImageFormat;
-    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-    createInfo.subresourceRange.baseMipLevel   = 0;
-    createInfo.subresourceRange.levelCount     = 1;
-    createInfo.subresourceRange.baseArrayLayer = 0;
-    createInfo.subresourceRange.layerCount     = 1;
-    if (vkCreateImageView(
-            _logicalDevice, &createInfo, nullptr, &_swapChainImageViews[i])
-        != VK_SUCCESS)
-    {
-      throw nebulaException("Vulkan: failed to create image views");
-    }
+    _swapChainImageViews[i]
+        = createImageView(_swapChainImages[i], _swapChainImageFormat);
   }
 }
 
@@ -1751,6 +1742,60 @@ void graphics::copyBufferToImage(
       1,
       &region);
   endSingleTimeCommands(commandBuffer);
+}
+
+void graphics::createTextureImageView()
+{
+  _textureImageView = createImageView(_textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
+VkImageView graphics::createImageView(VkImage image, VkFormat format)
+{
+  VkImageViewCreateInfo viewInfo {};
+  viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  viewInfo.image    = image;
+  viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  viewInfo.format   = format;
+  viewInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+  viewInfo.subresourceRange.baseMipLevel   = 0;
+  viewInfo.subresourceRange.levelCount     = 1;
+  viewInfo.subresourceRange.baseArrayLayer = 0;
+  viewInfo.subresourceRange.layerCount     = 1;
+  VkImageView imageView;
+  if (vkCreateImageView(_logicalDevice, &viewInfo, nullptr, &imageView)
+      != VK_SUCCESS)
+  {
+    throw nebulaException("Vulkan: failed to create texture image view");
+  }
+  return imageView;
+}
+
+void graphics::createTextureSampler()
+{
+  VkSamplerCreateInfo samplerInfo {};
+  samplerInfo.sType            = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+  samplerInfo.magFilter        = VK_FILTER_LINEAR;
+  samplerInfo.minFilter        = VK_FILTER_LINEAR;
+  samplerInfo.addressModeU     = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerInfo.addressModeV     = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerInfo.addressModeW     = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerInfo.anisotropyEnable = VK_TRUE;
+  VkPhysicalDeviceProperties properties {};
+  vkGetPhysicalDeviceProperties(_physicalDevice, &properties);
+  samplerInfo.maxAnisotropy           = properties.limits.maxSamplerAnisotropy;
+  samplerInfo.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+  samplerInfo.unnormalizedCoordinates = VK_FALSE;
+  samplerInfo.compareEnable           = VK_FALSE;
+  samplerInfo.compareOp               = VK_COMPARE_OP_ALWAYS;
+  samplerInfo.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+  samplerInfo.mipLodBias              = 0.0f;
+  samplerInfo.minLod                  = 0.0f;
+  samplerInfo.maxLod                  = 0.0f;
+  if (vkCreateSampler(_logicalDevice, &samplerInfo, nullptr, &_textureSampler)
+      != VK_SUCCESS)
+  {
+    throw nebulaException("Vulkan: failed to create texture sampler");
+  }
 }
 
 } // namespace nebula
