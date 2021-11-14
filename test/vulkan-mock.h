@@ -82,6 +82,12 @@ private:
     }
   };
 
+  struct mockImage {
+    VkImageCreateInfo _createInfo;
+    mockImage(const VkImageCreateInfo *createInfo)
+        : _createInfo(*createInfo) { }
+  };
+
 public:
   static vulkanMock *&instance()
   {
@@ -363,6 +369,35 @@ public:
           const VkDescriptorSet *,
           uint32_t,
           const uint32_t *));
+  MAKE_MOCK6(vkCmdCopyBufferToImage,
+      void(VkCommandBuffer,
+          VkBuffer,
+          VkImage,
+          VkImageLayout,
+          uint32_t,
+          const VkBufferImageCopy *));
+  MAKE_MOCK3(
+      vkDestroyImage, void(VkDevice, VkImage, const VkAllocationCallbacks *));
+  MAKE_MOCK10(vkCmdPipelineBarrier,
+      void(VkCommandBuffer,
+          VkPipelineStageFlags,
+          VkPipelineStageFlags,
+          VkDependencyFlags,
+          uint32_t,
+          const VkMemoryBarrier *,
+          uint32_t,
+          const VkBufferMemoryBarrier *,
+          uint32_t,
+          const VkImageMemoryBarrier *));
+  MAKE_MOCK4(vkCreateImage,
+      VkResult(VkDevice,
+          const VkImageCreateInfo *,
+          const VkAllocationCallbacks *,
+          VkImage *));
+  MAKE_MOCK3(vkGetImageMemoryRequirements,
+      void(VkDevice, VkImage, VkMemoryRequirements *));
+  MAKE_MOCK4(vkBindImageMemory,
+      VkResult(VkDevice, VkImage, VkDeviceMemory, VkDeviceSize));
 };
 
 #endif // NEBULA_TEST_VULKAN_MOCK_H
