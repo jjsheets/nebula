@@ -18,10 +18,11 @@ namespace nebula {
 struct vertex {
   glm::vec2 pos;
   glm::vec3 color;
+  glm::vec2 texCoord;
   static void getBindingDesc();
   static void getAttributeDesc();
   static VkVertexInputBindingDescription _bindDesc;
-  static std::array<VkVertexInputAttributeDescription, 2> _attribDesc;
+  static std::array<VkVertexInputAttributeDescription, 3> _attribDesc;
 };
 
 struct uniformBufferObject {

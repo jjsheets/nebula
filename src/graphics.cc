@@ -70,10 +70,11 @@ SCENARIO("class graphics")
 
 namespace nebula {
 
-const std::vector<vertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+const std::vector<vertex> vertices
+    = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
 
 const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0};
 
@@ -125,11 +126,11 @@ graphics::graphics(uint32_t width,
 graphics::~graphics()
 {
   LOG_SCOPE_FUNCTION(INFO);
+  destroySynchronization();
   vkDestroySampler(_logicalDevice, _textureSampler, nullptr);
   vkDestroyImageView(_logicalDevice, _textureImageView, nullptr);
   vkDestroyImage(_logicalDevice, _textureImage, nullptr);
   vkFreeMemory(_logicalDevice, _textureImageMemory, nullptr);
-  destroySynchronization();
   cleanupSwapChain();
   destroyBuffers();
   destroyLogicalDevice();
@@ -1326,7 +1327,7 @@ void graphics::updateUniformBuffer(uint32_t currentImage)
 }
 
 VkVertexInputBindingDescription vertex::_bindDesc;
-std::array<VkVertexInputAttributeDescription, 2> vertex::_attribDesc;
+std::array<VkVertexInputAttributeDescription, 3> vertex::_attribDesc;
 
 void vertex::getBindingDesc()
 {
@@ -1347,6 +1348,10 @@ void vertex::getAttributeDesc()
   _attribDesc[1].location = 1;
   _attribDesc[1].format   = VK_FORMAT_R32G32B32_SFLOAT;
   _attribDesc[1].offset   = offsetof(vertex, color);
+  _attribDesc[2].binding  = 0;
+  _attribDesc[2].location = 2;
+  _attribDesc[2].format   = VK_FORMAT_R32G32_SFLOAT;
+  _attribDesc[2].offset   = offsetof(vertex, texCoord);
 }
 
 void graphics::createBuffer(VkDeviceSize size,
@@ -1471,10 +1476,19 @@ void graphics::pipeline::createDescriptorSetLayout()
   uboLayoutBinding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
   uboLayoutBinding.descriptorCount = 1;
   uboLayoutBinding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
+  VkDescriptorSetLayoutBinding samplerLayoutBinding {};
+  samplerLayoutBinding.binding         = 1;
+  samplerLayoutBinding.descriptorCount = 1;
+  samplerLayoutBinding.descriptorType
+      = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  samplerLayoutBinding.pImmutableSamplers = nullptr;
+  samplerLayoutBinding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
+  std::array<VkDescriptorSetLayoutBinding, 2> bindings
+      = {uboLayoutBinding, samplerLayoutBinding};
   VkDescriptorSetLayoutCreateInfo layoutInfo {};
   layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-  layoutInfo.bindingCount = 1;
-  layoutInfo.pBindings    = &uboLayoutBinding;
+  layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+  layoutInfo.pBindings    = bindings.data();
   if (vkCreateDescriptorSetLayout(
           _device, &layoutInfo, nullptr, &_descriptorSetLayout)
       != VK_SUCCESS)
@@ -1502,13 +1516,15 @@ void graphics::createUniformBuffers()
 void graphics::createDescriptorPool()
 {
   LOG_SCOPE_FUNCTION(INFO);
-  VkDescriptorPoolSize poolSize {};
-  poolSize.type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  poolSize.descriptorCount = static_cast<uint32_t>(_swapChainImages.size());
+  std::array<VkDescriptorPoolSize, 2> poolSizes {};
+  poolSizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  poolSizes[0].descriptorCount = static_cast<uint32_t>(_swapChainImages.size());
+  poolSizes[1].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[1].descriptorCount = static_cast<uint32_t>(_swapChainImages.size());
   VkDescriptorPoolCreateInfo poolInfo {};
   poolInfo.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-  poolInfo.poolSizeCount = 1;
-  poolInfo.pPoolSizes    = &poolSize;
+  poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+  poolInfo.pPoolSizes    = poolSizes.data();
   poolInfo.maxSets       = static_cast<uint32_t>(_swapChainImages.size());
   if (vkCreateDescriptorPool(
           _logicalDevice, &poolInfo, nullptr, &_descriptorPool)
@@ -1540,15 +1556,31 @@ void graphics::createDescriptorSets()
     bufferInfo.buffer = _uniformBuffers[i];
     bufferInfo.offset = 0;
     bufferInfo.range  = sizeof(uniformBufferObject);
-    VkWriteDescriptorSet descriptorWrite {};
-    descriptorWrite.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrite.dstSet          = _descriptorSets[i];
-    descriptorWrite.dstBinding      = 0;
-    descriptorWrite.dstArrayElement = 0;
-    descriptorWrite.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptorWrite.descriptorCount = 1;
-    descriptorWrite.pBufferInfo     = &bufferInfo;
-    vkUpdateDescriptorSets(_logicalDevice, 1, &descriptorWrite, 0, nullptr);
+    VkDescriptorImageInfo imageInfo {};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView   = _textureImageView;
+    imageInfo.sampler     = _textureSampler;
+    std::array<VkWriteDescriptorSet, 2> descriptorWrites {};
+    descriptorWrites[0].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[0].dstSet     = _descriptorSets[i];
+    descriptorWrites[0].dstBinding = 0;
+    descriptorWrites[0].dstArrayElement = 0;
+    descriptorWrites[0].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrites[0].descriptorCount = 1;
+    descriptorWrites[0].pBufferInfo     = &bufferInfo;
+    descriptorWrites[1].sType      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[1].dstSet     = _descriptorSets[i];
+    descriptorWrites[1].dstBinding = 1;
+    descriptorWrites[1].dstArrayElement = 0;
+    descriptorWrites[1].descriptorType
+        = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[1].descriptorCount = 1;
+    descriptorWrites[1].pImageInfo      = &imageInfo;
+    vkUpdateDescriptorSets(_logicalDevice,
+        static_cast<uint32_t>(descriptorWrites.size()),
+        descriptorWrites.data(),
+        0,
+        nullptr);
   }
 }
 
