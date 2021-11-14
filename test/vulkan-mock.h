@@ -88,6 +88,9 @@ private:
         : _createInfo(*createInfo) { }
   };
 
+  struct mockSampler {
+  };
+
 public:
   static vulkanMock *&instance()
   {
@@ -398,6 +401,15 @@ public:
       void(VkDevice, VkImage, VkMemoryRequirements *));
   MAKE_MOCK4(vkBindImageMemory,
       VkResult(VkDevice, VkImage, VkDeviceMemory, VkDeviceSize));
+  MAKE_MOCK4(vkCreateSampler,
+      VkResult(VkDevice,
+          const VkSamplerCreateInfo *,
+          const VkAllocationCallbacks *,
+          VkSampler *));
+  MAKE_MOCK3(vkDestroySampler,
+      void(VkDevice, VkSampler, const VkAllocationCallbacks *));
+  MAKE_MOCK2(vkGetPhysicalDeviceFeatures,
+      void(VkPhysicalDevice, VkPhysicalDeviceFeatures *));
 };
 
 #endif // NEBULA_TEST_VULKAN_MOCK_H
