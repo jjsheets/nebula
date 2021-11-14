@@ -794,6 +794,92 @@ void vkCmdBindDescriptorSets(VkCommandBuffer a,
   assert(vkMock);
   vkMock->vkCmdBindDescriptorSets(a, b, c, d, e, f, g, h);
 }
+
+void vkCmdCopyBufferToImage(VkCommandBuffer a,
+    VkBuffer b,
+    VkImage c,
+    VkImageLayout d,
+    uint32_t e,
+    const VkBufferImageCopy *f)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkCmdCopyBufferToImage(a, b, c, d, e, f);
+}
+
+void vkDestroyImage(VkDevice a, VkImage b, const VkAllocationCallbacks *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkDestroyImage(a, b, c);
+}
+
+void vkCmdPipelineBarrier(VkCommandBuffer a,
+    VkPipelineStageFlags b,
+    VkPipelineStageFlags c,
+    VkDependencyFlags d,
+    uint32_t e,
+    const VkMemoryBarrier *f,
+    uint32_t g,
+    const VkBufferMemoryBarrier *h,
+    uint32_t i,
+    const VkImageMemoryBarrier *j)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkCmdPipelineBarrier(a, b, c, d, e, f, g, h, i, j);
+}
+
+VkResult vkCreateImage(VkDevice a,
+    const VkImageCreateInfo *b,
+    const VkAllocationCallbacks *c,
+    VkImage *d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkCreateImage(a, b, c, d);
+}
+
+void vkGetImageMemoryRequirements(
+    VkDevice a, VkImage b, VkMemoryRequirements *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkGetImageMemoryRequirements(a, b, c);
+}
+
+VkResult vkBindImageMemory(
+    VkDevice a, VkImage b, VkDeviceMemory c, VkDeviceSize d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkBindImageMemory(a, b, c, d);
+}
+
+VkResult vkCreateSampler(VkDevice a,
+    const VkSamplerCreateInfo *b,
+    const VkAllocationCallbacks *c,
+    VkSampler *d)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  return vkMock->vkCreateSampler(a, b, c, d);
+}
+
+void vkDestroySampler(VkDevice a, VkSampler b, const VkAllocationCallbacks *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkDestroySampler(a, b, c);
+}
+
+void vkGetPhysicalDeviceFeatures(
+    VkPhysicalDevice a, VkPhysicalDeviceFeatures *b)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkGetPhysicalDeviceFeatures(a, b);
+}
 }
 
 void vulkanMock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
@@ -831,7 +917,8 @@ void vulkanMock::fillPhysDevProps(VkPhysicalDeviceProperties &props)
   props.vendorID      = 0;
   props.deviceID      = 0;
   // Provide a discrete gpu, even though this is a test fixture
-  props.deviceType = _gpuType;
+  props.deviceType                  = _gpuType;
+  props.limits.maxSamplerAnisotropy = 8;
   std::strcpy(props.deviceName, "nebula test device");
   for (int i = 0; i < VK_UUID_SIZE; i++) {
     props.pipelineCacheUUID[i] = 0;
@@ -1373,4 +1460,31 @@ void vulkanMock::mockGraphics()
       NAMED_ALLOW_CALL(*this, vkUpdateDescriptorSets(testLogDev, _, _, _, _)));
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkCmdBindDescriptorSets(_, _, _, _, _, _, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCmdCopyBufferToImage(_, _, _, _, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroyImage(testLogDev, _, nullptr))
+          .SIDE_EFFECT(delete (reinterpret_cast<VkImage *>(_2))));
+  expectations.push(NAMED_ALLOW_CALL(
+      *this, vkCmdPipelineBarrier(_, _, _, _, _, _, _, _, _, _)));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateImage(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<VkImage>(new mockImage(_2)))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkGetImageMemoryRequirements(testLogDev, _, _))
+          .SIDE_EFFECT(_3->memoryTypeBits = 1));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkBindImageMemory(testLogDev, _, _, _))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCreateSampler(testLogDev, _, nullptr, _))
+          .SIDE_EFFECT(*_4 = reinterpret_cast<VkSampler>(new mockSampler))
+          .RETURN(VK_SUCCESS));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkDestroySampler(testLogDev, _, nullptr))
+          .SIDE_EFFECT(delete (reinterpret_cast<VkSampler *>(_2))));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkGetPhysicalDeviceFeatures(testPhysDev, _))
+          .SIDE_EFFECT(_2->samplerAnisotropy = VK_TRUE));
 }

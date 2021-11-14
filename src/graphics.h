@@ -18,10 +18,11 @@ namespace nebula {
 struct vertex {
   glm::vec2 pos;
   glm::vec3 color;
+  glm::vec2 texCoord;
   static void getBindingDesc();
   static void getAttributeDesc();
   static VkVertexInputBindingDescription _bindDesc;
-  static std::array<VkVertexInputAttributeDescription, 2> _attribDesc;
+  static std::array<VkVertexInputAttributeDescription, 3> _attribDesc;
 };
 
 struct uniformBufferObject {
@@ -116,6 +117,10 @@ private:
   std::vector<VkDeviceMemory> _uniformBuffersMemory;
   VkDescriptorPool _descriptorPool;
   std::vector<VkDescriptorSet> _descriptorSets;
+  VkImage _textureImage;
+  VkDeviceMemory _textureImageMemory;
+  VkImageView _textureImageView;
+  VkSampler _textureSampler;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -175,6 +180,26 @@ private:
   void updateUniformBuffer(uint32_t currentImage);
   void createDescriptorPool();
   void createDescriptorSets();
+  void createTextureImage();
+  void createImage(uint32_t width,
+      uint32_t height,
+      VkFormat format,
+      VkImageTiling tiling,
+      VkImageUsageFlags usage,
+      VkMemoryPropertyFlags properties,
+      VkImage &image,
+      VkDeviceMemory &imageMemory);
+  VkCommandBuffer beginSingleTimeCommands();
+  void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+  void transitionImageLayout(VkImage image,
+      VkFormat format,
+      VkImageLayout oldLayout,
+      VkImageLayout newLayout);
+  void copyBufferToImage(
+      VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+  void createTextureImageView();
+  VkImageView createImageView(VkImage image, VkFormat format);
+  void createTextureSampler();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
