@@ -16,7 +16,7 @@
 namespace nebula {
 
 struct vertex {
-  glm::vec2 pos;
+  glm::vec3 pos;
   glm::vec3 color;
   glm::vec2 texCoord;
   static void getBindingDesc();
@@ -49,6 +49,7 @@ private:
     VkPipelineMultisampleStateCreateInfo _multisampling;
     VkPipelineColorBlendAttachmentState _colorBlendAttachment;
     VkPipelineColorBlendStateCreateInfo _colorBlending;
+    VkPipelineDepthStencilStateCreateInfo _depthStencil;
     VkPipelineLayoutCreateInfo _pipelineLayoutInfo;
     VkGraphicsPipelineCreateInfo _pipelineInfo;
     VkDescriptorSetLayout _descriptorSetLayout;
@@ -66,6 +67,7 @@ private:
     void setupRasterState();
     void setupMultisampling();
     void setupColorBlend();
+    void setupDepthStencil();
     void setupPipelineLayout(VkRenderPass renderPass);
     void createDescriptorSetLayout();
 
@@ -121,6 +123,9 @@ private:
   VkDeviceMemory _textureImageMemory;
   VkImageView _textureImageView;
   VkSampler _textureSampler;
+  VkImage _depthImage;
+  VkDeviceMemory _depthImageMemory;
+  VkImageView _depthImageView;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -198,8 +203,15 @@ private:
   void copyBufferToImage(
       VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
   void createTextureImageView();
-  VkImageView createImageView(VkImage image, VkFormat format);
+  VkImageView createImageView(
+      VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
   void createTextureSampler();
+  void createDepthResources();
+  VkFormat findSupportedFormat(const std::vector<VkFormat> &candidates,
+      VkImageTiling tiling,
+      VkFormatFeatureFlags features);
+  VkFormat findDepthFormat();
+  bool hasStencilComponent(VkFormat format);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

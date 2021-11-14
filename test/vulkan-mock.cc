@@ -880,6 +880,14 @@ void vkGetPhysicalDeviceFeatures(
   assert(vkMock);
   vkMock->vkGetPhysicalDeviceFeatures(a, b);
 }
+
+void vkGetPhysicalDeviceFormatProperties(
+    VkPhysicalDevice a, VkFormat b, VkFormatProperties *c)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkGetPhysicalDeviceFormatProperties(a, b, c);
+}
 }
 
 void vulkanMock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
@@ -1487,4 +1495,11 @@ void vulkanMock::mockGraphics()
   expectations.push(
       NAMED_ALLOW_CALL(*this, vkGetPhysicalDeviceFeatures(testPhysDev, _))
           .SIDE_EFFECT(_2->samplerAnisotropy = VK_TRUE));
+  expectations.push(
+      NAMED_ALLOW_CALL(
+          *this, vkGetPhysicalDeviceFormatProperties(testPhysDev, _, _))
+          .SIDE_EFFECT(_3->linearTilingFeatures
+                       = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+          .SIDE_EFFECT(_3->optimalTilingFeatures
+                       = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT));
 }
