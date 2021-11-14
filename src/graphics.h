@@ -116,6 +116,8 @@ private:
   std::vector<VkDeviceMemory> _uniformBuffersMemory;
   VkDescriptorPool _descriptorPool;
   std::vector<VkDescriptorSet> _descriptorSets;
+  VkImage _textureImage;
+  VkDeviceMemory _textureImageMemory;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -175,6 +177,23 @@ private:
   void updateUniformBuffer(uint32_t currentImage);
   void createDescriptorPool();
   void createDescriptorSets();
+  void createTextureImage();
+  void createImage(uint32_t width,
+      uint32_t height,
+      VkFormat format,
+      VkImageTiling tiling,
+      VkImageUsageFlags usage,
+      VkMemoryPropertyFlags properties,
+      VkImage &image,
+      VkDeviceMemory &imageMemory);
+  VkCommandBuffer beginSingleTimeCommands();
+  void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+  void transitionImageLayout(VkImage image,
+      VkFormat format,
+      VkImageLayout oldLayout,
+      VkImageLayout newLayout);
+  void copyBufferToImage(
+      VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
