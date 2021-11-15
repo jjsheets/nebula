@@ -12,6 +12,7 @@ CFLAGS += -I../external/sqlite-build
 CFLAGS += -I../external/glm
 CFLAGS += -I../external/clipp/include
 CFLAGS += -I../external/stb
+CFLAGS += -I../external/tinyobjloader
 ifeq (@(TUP_PLATFORM),win32)
 CFLAGS += -I../VULKAN_SDK/include
 CFLAGS += `pkg-config --cflags glfw3`

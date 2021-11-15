@@ -17,8 +17,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include <tiny_obj_loader.h>
+#include <unordered_map>
 
 // Logging system includes
 #include "loguru.hpp"
@@ -71,18 +72,6 @@ SCENARIO("class graphics")
 
 namespace nebula {
 
-const std::vector<vertex> vertices
-    = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-        {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-        {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}};
-
-const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
-
 graphics::graphics(uint32_t width,
     uint32_t height,
     GLFWkeyfun keyCallback,
@@ -120,6 +109,7 @@ graphics::graphics(uint32_t width,
   createTextureImage();
   createTextureImageView();
   createTextureSampler();
+  loadModel();
   createVertexBuffer();
   createIndexBuffer();
   createUniformBuffers();
@@ -1202,7 +1192,7 @@ void graphics::createCommandBuffers()
     VkDeviceSize offsets[]   = {0};
     vkCmdBindVertexBuffers(_commandBuffers[i], 0, 1, vertexBuffers, offsets);
     vkCmdBindIndexBuffer(
-        _commandBuffers[i], _indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        _commandBuffers[i], _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     vkCmdBindDescriptorSets(_commandBuffers[i],
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         _pipeline->_pipelineLayout,
@@ -1212,7 +1202,7 @@ void graphics::createCommandBuffers()
         0,
         nullptr);
     vkCmdDrawIndexed(
-        _commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        _commandBuffers[i], static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
     vkCmdEndRenderPass(_commandBuffers[i]);
     if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
       throw nebulaException("Vulkan: failed to record command buffer");
@@ -1435,7 +1425,7 @@ void graphics::createBuffer(VkDeviceSize size,
 void graphics::createVertexBuffer()
 {
   LOG_SCOPE_FUNCTION(INFO);
-  VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+  VkDeviceSize bufferSize = sizeof(_vertices[0]) * _vertices.size();
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
   createBuffer(bufferSize,
@@ -1446,7 +1436,7 @@ void graphics::createVertexBuffer()
       stagingBufferMemory);
   void *data;
   vkMapMemory(_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
-  std::memcpy(data, vertices.data(), (size_t)bufferSize);
+  std::memcpy(data, _vertices.data(), (size_t)bufferSize);
   vkUnmapMemory(_logicalDevice, stagingBufferMemory);
   LOG_S(INFO) << "Vulkan: vertex data transferred";
   createBuffer(bufferSize,
@@ -1462,7 +1452,7 @@ void graphics::createVertexBuffer()
 void graphics::createIndexBuffer()
 {
   LOG_SCOPE_FUNCTION(INFO);
-  VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+  VkDeviceSize bufferSize = sizeof(_indices[0]) * _indices.size();
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
   createBuffer(bufferSize,
@@ -1473,7 +1463,7 @@ void graphics::createIndexBuffer()
       stagingBufferMemory);
   void *data;
   vkMapMemory(_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
-  std::memcpy(data, indices.data(), (size_t)bufferSize);
+  std::memcpy(data, _indices.data(), (size_t)bufferSize);
   vkUnmapMemory(_logicalDevice, stagingBufferMemory);
   createBuffer(bufferSize,
       VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
@@ -1631,8 +1621,9 @@ void graphics::createDescriptorSets()
 
 void graphics::createTextureImage()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   int texWidth, texHeight, texChannels;
-  stbi_uc *pixels        = stbi_load("textures/nebula.jpg",
+  stbi_uc *pixels        = stbi_load("textures/viking_room.png",
       &texWidth,
       &texHeight,
       &texChannels,
@@ -1687,6 +1678,7 @@ void graphics::createImage(uint32_t width,
     VkImage &image,
     VkDeviceMemory &imageMemory)
 {
+  LOG_SCOPE_FUNCTION(INFO);
   VkImageCreateInfo imageInfo {};
   imageInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   imageInfo.imageType     = VK_IMAGE_TYPE_2D;
@@ -1722,6 +1714,7 @@ void graphics::createImage(uint32_t width,
 
 VkCommandBuffer graphics::beginSingleTimeCommands()
 {
+  LOG_SCOPE_FUNCTION(1);
   VkCommandBufferAllocateInfo allocInfo {};
   allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -1738,6 +1731,7 @@ VkCommandBuffer graphics::beginSingleTimeCommands()
 
 void graphics::endSingleTimeCommands(VkCommandBuffer commandBuffer)
 {
+  LOG_SCOPE_FUNCTION(1);
   vkEndCommandBuffer(commandBuffer);
   VkSubmitInfo submitInfo {};
   submitInfo.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1753,6 +1747,7 @@ void graphics::transitionImageLayout(VkImage image,
     VkImageLayout oldLayout,
     VkImageLayout newLayout)
 {
+  LOG_SCOPE_FUNCTION(INFO);
   VkCommandBuffer commandBuffer = beginSingleTimeCommands();
   VkImageMemoryBarrier barrier {};
   barrier.sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -1818,6 +1813,7 @@ void graphics::transitionImageLayout(VkImage image,
 void graphics::copyBufferToImage(
     VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 {
+  LOG_SCOPE_FUNCTION(INFO);
   VkCommandBuffer commandBuffer = beginSingleTimeCommands();
   VkBufferImageCopy region {};
   region.bufferOffset                    = 0;
@@ -1840,6 +1836,7 @@ void graphics::copyBufferToImage(
 
 void graphics::createTextureImageView()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   _textureImageView = createImageView(
       _textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 }
@@ -1847,6 +1844,7 @@ void graphics::createTextureImageView()
 VkImageView graphics::createImageView(
     VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
 {
+  LOG_SCOPE_FUNCTION(9);
   VkImageViewCreateInfo viewInfo {};
   viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   viewInfo.image    = image;
@@ -1868,6 +1866,7 @@ VkImageView graphics::createImageView(
 
 void graphics::createTextureSampler()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   VkSamplerCreateInfo samplerInfo {};
   samplerInfo.sType            = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
   samplerInfo.magFilter        = VK_FILTER_LINEAR;
@@ -1896,6 +1895,7 @@ void graphics::createTextureSampler()
 
 void graphics::createDepthResources()
 {
+  LOG_SCOPE_FUNCTION(INFO);
   VkFormat depthFormat = findDepthFormat();
   createImage(_swapChainExtent.width,
       _swapChainExtent.height,
@@ -1917,6 +1917,7 @@ VkFormat graphics::findSupportedFormat(const std::vector<VkFormat> &candidates,
     VkImageTiling tiling,
     VkFormatFeatureFlags features)
 {
+  LOG_SCOPE_FUNCTION(1);
   for (VkFormat format : candidates) {
     VkFormatProperties props;
     vkGetPhysicalDeviceFormatProperties(_physicalDevice, format, &props);
@@ -1935,6 +1936,7 @@ VkFormat graphics::findSupportedFormat(const std::vector<VkFormat> &candidates,
 
 VkFormat graphics::findDepthFormat()
 {
+  LOG_SCOPE_FUNCTION(9);
   return findSupportedFormat({VK_FORMAT_D32_SFLOAT,
                                  VK_FORMAT_D32_SFLOAT_S8_UINT,
                                  VK_FORMAT_D24_UNORM_S8_UINT},
@@ -1946,6 +1948,37 @@ bool graphics::hasStencilComponent(VkFormat format)
 {
   return format == VK_FORMAT_D32_SFLOAT_S8_UINT
       || format == VK_FORMAT_D24_UNORM_S8_UINT;
+}
+
+void graphics::loadModel()
+{
+  LOG_SCOPE_FUNCTION(INFO);
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+  std::string warn, err;
+  if (!tinyobj::LoadObj(
+          &attrib, &shapes, &materials, &warn, &err, "models/viking_room.obj"))
+  {
+    throw nebulaException(warn + err);
+  }
+  std::unordered_map<vertex, uint32_t> uniqueVertices {};
+  for (const auto &shape : shapes) {
+    for (const auto &index : shape.mesh.indices) {
+      vertex vert {};
+      vert.pos      = {attrib.vertices[3 * index.vertex_index + 0],
+          attrib.vertices[3 * index.vertex_index + 1],
+          attrib.vertices[3 * index.vertex_index + 2]};
+      vert.texCoord = {attrib.texcoords[2 * index.texcoord_index + 0],
+          1.0f - attrib.texcoords[2 * index.texcoord_index + 1]};
+      vert.color    = {1.0f, 1.0f, 1.0f};
+      if (uniqueVertices.count(vert) == 0) {
+        uniqueVertices[vert] = static_cast<uint32_t>(_vertices.size());
+        _vertices.push_back(vert);
+      }
+      _indices.push_back(uniqueVertices[vert]);
+    }
+  }
 }
 
 } // namespace nebula

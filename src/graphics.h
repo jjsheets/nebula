@@ -12,6 +12,8 @@
 #include <string>
 #include <array>
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 namespace nebula {
 
@@ -23,6 +25,11 @@ struct vertex {
   static void getAttributeDesc();
   static VkVertexInputBindingDescription _bindDesc;
   static std::array<VkVertexInputAttributeDescription, 3> _attribDesc;
+  bool operator==(const vertex &other) const
+  {
+    return pos == other.pos && color == other.color
+        && texCoord == other.texCoord;
+  }
 };
 
 struct uniformBufferObject {
@@ -111,6 +118,8 @@ private:
   std::vector<VkFence> _inFlightImage;
   size_t _currentFrame;
   bool _framebufferResized;
+  std::vector<vertex> _vertices;
+  std::vector<uint32_t> _indices;
   VkBuffer _vertexBuffer;
   VkDeviceMemory _vertexBufferMemory;
   VkBuffer _indexBuffer;
@@ -212,6 +221,7 @@ private:
       VkFormatFeatureFlags features);
   VkFormat findDepthFormat();
   bool hasStencilComponent(VkFormat format);
+  void loadModel();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -256,5 +266,17 @@ public:
 };
 
 } // namespace nebula
+
+namespace std {
+template <>
+struct hash<nebula::vertex> {
+  size_t operator()(nebula::vertex const &vert) const
+  {
+    return ((hash<glm::vec3>()(vert.pos) ^ (hash<glm::vec3>()(vert.color) << 1))
+               >> 1)
+         ^ (hash<glm::vec2>()(vert.texCoord) << 1);
+  }
+};
+} // namespace std
 
 #endif // NEBULA_GRAPHICS_H
