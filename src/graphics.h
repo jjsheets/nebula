@@ -128,6 +128,7 @@ private:
   std::vector<VkDeviceMemory> _uniformBuffersMemory;
   VkDescriptorPool _descriptorPool;
   std::vector<VkDescriptorSet> _descriptorSets;
+  uint32_t _mipLevels;
   VkImage _textureImage;
   VkDeviceMemory _textureImageMemory;
   VkImageView _textureImageView;
@@ -197,6 +198,7 @@ private:
   void createTextureImage();
   void createImage(uint32_t width,
       uint32_t height,
+      uint32_t mipLevels,
       VkFormat format,
       VkImageTiling tiling,
       VkImageUsageFlags usage,
@@ -208,12 +210,15 @@ private:
   void transitionImageLayout(VkImage image,
       VkFormat format,
       VkImageLayout oldLayout,
-      VkImageLayout newLayout);
+      VkImageLayout newLayout,
+      uint32_t mipLevels);
   void copyBufferToImage(
       VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
   void createTextureImageView();
-  VkImageView createImageView(
-      VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+  VkImageView createImageView(VkImage image,
+      VkFormat format,
+      VkImageAspectFlags aspectFlags,
+      uint32_t mipLevels);
   void createTextureSampler();
   void createDepthResources();
   VkFormat findSupportedFormat(const std::vector<VkFormat> &candidates,
@@ -222,6 +227,11 @@ private:
   VkFormat findDepthFormat();
   bool hasStencilComponent(VkFormat format);
   void loadModel();
+  void generateMipmaps(VkImage image,
+      VkFormat imageFormat,
+      int32_t texWidth,
+      int32_t texHeight,
+      uint32_t mipLevels);
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
