@@ -412,6 +412,15 @@ public:
       void(VkPhysicalDevice, VkPhysicalDeviceFeatures *));
   MAKE_MOCK3(vkGetPhysicalDeviceFormatProperties,
       void(VkPhysicalDevice, VkFormat, VkFormatProperties *));
+  MAKE_MOCK8(vkCmdBlitImage,
+      void(VkCommandBuffer,
+          VkImage,
+          VkImageLayout,
+          VkImage,
+          VkImageLayout,
+          uint32_t,
+          const VkImageBlit *,
+          VkFilter));
 };
 
 #endif // NEBULA_TEST_VULKAN_MOCK_H

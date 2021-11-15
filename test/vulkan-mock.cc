@@ -888,6 +888,20 @@ void vkGetPhysicalDeviceFormatProperties(
   assert(vkMock);
   vkMock->vkGetPhysicalDeviceFormatProperties(a, b, c);
 }
+
+void vkCmdBlitImage(VkCommandBuffer a,
+    VkImage b,
+    VkImageLayout c,
+    VkImage d,
+    VkImageLayout e,
+    uint32_t f,
+    const VkImageBlit *g,
+    VkFilter h)
+{
+  auto vkMock = vulkanMock::instance();
+  assert(vkMock);
+  vkMock->vkCmdBlitImage(a, b, c, d, e, f, g, h);
+}
 }
 
 void vulkanMock::fillSurfCaps(VkSurfaceCapabilitiesKHR &caps)
@@ -1501,5 +1515,8 @@ void vulkanMock::mockGraphics()
           .SIDE_EFFECT(_3->linearTilingFeatures
                        = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
           .SIDE_EFFECT(_3->optimalTilingFeatures
-                       = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT));
+                       = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+                       | VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT));
+  expectations.push(
+      NAMED_ALLOW_CALL(*this, vkCmdBlitImage(_, _, _, _, _, _, _, _)));
 }
