@@ -72,7 +72,7 @@ private:
     void setupViewport(VkExtent2D &swapChainExtent);
     void setupViewportState();
     void setupRasterState();
-    void setupMultisampling();
+    void setupMultisampling(VkSampleCountFlagBits msaaSamples);
     void setupColorBlend();
     void setupDepthStencil();
     void setupPipelineLayout(VkRenderPass renderPass);
@@ -82,7 +82,8 @@ private:
         const std::string &vertShader,
         const std::string &fragShader,
         VkExtent2D &swapChainExtent,
-        VkRenderPass renderPass);
+        VkRenderPass renderPass,
+        VkSampleCountFlagBits msaaSamples);
     ~pipeline();
     operator VkPipeline()
     {
@@ -136,6 +137,10 @@ private:
   VkImage _depthImage;
   VkDeviceMemory _depthImageMemory;
   VkImageView _depthImageView;
+  VkSampleCountFlagBits _msaaSamples;
+  VkImage _colorImage;
+  VkDeviceMemory _colorImageMemory;
+  VkImageView _colorImageView;
 
   const std::vector<const char *> _validationLayers
       = {"VK_LAYER_KHRONOS_validation"};
@@ -199,6 +204,7 @@ private:
   void createImage(uint32_t width,
       uint32_t height,
       uint32_t mipLevels,
+      VkSampleCountFlagBits numSamples,
       VkFormat format,
       VkImageTiling tiling,
       VkImageUsageFlags usage,
@@ -232,6 +238,8 @@ private:
       int32_t texWidth,
       int32_t texHeight,
       uint32_t mipLevels);
+  VkSampleCountFlagBits getMaxUsableSampleCount();
+  void createColorResources();
 
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
