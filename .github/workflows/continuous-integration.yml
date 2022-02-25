@@ -69,7 +69,7 @@ jobs:
 
       - name: Install Vulkan SDK (Windows)
         if: matrix.os == 'windows-latest'
-        uses: humbletim/setup-vulkan-sdk@v1.0.3
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
 
       - name: Update submodules
         run: |
