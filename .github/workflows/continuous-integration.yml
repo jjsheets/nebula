@@ -82,7 +82,7 @@ jobs:
 
       - name: Cache Handling (lua)
         id: cache-lua
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.1
         with:
           path: |
             external/lua/liblua.a
@@ -90,7 +90,7 @@ jobs:
 
       - name: Cache Handling (yaml-cpp)
         id: cache-yaml
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.1
         with:
           path: |
             external/yaml-cpp/libyaml-cpp.a
@@ -100,7 +100,7 @@ jobs:
       - name: Cache Handling (GLFW, Ubuntu)
         if: matrix.os != 'windows-latest'
         id: cache-glfw
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.1
         with:
           path: |
             external/glfw/src/libglfw3.a
