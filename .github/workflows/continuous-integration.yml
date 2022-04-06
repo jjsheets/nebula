@@ -196,7 +196,7 @@ jobs:
 #          lcov -c -d ../test -o test.info
 #          lcov -e test.info /home/runner/work/nebula/nebula/src/* -o test.info
 
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v3
         if: matrix.os == 'ubuntu-latest'
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
